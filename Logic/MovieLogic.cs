@@ -16,7 +16,7 @@ namespace Logic
         {
             _repo = repo;
         }
-        public async Task<bool> CreateMovie(Guid movieId)
+        public async Task<bool> CreateMovie(string movieId)
         {
             return await _repo.AddMovie(movieId);
         }
@@ -24,6 +24,21 @@ namespace Logic
         public async Task<List<Movie>> GetAllMovies()
         {
             return await _repo.getAllThemoves();
+        }
+
+        public  List<Movie> getAllMoviesByActor(string actor)
+        {
+            return  _repo.getAllByActor(actor);
+        }
+
+        public async Task<Movie> getOneMovie(string imdb)
+        {
+            return await _repo.getOneMovie(imdb);
+        }
+
+        public Task<bool> UpdatedPlotMovie(string imdb, Movie movie)
+        {
+            return null;
         }
     }
 }

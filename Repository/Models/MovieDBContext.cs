@@ -45,6 +45,9 @@ namespace Repository.Models
             {
                 entity.ToTable("Actor");
 
+                entity.HasIndex(e => e.ActorName, "uk_actorName")
+                    .IsUnique();
+
                 entity.Property(e => e.ActorId)
                     .HasColumnName("actorId")
                     .HasDefaultValueSql("(newid())");
@@ -58,6 +61,9 @@ namespace Repository.Models
             modelBuilder.Entity<Director>(entity =>
             {
                 entity.ToTable("Director");
+
+                entity.HasIndex(e => e.DirectorName, "uk_directorName")
+                    .IsUnique();
 
                 entity.Property(e => e.DirectorId)
                     .HasColumnName("directorId")
@@ -73,6 +79,9 @@ namespace Repository.Models
             {
                 entity.ToTable("Genre");
 
+                entity.HasIndex(e => e.GenreName, "uk_genreName")
+                    .IsUnique();
+
                 entity.Property(e => e.GenreId)
                     .HasColumnName("genreId")
                     .HasDefaultValueSql("(newid())");
@@ -87,6 +96,9 @@ namespace Repository.Models
             {
                 entity.ToTable("Language");
 
+                entity.HasIndex(e => e.LanguageName, "uk_languageName")
+                    .IsUnique();
+
                 entity.Property(e => e.LanguageId)
                     .HasColumnName("languageId")
                     .HasDefaultValueSql("(newid())");
@@ -99,11 +111,16 @@ namespace Repository.Models
 
             modelBuilder.Entity<Movie>(entity =>
             {
+                entity.HasKey(e => e.ImdbId)
+                    .HasName("pk_imdbId");
+
                 entity.ToTable("Movie");
 
-                entity.Property(e => e.MovieId)
-                    .HasColumnName("movieId")
-                    .HasDefaultValueSql("(newid())");
+                entity.HasIndex(e => e.ImdbId, "uk_imdbId")
+                    .IsUnique();
+
+                entity.HasIndex(e => e.Title, "uk_movieTitle")
+                    .IsUnique();
 
                 entity.Property(e => e.ImdbId)
                     .HasMaxLength(255)
@@ -149,7 +166,10 @@ namespace Repository.Models
 
                 entity.Property(e => e.ActorId).HasColumnName("actorId");
 
-                entity.Property(e => e.MovieId).HasColumnName("movieId");
+                entity.Property(e => e.ImdbId)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("imdbId");
 
                 entity.HasOne(d => d.Actor)
                     .WithMany(p => p.MovieActors)
@@ -157,9 +177,9 @@ namespace Repository.Models
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fk_movieActorActorId");
 
-                entity.HasOne(d => d.Movie)
+                entity.HasOne(d => d.Imdb)
                     .WithMany(p => p.MovieActors)
-                    .HasForeignKey(d => d.MovieId)
+                    .HasForeignKey(d => d.ImdbId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fk_movieActorMovieId");
             });
@@ -174,7 +194,10 @@ namespace Repository.Models
 
                 entity.Property(e => e.DirectorId).HasColumnName("directorId");
 
-                entity.Property(e => e.MovieId).HasColumnName("movieId");
+                entity.Property(e => e.ImdbId)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("imdbId");
 
                 entity.HasOne(d => d.Director)
                     .WithMany(p => p.MovieDirectors)
@@ -182,9 +205,9 @@ namespace Repository.Models
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fk_movieDirectorDirectorId");
 
-                entity.HasOne(d => d.Movie)
+                entity.HasOne(d => d.Imdb)
                     .WithMany(p => p.MovieDirectors)
-                    .HasForeignKey(d => d.MovieId)
+                    .HasForeignKey(d => d.ImdbId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fk_movieDirectorMovieId");
             });
@@ -199,7 +222,10 @@ namespace Repository.Models
 
                 entity.Property(e => e.GenreId).HasColumnName("genreId");
 
-                entity.Property(e => e.MovieId).HasColumnName("movieId");
+                entity.Property(e => e.ImdbId)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("imdbId");
 
                 entity.HasOne(d => d.Genre)
                     .WithMany(p => p.MovieGenres)
@@ -207,9 +233,9 @@ namespace Repository.Models
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fk_movieGenreGenreId");
 
-                entity.HasOne(d => d.Movie)
+                entity.HasOne(d => d.Imdb)
                     .WithMany(p => p.MovieGenres)
-                    .HasForeignKey(d => d.MovieId)
+                    .HasForeignKey(d => d.ImdbId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fk_movieGenreMovieId");
             });
@@ -222,26 +248,32 @@ namespace Repository.Models
                     .HasColumnName("movieLanguageId")
                     .HasDefaultValueSql("(newid())");
 
+                entity.Property(e => e.ImdbId)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("imdbId");
+
                 entity.Property(e => e.LanguageId).HasColumnName("languageId");
 
-                entity.Property(e => e.MovieId).HasColumnName("movieId");
+                entity.HasOne(d => d.Imdb)
+                    .WithMany(p => p.MovieLanguages)
+                    .HasForeignKey(d => d.ImdbId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_movieLanguageMovieId");
 
                 entity.HasOne(d => d.Language)
                     .WithMany(p => p.MovieLanguages)
                     .HasForeignKey(d => d.LanguageId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fk_movieLanguageLanguageId");
-
-                entity.HasOne(d => d.Movie)
-                    .WithMany(p => p.MovieLanguages)
-                    .HasForeignKey(d => d.MovieId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_movieLanguageMovieId");
             });
 
             modelBuilder.Entity<Rating>(entity =>
             {
                 entity.ToTable("Rating");
+
+                entity.HasIndex(e => e.RatingName, "uk_ratingName")
+                    .IsUnique();
 
                 entity.Property(e => e.RatingId).HasColumnName("ratingId");
 

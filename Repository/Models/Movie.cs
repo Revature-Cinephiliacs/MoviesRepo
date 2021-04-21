@@ -15,7 +15,6 @@ namespace Repository.Models
             MovieLanguages = new HashSet<MovieLanguage>();
         }
 
-        public Guid MovieId { get; set; }
         public string ImdbId { get; set; }
         public string Title { get; set; }
         public int RatingId { get; set; }
