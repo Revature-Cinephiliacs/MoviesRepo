@@ -33,7 +33,7 @@ namespace Repository.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("server=ANIS-MAC\\SQLEXPRESS;database=MovieDB;Trusted_Connection=True;");
+                optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=MovieDB;Trusted_Connection = true;");
             }
         }
 
@@ -158,114 +158,58 @@ namespace Repository.Models
 
             modelBuilder.Entity<MovieActor>(entity =>
             {
+                entity.HasKey(e => new { e.ImdbId, e.ActorId })
+                    .HasName("pk_imdbIdAndActorId");
+
                 entity.ToTable("Movie_Actor");
 
-                entity.Property(e => e.MovieActorId)
-                    .HasColumnName("movieActorId")
-                    .HasDefaultValueSql("(newid())");
-
-                entity.Property(e => e.ActorId).HasColumnName("actorId");
-
                 entity.Property(e => e.ImdbId)
-                    .IsRequired()
                     .HasMaxLength(255)
                     .HasColumnName("imdbId");
 
-                entity.HasOne(d => d.Actor)
-                    .WithMany(p => p.MovieActors)
-                    .HasForeignKey(d => d.ActorId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_movieActorActorId");
-
-                entity.HasOne(d => d.Imdb)
-                    .WithMany(p => p.MovieActors)
-                    .HasForeignKey(d => d.ImdbId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_movieActorMovieId");
+                entity.Property(e => e.ActorId).HasColumnName("actorId");
             });
 
             modelBuilder.Entity<MovieDirector>(entity =>
             {
+                entity.HasKey(e => new { e.ImdbId, e.DirectorId })
+                    .HasName("pk_imdbIdDirectorId");
+
                 entity.ToTable("Movie_Director");
 
-                entity.Property(e => e.MovieDirectorId)
-                    .HasColumnName("movieDirectorId")
-                    .HasDefaultValueSql("(newid())");
-
-                entity.Property(e => e.DirectorId).HasColumnName("directorId");
-
                 entity.Property(e => e.ImdbId)
-                    .IsRequired()
                     .HasMaxLength(255)
                     .HasColumnName("imdbId");
 
-                entity.HasOne(d => d.Director)
-                    .WithMany(p => p.MovieDirectors)
-                    .HasForeignKey(d => d.DirectorId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_movieDirectorDirectorId");
-
-                entity.HasOne(d => d.Imdb)
-                    .WithMany(p => p.MovieDirectors)
-                    .HasForeignKey(d => d.ImdbId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_movieDirectorMovieId");
+                entity.Property(e => e.DirectorId).HasColumnName("directorId");
             });
 
             modelBuilder.Entity<MovieGenre>(entity =>
             {
+                entity.HasKey(e => new { e.ImdbId, e.GenreId })
+                    .HasName("pk_movieGenreId");
+
                 entity.ToTable("Movie_Genre");
 
-                entity.Property(e => e.MovieGenreId)
-                    .HasColumnName("movieGenreId")
-                    .HasDefaultValueSql("(newid())");
-
-                entity.Property(e => e.GenreId).HasColumnName("genreId");
-
                 entity.Property(e => e.ImdbId)
-                    .IsRequired()
                     .HasMaxLength(255)
                     .HasColumnName("imdbId");
 
-                entity.HasOne(d => d.Genre)
-                    .WithMany(p => p.MovieGenres)
-                    .HasForeignKey(d => d.GenreId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_movieGenreGenreId");
-
-                entity.HasOne(d => d.Imdb)
-                    .WithMany(p => p.MovieGenres)
-                    .HasForeignKey(d => d.ImdbId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_movieGenreMovieId");
+                entity.Property(e => e.GenreId).HasColumnName("genreId");
             });
 
             modelBuilder.Entity<MovieLanguage>(entity =>
             {
+                entity.HasKey(e => new { e.ImdbId, e.LanguageId })
+                    .HasName("pk_movieLanguageId");
+
                 entity.ToTable("Movie_Language");
 
-                entity.Property(e => e.MovieLanguageId)
-                    .HasColumnName("movieLanguageId")
-                    .HasDefaultValueSql("(newid())");
-
                 entity.Property(e => e.ImdbId)
-                    .IsRequired()
                     .HasMaxLength(255)
                     .HasColumnName("imdbId");
 
                 entity.Property(e => e.LanguageId).HasColumnName("languageId");
-
-                entity.HasOne(d => d.Imdb)
-                    .WithMany(p => p.MovieLanguages)
-                    .HasForeignKey(d => d.ImdbId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_movieLanguageMovieId");
-
-                entity.HasOne(d => d.Language)
-                    .WithMany(p => p.MovieLanguages)
-                    .HasForeignKey(d => d.LanguageId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_movieLanguageLanguageId");
             });
 
             modelBuilder.Entity<Rating>(entity =>

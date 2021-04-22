@@ -13,7 +13,10 @@ namespace Logic
         Task<List<Movie>> GetAllMovies();
 
         List<Movie> getAllMoviesByActor(string actor);
-        Task<Movie> getOneMovie(string imdb);
-        Task<bool> UpdatedPlotMovie(string imdb, Movie movie);
+        List<Movie> getAllMoviesByGenre(string genre);
+        List<Movie> getAllMoviesByLanguage(string language);
+        List<Movie> getAllMoviesByDirector(string director);
+        Task<Movie> getOneMovie(string imdb); 
+        Movie UpdatedPlotMovie(Movie movie);
     }
 }

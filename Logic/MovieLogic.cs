@@ -31,14 +31,29 @@ namespace Logic
             return  _repo.getAllByActor(actor);
         }
 
+        public List<Movie> getAllMoviesByDirector(string director)
+        {
+            return _repo.getAllByDirector(director);
+        }
+
+        public List<Movie> getAllMoviesByGenre(string genre)
+        {
+            return _repo.getAllByGenre(genre);
+        }
+
+        public List<Movie> getAllMoviesByLanguage(string language)
+        {
+            return _repo.getAllByLanguage(language);
+        }
+
         public async Task<Movie> getOneMovie(string imdb)
         {
             return await _repo.getOneMovie(imdb);
         }
 
-        public Task<bool> UpdatedPlotMovie(string imdb, Movie movie)
+        public  Movie UpdatedPlotMovie( Movie movie)
         {
-            return null;
+            return  _repo.updateMovie(movie);
         }
     }
 }
