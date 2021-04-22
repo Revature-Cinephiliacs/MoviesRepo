@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Logic;
 using Logic.ApiHelper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Repository.Models;
 
 
@@ -49,10 +50,27 @@ namespace CinemaAPI.Controllers
             return await _movieLogic.GetAllMovies();
         }
 
-        [HttpGet("/{actor}")]
+        [HttpGet("byActor/{actor}")]
         public  List<Movie> GetAllMoviesByActor(string actor)
         {
             return  _movieLogic.getAllMoviesByActor(actor);
+        }
+
+        [HttpGet("byGenre/{genre}")]
+        public  List<Movie> GetAllMoviesByGenre(string genre)
+        {
+            return  _movieLogic.getAllMoviesByGenre(genre);
+        }
+        [HttpGet("byDirector/{director}")]
+        public  List<Movie> GetAllMoviesByDir(string director)
+        {
+            return  _movieLogic.getAllMoviesByDirector(director);
+        }
+
+        [HttpGet("byLanguage/{language}")]
+        public  List<Movie> GetAllMoviesByLanguage(string language)
+        {
+            return  _movieLogic.getAllMoviesByLanguage(language);
         }
 
         [HttpGet("byIMDB/{imdb}")]
@@ -63,9 +81,23 @@ namespace CinemaAPI.Controllers
             {
                 return  new StatusCodeResult(404);
             }
-
             new StatusCodeResult(200);
             return movie;
+        }
+        [HttpPatch("update/{imdb}")]
+        public async Task<ActionResult> updateMovie(string imdb,Movie movie)
+        {
+            var movieExist = await _movieLogic.getOneMovie(imdb);
+
+            if (movieExist != null)
+            {
+                movie.ImdbId = movieExist.ImdbId;
+                _movieLogic.UpdatedPlotMovie(movie);
+                return new StatusCodeResult(200);
+            }
+
+            return new StatusCodeResult(404);
+
         }
     }
 }
