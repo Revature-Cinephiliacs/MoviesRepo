@@ -51,26 +51,51 @@ namespace CinemaAPI.Controllers
         }
 
         [HttpGet("byActor/{actor}")]
-        public  List<Movie> GetAllMoviesByActor(string actor)
+        public ActionResult<List<Movie>> GetAllMoviesByActor(string actor)
         {
-            return  _movieLogic.getAllMoviesByActor(actor);
+            List<Movie> movies =  _movieLogic.getAllMoviesByActor(actor);
+            if (movies == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            new StatusCodeResult(200);
+            return movies;
         }
 
         [HttpGet("byGenre/{genre}")]
-        public  List<Movie> GetAllMoviesByGenre(string genre)
+        public  ActionResult<List<Movie>> GetAllMoviesByGenre(string genre)
         {
-            return  _movieLogic.getAllMoviesByGenre(genre);
+            List<Movie> movies =  _movieLogic.getAllMoviesByGenre(genre);
+            if (movies == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            new StatusCodeResult(200);
+            return movies;
         }
         [HttpGet("byDirector/{director}")]
-        public  List<Movie> GetAllMoviesByDir(string director)
-        {
-            return  _movieLogic.getAllMoviesByDirector(director);
+        public  ActionResult<List<Movie>> GetAllMoviesByDir(string director)
+        { 
+            List<Movie> movies =  _movieLogic.getAllMoviesByDirector(director);
+            if (movies == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            new StatusCodeResult(200);
+            return movies;
+
         }
 
         [HttpGet("byLanguage/{language}")]
-        public  List<Movie> GetAllMoviesByLanguage(string language)
+        public  ActionResult<List<Movie>> GetAllMoviesByLanguage(string language)
         {
-            return  _movieLogic.getAllMoviesByLanguage(language);
+            List<Movie> movies =  _movieLogic.getAllMoviesByLanguage(language);
+            if (movies == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            new StatusCodeResult(200);
+            return movies;
         }
 
         [HttpGet("byIMDB/{imdb}")]
