@@ -10,9 +10,9 @@ namespace Repository
 {
     public class RepoLogic
     {
-        private readonly MovieDBContext _dbContext;
+        private readonly Cinephiliacs_MovieContext _dbContext;
 
-        public RepoLogic(MovieDBContext dbContext)
+        public RepoLogic(Cinephiliacs_MovieContext dbContext)
         {
             _dbContext = dbContext;
         }
