@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Logic;
 using Logic.ApiHelper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Repository.Models;
+
 
 
 namespace CinemaAPI.Controllers
@@ -123,6 +125,17 @@ namespace CinemaAPI.Controllers
 
             return new StatusCodeResult(404);
 
+        }
+
+        /// <summary>
+        /// Example for using authentication
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("users")]
+        [Authorize]
+        public async Task<ActionResult<string>> GetExample()
+        {
+            return "Success";
         }
     }
 }
