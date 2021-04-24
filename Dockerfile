@@ -12,7 +12,7 @@ FROM build AS publish
 RUN dotnet publish "CinemaAPI.csproj" -c Release -o /app/publish
 
 # final stage/image
-FROM base AS final
+FROM mcr.microsoft.com/dotnet/aspnet:5.0
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "CinemaAPI.dll"]
