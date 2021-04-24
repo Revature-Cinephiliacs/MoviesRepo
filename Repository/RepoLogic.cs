@@ -29,7 +29,6 @@ namespace Repository
                 ImdbId = movieid
             };
             await _dbContext.Movies.AddAsync(movie);
-
             await _dbContext.SaveChangesAsync();
             return true;
         }
