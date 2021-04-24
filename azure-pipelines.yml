@@ -24,8 +24,8 @@ variables:
 
 stages:
 #below will be the stage for testing and reporting to sonarcloud.
-- stage:
-  displayName: build for testing
+# - stage:
+#   displayName: build for testing
 
 
 
