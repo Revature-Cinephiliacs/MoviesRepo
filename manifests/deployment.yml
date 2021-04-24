@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: movieservice 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: movieservice
+  template:
+    metadata:
+      labels:
+        app: movieservice 
+    spec:
+      containers:
+        - name: movieservice 
+          image: 03012021batchp3acr.azurecr.io/movieservice
+          ports:
+          - containerPort: 80
