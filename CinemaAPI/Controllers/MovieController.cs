@@ -23,7 +23,7 @@ namespace CinemaAPI.Controllers
         }
 
         [HttpGet("api/{search}")]
-        public async Task<MovieObject> getMovieObject(string search)
+        public async Task<MovieObject> GetMovieObject(string search)
         {
             return await MovieProcessor.LoadMovie(search);
         }
@@ -33,7 +33,7 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("test")]
-        public MovieObject getTestObject()
+        public MovieObject GetTestObject()
         {
             MovieObject mo = new MovieObject();
             mo.Title = "Test Str";
