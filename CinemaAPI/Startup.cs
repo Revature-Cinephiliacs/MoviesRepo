@@ -11,6 +11,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Logic;
+using Microsoft.EntityFrameworkCore;
+using Repository;
+using Repository.Models;
+using Microsoft.AspNetCore.Authentication;
+using CinemaAPI.Helpers;
 
 namespace CinemaAPI
 {
@@ -26,8 +32,41 @@ namespace CinemaAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers();
+            var myConnectionString = Configuration.GetConnectionString("MovieContextConnectionString");
+            services.AddDbContext<Cinephiliacs_MovieContext>(options =>
+            {
+                if (!options.IsConfigured)
+                {
+                    options.UseSqlServer(myConnectionString);
+                }
+            });
+            services.AddScoped<IMovieLogic, MovieLogic>();
+
+
+            services.AddScoped<RepoLogic>();
+
+            // for authentication
+            services.AddAuthentication(o =>
+            {
+                o.DefaultScheme = "scheme";
+            })
+            .AddScheme<AuthenticationSchemeOptions, CustomAuthenticationHandler>(
+                "scheme", o => { });
+
+            var permissions = new[] {
+                // "loggedin", // for signed in
+                "manage:forums", // for moderator (is signed in)
+                "manage:awebsite", // for admin (is moderator and signed in)
+            };
+            services.AddAuthorization(options =>
+            {
+                for (int i = 0; i < permissions.Length; i++)
+                {
+                    options.AddPolicy(permissions[i], policy => policy.RequireClaim(permissions[i], "true"));
+                }
+            });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "CinemaAPI", Version = "v1" });
@@ -47,6 +86,8 @@ namespace CinemaAPI
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

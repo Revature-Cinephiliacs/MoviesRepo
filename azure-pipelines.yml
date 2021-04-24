@@ -27,8 +27,6 @@ stages:
 # - stage:
 #   displayName: build for testing
 
-
-
 - stage: Build
   displayName: Build stage
   jobs:
