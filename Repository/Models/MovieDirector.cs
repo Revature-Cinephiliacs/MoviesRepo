@@ -9,5 +9,8 @@ namespace Repository.Models
     {
         public string ImdbId { get; set; }
         public Guid DirectorId { get; set; }
+
+        public virtual Director Director { get; set; }
+        public virtual Movie Imdb { get; set; }
     }
 }
