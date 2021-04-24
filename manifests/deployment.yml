@@ -16,4 +16,4 @@ spec:
         - name: movieservice 
           image: cinephiliacs.azurecr.io/movieservice
           ports:
-          - containerPort: 6379
+          - containerPort: 80

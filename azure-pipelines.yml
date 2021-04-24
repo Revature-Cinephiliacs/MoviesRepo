@@ -11,12 +11,12 @@ resources:
 variables:
 
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '6cd346e6-97b8-4f0a-a63e-2c29920e32f7'
+  dockerRegistryServiceConnection: 'fb9ba3c0-dc74-4d39-ac88-968c47b8c4d7'
   imageRepository: 'movieservice'
   containerRegistry: 'cinephiliacs.azurecr.io'
   dockerfilePath: './Dockerfile'
   tag: '$(Build.BuildId)'
-  imagePullSecret: 'cinephiliacs6c0c-auth'
+  imagePullSecret: 'cinephiliacs184107a4-auth'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
@@ -53,7 +53,7 @@ stages:
     displayName: Deploy
     pool:
       vmImage: $(vmImageName)
-    environment: 'RevatureCinephiliacsMoviesRepo.default'
+    environment: 'RevatureCinephiliacsMoviesRepo-4270.default'
     strategy:
       runOnce:
         deploy:
