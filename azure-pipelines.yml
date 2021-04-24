@@ -3,7 +3,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-- staging
+- main
 
 resources:
 - repo: self
@@ -11,18 +11,22 @@ resources:
 variables:
 
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: 'fb9ba3c0-dc74-4d39-ac88-968c47b8c4d7'
+  dockerRegistryServiceConnection: '4b6e6936-841a-4c76-85e7-de19fe595021'
   imageRepository: 'movieservice'
-  containerRegistry: 'cinephiliacs.azurecr.io'
-  dockerfilePath: './Dockerfile'
+  containerRegistry: '03012021batchp3acr.azurecr.io'
+  dockerfilePath: '.'
   tag: '$(Build.BuildId)'
-  imagePullSecret: 'cinephiliacs184107a4-auth'
+  imagePullSecret: '03012021batchp3acr60bd-auth'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
 
 stages:
+#below will be the stage for testing and reporting to sonarcloud.
+# - stage:
+#   displayName: build for testing
+
 - stage: Build
   displayName: Build stage
   jobs:
@@ -53,7 +57,7 @@ stages:
     displayName: Deploy
     pool:
       vmImage: $(vmImageName)
-    environment: 'RevatureCinephiliacsMoviesRepo-4270.default'
+    environment: 'RevatureCinephiliacsMoviesRepo.default'
     strategy:
       runOnce:
         deploy:

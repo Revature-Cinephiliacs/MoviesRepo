@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: movieservice 
-          image: cinephiliacs.azurecr.io/movieservice
+          image: 03012021batchp3acr.azurecr.io/movieservice
           ports:
           - containerPort: 80
