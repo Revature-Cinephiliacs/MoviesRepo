@@ -14,7 +14,7 @@ variables:
   dockerRegistryServiceConnection: '6cd346e6-97b8-4f0a-a63e-2c29920e32f7'
   imageRepository: 'movieservice'
   containerRegistry: 'cinephiliacs.azurecr.io'
-  dockerfilePath: '**/Dockerfile'
+  dockerfilePath: './Dockerfile'
   tag: '$(Build.BuildId)'
   imagePullSecret: 'cinephiliacs6c0c-auth'
 
