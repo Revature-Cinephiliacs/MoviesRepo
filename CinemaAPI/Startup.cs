@@ -34,7 +34,7 @@ namespace CinemaAPI
         {
             services.AddControllers();
             var myConnectionString = Configuration.GetConnectionString("MovieContextConnectionString");
-            services.AddDbContext<MovieDBContext>(options =>
+            services.AddDbContext<Cinephiliacs_MovieContext>(options =>
             {
                 if (!options.IsConfigured)
                 {

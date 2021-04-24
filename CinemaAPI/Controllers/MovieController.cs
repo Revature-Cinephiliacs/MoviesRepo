@@ -9,8 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Repository.Models;
 
-
-
 namespace CinemaAPI.Controllers
 {
     [ApiController]
@@ -28,6 +26,41 @@ namespace CinemaAPI.Controllers
         public async Task<MovieObject> getMovieObject(string search)
         {
             return await MovieProcessor.LoadMovie(search);
+        }
+
+        /// <summary>
+        /// Only for testing the Kubernetes deployment.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("test")]
+        public MovieObject getTestObject()
+        {
+            MovieObject mo = new MovieObject();
+            mo.Title = "Test Str";
+            mo.Year = "Test Str";
+            mo.Rated = "Test Str";
+            mo.Released = "Test Str";
+            mo.RunTime = "Test Str";
+            mo.Genre = "Test Str";
+            mo.Director = "Test Str";
+            mo.Writer = "Test Str";
+            mo.Actors = "Test Str";
+            mo.Plot = "Test Str";
+            mo.Language = "Test Str";
+            mo.Country = "Test Str";
+            mo.Awards = "Test Str";
+            mo.Poster = "Test Str";
+            mo.Ratings = null;
+            mo.Metascore = "Test Str";
+            mo.imdbVotes = "Test Str";
+            mo.imdbID = "Test Str";
+            mo.Type = "Test Str";
+            mo.DVD = "Test Str";
+            mo.BoxOffice = "Test Str";
+            mo.Production = "Test Str";
+            mo.Website = "Test Str";
+            mo.Response = "Test Str";
+            return mo;
         }
 
         /// <summary>
