@@ -27,6 +27,7 @@ namespace Repository.Models
         public virtual DbSet<MovieGenre> MovieGenres { get; set; }
         public virtual DbSet<MovieLanguage> MovieLanguages { get; set; }
         public virtual DbSet<MovieTag> MovieTags { get; set; }
+        public virtual DbSet<MovieTagUser> MovieTagUsers { get; set; }
         public virtual DbSet<Rating> Ratings { get; set; }
         public virtual DbSet<Tag> Tags { get; set; }
 
@@ -263,10 +264,40 @@ namespace Repository.Models
 
             modelBuilder.Entity<MovieTag>(entity =>
             {
+                entity.HasKey(e => new { e.ImdbId, e.TagName })
+                    .HasName("pk_imdbId_tagName");
+
+                entity.ToTable("Movie_Tag");
+
+                entity.Property(e => e.ImdbId)
+                    .HasMaxLength(255)
+                    .HasColumnName("imdbId");
+
+                entity.Property(e => e.TagName)
+                    .HasMaxLength(50)
+                    .HasColumnName("tagName");
+
+                entity.Property(e => e.VoteSum).HasColumnName("voteSum");
+
+                entity.HasOne(d => d.Imdb)
+                    .WithMany(p => p.MovieTags)
+                    .HasForeignKey(d => d.ImdbId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_movietag_imdbId");
+
+                entity.HasOne(d => d.TagNameNavigation)
+                    .WithMany(p => p.MovieTags)
+                    .HasForeignKey(d => d.TagName)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_movietag_tagName");
+            });
+
+            modelBuilder.Entity<MovieTagUser>(entity =>
+            {
                 entity.HasKey(e => new { e.ImdbId, e.TagName, e.UserId })
                     .HasName("pk_imdbId_tagName_userId");
 
-                entity.ToTable("Movie_Tag");
+                entity.ToTable("Movie_Tag_User");
 
                 entity.Property(e => e.ImdbId)
                     .HasMaxLength(255)
@@ -286,16 +317,16 @@ namespace Repository.Models
                     .HasDefaultValueSql("((1))");
 
                 entity.HasOne(d => d.Imdb)
-                    .WithMany(p => p.MovieTags)
+                    .WithMany(p => p.MovieTagUsers)
                     .HasForeignKey(d => d.ImdbId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_movietag_imdbId");
+                    .HasConstraintName("fk_movietaguser_imdbId");
 
                 entity.HasOne(d => d.TagNameNavigation)
-                    .WithMany(p => p.MovieTags)
+                    .WithMany(p => p.MovieTagUsers)
                     .HasForeignKey(d => d.TagName)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fk_movietag_tagName");
+                    .HasConstraintName("fk_movietaguser_tagName");
             });
 
             modelBuilder.Entity<Rating>(entity =>

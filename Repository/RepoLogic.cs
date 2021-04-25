@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Repository.Models;
 
 namespace Repository
@@ -17,121 +14,168 @@ namespace Repository
             _dbContext = dbContext;
         }
 
-        public async Task<bool> AddMovie(string movieid)
+        public bool AddMovie(Movie movie)
         {
-            if(MovieExists(movieid))
+            _dbContext.Movies.Add(movie);
+            if(_dbContext.SaveChanges() > 0)
             {
-                Console.WriteLine("RepoLogic.AddMovie() was called for a movie that doesn't exist.");
-                return false;
+                return true;
             }
-            Movie movie = new Movie
-            {
-                ImdbId = movieid
-            };
-            await _dbContext.Movies.AddAsync(movie);
-            await _dbContext.SaveChangesAsync();
-            return true;
-        }
-        private bool MovieExists(string movieid)
-        {
-            return (_dbContext.Movies.FirstOrDefault(m => m.ImdbId == movieid) != null);
+            return false;
         }
 
-        public async Task<List<Movie>> getAllThemoves()
+        public bool AddTag(Tag tag)
         {
-            return await _dbContext.Movies.ToListAsync();
-        }
-        public  List<Movie> getAllByActor(string actor)
-        {
-            if (!ActorExist(actor))
+            _dbContext.Tags.Add(tag);
+            if(_dbContext.SaveChanges() > 0)
             {
-                return null;
+                return true;
             }
-
-            return _dbContext.Movies
-                .FromSqlRaw(
-                    $"SELECT m.imdbId,title,ratingId,releaseDate,releaseCountry,runtimeMinutes,isReleased,plot FROM Movie m Join Movie_Actor ma on m.ImdbId = ma.ImdbId Join Actor a on a.actorId = ma.actorId where a.actorName = '{actor}'")
-                .ToList();
+            return false;
         }
-        public  List<Movie> getAllByGenre(string genre)
+
+        public bool AddRating(Rating rating)
         {
-            if (!GenreExist(genre))
+            _dbContext.Ratings.Add(rating);
+            if(_dbContext.SaveChanges() > 0)
             {
-                return null;
+                return true;
             }
-
-            return _dbContext.Movies
-                .FromSqlRaw(
-                    $"SELECT m.imdbId,title,ratingId,releaseDate,releaseCountry,runtimeMinutes,isReleased,plot FROM Movie m Join Movie_Genre ma on m.ImdbId = ma.ImdbId Join Genre a on a.genreId = ma.genreId where a.genreName = '{genre}'")
-                .ToList();
+            return false;
         }
-        public  List<Movie> getAllByLanguage(string language)
+
+        public bool AddActor(Actor actor)
         {
-            if (!LanguageExist(language))
+            _dbContext.Actors.Add(actor);
+            if(_dbContext.SaveChanges() > 0)
             {
-                return null;
+                return true;
             }
-
-            return _dbContext.Movies
-                .FromSqlRaw(
-                    $"SELECT m.imdbId,title,ratingId,releaseDate,releaseCountry,runtimeMinutes,isReleased,plot FROM Movie m Join Movie_Language ma on m.ImdbId = ma.ImdbId Join Language a on a.languageId = ma.languageId where a.languageName = '{language}'")
-                .ToList();
+            return false;
         }
-        public  List<Movie> getAllByDirector(string director)
+
+        public bool AddDirector(Director director)
         {
-            if (!DirectorExist(director))
+            _dbContext.Directors.Add(director);
+            if(_dbContext.SaveChanges() > 0)
             {
-                return null;
+                return true;
             }
-
-            return _dbContext.Movies
-                .FromSqlRaw(
-                    $"SELECT m.imdbId,title,ratingId,releaseDate,releaseCountry,runtimeMinutes,isReleased,plot FROM Movie m Join Movie_Director ma on m.ImdbId = ma.ImdbId Join Director a on a.directorId = ma.directorId where a.directorName = '{director}'")
-                .ToList();
+            return false;
         }
-        public async Task<Movie> getOneMovie(string imdb)
+
+        public bool AddGenre(Genre genre)
         {
-            if (!MovieExist(imdb))
+            _dbContext.Genres.Add(genre);
+            if(_dbContext.SaveChanges() > 0)
             {
-                return null;
+                return true;
             }
-
-            return await _dbContext.Movies.FirstOrDefaultAsync(a=>a.ImdbId == imdb);
+            return false;
         }
 
-        public  Movie updateMovie(Movie updatedMovie)
+        public bool AddLanguage(Language language)
         {
-            
-            var existingMovie = _dbContext.Movies.Find(updatedMovie.ImdbId);
-            if (existingMovie != null)
+            _dbContext.Languages.Add(language);
+            if(_dbContext.SaveChanges() > 0)
             {
-                existingMovie.Plot = updatedMovie.Plot;
-                _dbContext.Movies.Update(existingMovie);
-                 _dbContext.SaveChangesAsync();
+                return true;
             }
-
-            return updatedMovie;
-
+            return false;
         }
-        private bool ActorExist(string actor)
+
+        public bool AddMovieTag(MovieTag movieTag)
+        {
+            _dbContext.MovieTags.Add(movieTag);
+            if(_dbContext.SaveChanges() > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool UpdateTag(Tag tag)
+        {
+            _dbContext.Tags.Update(tag);
+            if(_dbContext.SaveChanges() > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool UpdateMovieTag(MovieTag movieTag)
+        {
+            _dbContext.MovieTags.Update(movieTag);
+            if(_dbContext.SaveChanges() > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public List<Movie> GetAllMovies()
+        {
+            return _dbContext.Movies.ToList<Movie>();
+        }
+
+        public Movie GetMovie(string movieId)
+        {
+            return _dbContext.Movies.FirstOrDefault(m => m.ImdbId == movieId);
+        }
+
+        public bool MovieExists(string movieId)
+        {
+            return (_dbContext.Movies.FirstOrDefault(m => m.ImdbId == movieId) != null);
+        }
+        public bool TagExists(string tagName)
+        {
+            return (_dbContext.Tags.FirstOrDefault(t => t.TagName == tagName) != null);
+        }
+        public bool RatingExists(string ratingName)
+        {
+            return (_dbContext.Ratings.FirstOrDefault(r => r.RatingName == ratingName) != null);
+        }
+        public bool ActorExists(string actor)
         {
             return (_dbContext.Actors.FirstOrDefault(a => a.ActorName == actor) != null);
         }
-        private bool LanguageExist(string language)
+        public bool LanguageExists(string language)
         {
-            return (_dbContext.Languages.FirstOrDefault(a => a.LanguageName ==language) != null);
+            return (_dbContext.Languages.FirstOrDefault(l => l.LanguageName == language) != null);
         }
-        private bool DirectorExist(string director)
+        public bool DirectorExists(string director)
         {
-            return (_dbContext.Directors.FirstOrDefault(a => a.DirectorName == director) != null);
+            return (_dbContext.Directors.FirstOrDefault(d => d.DirectorName == director) != null);
         }
-        private bool GenreExist(string genre)
+        public bool GenreExists(string genre)
         {
-            return (_dbContext.Genres.FirstOrDefault(a => a.GenreName == genre) != null);
+            return (_dbContext.Genres.FirstOrDefault(g => g.GenreName == genre) != null);
         }
-        private bool MovieExist(string movieIMDB)
+        public bool MovieActorExists(MovieActor movieActor)
         {
-            return (_dbContext.Movies.FirstOrDefault(a => a.ImdbId == movieIMDB) != null);
+            return (_dbContext.MovieActors.FirstOrDefault(ma => ma.ImdbId == movieActor.ImdbId
+                && ma.ActorId == movieActor.ActorId) != null);
+        }
+        public bool MovieDirectorExists(MovieDirector movieDirector)
+        {
+            return (_dbContext.MovieDirectors.FirstOrDefault(md => md.ImdbId == movieDirector.ImdbId
+                && md.DirectorId == movieDirector.DirectorId) != null);
+        }
+        public bool MovieGenreExists(MovieGenre movieGenre)
+        {
+            return (_dbContext.MovieGenres.FirstOrDefault(mg => mg.ImdbId == movieGenre.ImdbId
+                && mg.GenreId == movieGenre.GenreId) != null);
+        }
+        public bool MovieLanguageExists(MovieLanguage movieLanguage)
+        {
+            return (_dbContext.MovieLanguages.FirstOrDefault(ml => ml.ImdbId == movieLanguage.ImdbId
+                && ml.LanguageId == movieLanguage.LanguageId) != null);
+        }
+        public bool MovieTagExists(MovieTag movieTag)
+        {
+            return (_dbContext.MovieTags.FirstOrDefault(mt => mt.ImdbId == movieTag.ImdbId
+                && mt.TagName == movieTag.TagName && mt.ImdbId == movieTag.ImdbId) != null);
         }
     }
 }

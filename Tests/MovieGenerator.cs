@@ -20,9 +20,7 @@ namespace Tests
             movieDTO.ReleaseCountry = Guid.NewGuid().ToString();
             movieDTO.Plot = Guid.NewGuid().ToString();
 
-            movieDTO. = GetRandomDateTime();
-            movieDTO.short = Guid.NewGuid().ToString();
-            movieDTO.bool = Guid.NewGuid().ToString();
+            return movieDTO;
         }
 
         private static DateTime GetRandomDateTime()
@@ -31,12 +29,6 @@ namespace Tests
             DateTime dateTime = DateTime.Now;
             
             return dateTime.AddDays(-1*randomGen.Next(10000));
-        }
-        DateTime RandomDay()
-        {
-            DateTime start = new DateTime(1995, 1, 1);
-            int range = (DateTime.Today - start).Days;           
-            return start.AddDays(gen.Next(range));
         }
     }
 }

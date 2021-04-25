@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Model;
-using Repository.Models;
 
 namespace CinemaAPI.Controllers
 {
@@ -28,25 +27,9 @@ namespace CinemaAPI.Controllers
         /// <param name="movieid"></param>
         /// <returns></returns>
         [HttpGet("{movieid}")]
-        public async Task<MovieDTO> GetMovie(string movieid)
+        public async Task<ActionResult<MovieDTO>> GetMovie(string movieid)
         {
-            await _movieLogic.GetMovie(movieid);
-        }
-
-        /// <summary>
-        /// Adds a new Movie based on the information provided.
-        /// Returns a 400 status code if creation fails.
-        /// </summary>
-        /// <param name="movieid"></param>
-        /// <returns></returns>
-        [HttpPost("{movieid}")]
-        public async Task<IActionResult> AddMovie(string movieid)
-        {
-            if (await _movieLogic.AddMovie(movieid))
-            {
-                return new StatusCodeResult(201);
-            }
-            return new StatusCodeResult(400);
+            return await _movieLogic.GetMovie(movieid);
         }
 
         /// <summary>
@@ -56,10 +39,10 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="filters"></param>
         /// <returns></returns>
-        [HttpGet("filtered")]
-        public ActionResult<List<string>> GetMoviesFiltered([FromBody] Dictionary<string, string> filters)
+        [HttpGet("tag/search")]
+        public ActionResult<List<string>> SearchMovies([FromBody] Dictionary<string, string> filters)
         {
-            var movies = _movieLogic.GetMoviesFiltered(filters);
+            var movies = _movieLogic.SearchMovies(filters);
             if (movies == null)
             {
                 return StatusCode(404);
@@ -68,20 +51,17 @@ namespace CinemaAPI.Controllers
             return movies;
         }
 
-        [HttpPatch("update/{imdb}")]
-        public async Task<ActionResult> UpdateMovie(string imdb,Movie movie)
+        [HttpPatch("update")]
+        public ActionResult UpdateMovie([FromBody] MovieDTO movieDTO)
         {
-            var movieExist = await _movieLogic.getOneMovie(imdb);
-
-            if (movieExist != null)
+            if(_movieLogic.UpdateMovie(movieDTO))
             {
-                movie.ImdbId = movieExist.ImdbId;
-                _movieLogic.UpdatedPlotMovie(movie);
-                return new StatusCodeResult(200);
+                return StatusCode(200);
             }
-
-            return new StatusCodeResult(404);
-
+            else
+            {
+                return StatusCode(400);
+            }
         }
 
         /// <summary>
@@ -92,9 +72,16 @@ namespace CinemaAPI.Controllers
         /// <param name="taggingDTO"></param>
         /// <returns></returns>
         [HttpPost("tag/movie")]
-        public async Task<ActionResult> TagMovie([FromBody] TaggingDTO taggingDTO)
+        public ActionResult TagMovie([FromBody] TaggingDTO taggingDTO)
         {
-            await _movieLogic.TagMovie(taggingDTO);
+            if(_movieLogic.TagMovie(taggingDTO))
+            {
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(400);
+            }
         }
 
         /// <summary>
@@ -104,9 +91,16 @@ namespace CinemaAPI.Controllers
         /// <param name="tagname"></param>
         /// <returns></returns>
         [HttpPost("tag/ban/{tagname}")]
-        public async Task<ActionResult> BanTag(string tagname)
+        public ActionResult BanTag(string tagname)
         {
-            await _movieLogic.BanTag(tagname);
+            if(_movieLogic.BanTag(tagname))
+            {
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(400);
+            }
         }
 
         /// <summary>
@@ -115,13 +109,13 @@ namespace CinemaAPI.Controllers
         /// <returns></returns>
         [HttpGet("users")]
         [Authorize]
-        public async Task<ActionResult<string>> GetExample()
+        public ActionResult<string> GetExample()
         {
             return "Success";
         }
 
         /// <summary>
-        /// Only for testing the Kubernetes deployment.
+        /// Temporary endpoint for testing the Kubernetes deployment.
         /// </summary>
         /// <returns></returns>
         [HttpGet("test")]

@@ -7,14 +7,14 @@ namespace Model
     {
         [Required]
         [StringLength(20)]
-        public string Movieid { get; set; }
+        public string MovieId { get; set; }
         [Required]
         [StringLength(50)]
-        public string Userid { get; set; }
+        public string UserId { get; set; }
         [Required]
         [StringLength(50)]
-        public string Tagname { get; set; }
-        public bool? Isupvote { get; set; }
+        public string TagName { get; set; }
+        public bool? IsUpvote { get; set; }
 
         public TaggingDTO() {}   
     }

@@ -17,7 +17,6 @@ namespace Logic.ApiHelper
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-           
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
