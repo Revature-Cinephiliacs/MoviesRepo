@@ -26,10 +26,18 @@ namespace Repository.Models
         public virtual DbSet<MovieDirector> MovieDirectors { get; set; }
         public virtual DbSet<MovieGenre> MovieGenres { get; set; }
         public virtual DbSet<MovieLanguage> MovieLanguages { get; set; }
+        public virtual DbSet<MovieTag> MovieTags { get; set; }
         public virtual DbSet<Rating> Ratings { get; set; }
+        public virtual DbSet<Tag> Tags { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        { }
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=tcp:cinephiliacs.database.windows.net,1433;Initial Catalog=Cinephiliacs_Movie;Persist Security Info=False;User ID=kugelsicher;Password=F36UWevqvcDxEmt;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -253,6 +261,43 @@ namespace Repository.Models
                     .HasConstraintName("fk_languageId");
             });
 
+            modelBuilder.Entity<MovieTag>(entity =>
+            {
+                entity.HasKey(e => new { e.ImdbId, e.TagName, e.UserId })
+                    .HasName("pk_imdbId_tagName_userId");
+
+                entity.ToTable("Movie_Tag");
+
+                entity.Property(e => e.ImdbId)
+                    .HasMaxLength(255)
+                    .HasColumnName("imdbId");
+
+                entity.Property(e => e.TagName)
+                    .HasMaxLength(50)
+                    .HasColumnName("tagName");
+
+                entity.Property(e => e.UserId)
+                    .HasMaxLength(50)
+                    .HasColumnName("userId");
+
+                entity.Property(e => e.IsUpvote)
+                    .IsRequired()
+                    .HasColumnName("is_upvote")
+                    .HasDefaultValueSql("((1))");
+
+                entity.HasOne(d => d.Imdb)
+                    .WithMany(p => p.MovieTags)
+                    .HasForeignKey(d => d.ImdbId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_movietag_imdbId");
+
+                entity.HasOne(d => d.TagNameNavigation)
+                    .WithMany(p => p.MovieTags)
+                    .HasForeignKey(d => d.TagName)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fk_movietag_tagName");
+            });
+
             modelBuilder.Entity<Rating>(entity =>
             {
                 entity.ToTable("Rating");
@@ -266,6 +311,20 @@ namespace Repository.Models
                     .IsRequired()
                     .HasMaxLength(255)
                     .HasColumnName("ratingName");
+            });
+
+            modelBuilder.Entity<Tag>(entity =>
+            {
+                entity.HasKey(e => e.TagName)
+                    .HasName("pk_tagName");
+
+                entity.ToTable("Tag");
+
+                entity.Property(e => e.TagName)
+                    .HasMaxLength(50)
+                    .HasColumnName("tagName");
+
+                entity.Property(e => e.IsBanned).HasColumnName("isBanned");
             });
 
             OnModelCreatingPartial(modelBuilder);
