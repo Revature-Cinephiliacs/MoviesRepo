@@ -13,6 +13,7 @@ namespace Repository.Models
             MovieDirectors = new HashSet<MovieDirector>();
             MovieGenres = new HashSet<MovieGenre>();
             MovieLanguages = new HashSet<MovieLanguage>();
+            MovieTags = new HashSet<MovieTag>();
         }
 
         public string ImdbId { get; set; }
@@ -30,5 +31,6 @@ namespace Repository.Models
         public virtual ICollection<MovieDirector> MovieDirectors { get; set; }
         public virtual ICollection<MovieGenre> MovieGenres { get; set; }
         public virtual ICollection<MovieLanguage> MovieLanguages { get; set; }
+        public virtual ICollection<MovieTag> MovieTags { get; set; }
     }
 }
