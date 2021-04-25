@@ -7,7 +7,14 @@ namespace Repository.Models
 {
     public partial class Actor
     {
+        public Actor()
+        {
+            MovieActors = new HashSet<MovieActor>();
+        }
+
         public Guid ActorId { get; set; }
         public string ActorName { get; set; }
+
+        public virtual ICollection<MovieActor> MovieActors { get; set; }
     }
 }
