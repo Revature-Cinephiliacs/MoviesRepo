@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 
 namespace Model
@@ -19,7 +15,7 @@ namespace Model
             
             public DateTime? ReleaseDate { get; set; }
             public string ReleaseCountry { get; set; }
-            public int? RuntimeMinutes { get; set; }
+            public short? RuntimeMinutes { get; set; }
             public bool? IsReleased { get; set; }
 
             [Required]
@@ -28,7 +24,7 @@ namespace Model
 
             public MovieDTO() {}
 
-            public MovieDTO(string ImdbId,string Title,DateTime? ReleaseDate,string ReleaseCountry,int? RuntimeMinutes,bool? IsReleased,string Plot)
+            public MovieDTO(string ImdbId, string Title, DateTime? ReleaseDate, string ReleaseCountry, short? RuntimeMinutes, bool? IsReleased, string Plot)
             {
                 this.ImdbId = ImdbId;
                 this.Title = Title;

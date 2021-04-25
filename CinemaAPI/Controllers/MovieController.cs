@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Logic;
 using Logic.ApiHelper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Model;
 using Repository.Models;
 
 namespace CinemaAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class MovieController
+    public class MovieController : ControllerBase
     {
         private readonly IMovieLogic _movieLogic;
 
@@ -22,10 +22,102 @@ namespace CinemaAPI.Controllers
             _movieLogic = movieLogic;
         }
 
-        [HttpGet("api/{search}")]
-        public async Task<MovieObject> GetMovieObject(string search)
+        /// <summary>
+        /// Returns detailed information for the specified movieid
+        /// </summary>
+        /// <param name="movieid"></param>
+        /// <returns></returns>
+        [HttpGet("{movieid}")]
+        public async Task<MovieDTO> GetMovie(string movieid)
         {
-            return await MovieProcessor.LoadMovie(search);
+            await _movieLogic.GetMovie(movieid);
+        }
+
+        /// <summary>
+        /// Adds a new Movie based on the information provided.
+        /// Returns a 400 status code if creation fails.
+        /// </summary>
+        /// <param name="movieid"></param>
+        /// <returns></returns>
+        [HttpPost("{movieid}")]
+        public async Task<IActionResult> AddMovie(string movieid)
+        {
+            if (await _movieLogic.AddMovie(movieid))
+            {
+                return new StatusCodeResult(201);
+            }
+            return new StatusCodeResult(400);
+        }
+
+        /// <summary>
+        /// Returns the movieId for each movie that matches all of the tags
+        /// passed in as tag:[value] pairs. Returns a 404 response if any of
+        /// the tags are invalid.
+        /// </summary>
+        /// <param name="filters"></param>
+        /// <returns></returns>
+        [HttpGet("filtered")]
+        public ActionResult<List<string>> GetMoviesFiltered([FromBody] Dictionary<string, string> filters)
+        {
+            var movies = _movieLogic.GetMoviesFiltered(filters);
+            if (movies == null)
+            {
+                return StatusCode(404);
+            }
+            StatusCode(200);
+            return movies;
+        }
+
+        [HttpPatch("update/{imdb}")]
+        public async Task<ActionResult> UpdateMovie(string imdb,Movie movie)
+        {
+            var movieExist = await _movieLogic.getOneMovie(imdb);
+
+            if (movieExist != null)
+            {
+                movie.ImdbId = movieExist.ImdbId;
+                _movieLogic.UpdatedPlotMovie(movie);
+                return new StatusCodeResult(200);
+            }
+
+            return new StatusCodeResult(404);
+
+        }
+
+        /// <summary>
+        /// Submits a vote as to whether the specified tag is associated
+        /// with the specified movie. Each user may have only one vote
+        /// per movie/tag combination.
+        /// </summary>
+        /// <param name="taggingDTO"></param>
+        /// <returns></returns>
+        [HttpPost("tag/movie")]
+        public async Task<ActionResult> TagMovie([FromBody] TaggingDTO taggingDTO)
+        {
+            await _movieLogic.TagMovie(taggingDTO);
+        }
+
+        /// <summary>
+        /// Bans the specified tag. This is only available to Moderators
+        /// and Administrators.
+        /// </summary>
+        /// <param name="tagname"></param>
+        /// <returns></returns>
+        [HttpPost("tag/ban/{tagname}")]
+        public async Task<ActionResult> BanTag(string tagname)
+        {
+            await _movieLogic.BanTag(tagname);
+        }
+
+        /// <summary>
+        /// Example for using authentication
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("users")]
+        [Authorize]
+        public async Task<ActionResult<string>> GetExample()
+        {
+            return "Success";
         }
 
         /// <summary>
@@ -61,114 +153,6 @@ namespace CinemaAPI.Controllers
             mo.Website = "Test Str";
             mo.Response = "Test Str";
             return mo;
-        }
-
-        /// <summary>
-        /// Adds a new Movie based on the information provided.
-        /// Returns a 400 status code if creation fails.
-        /// </summary>
-        /// <param name="movieid"></param>
-        /// <returns></returns>
-        [HttpPost("{movieid}")]
-        public async Task<IActionResult> CreateMovie(string movieid)
-        {
-            if (await _movieLogic.CreateMovie(movieid))
-            {
-                return new StatusCodeResult(201);
-            }
-            return new StatusCodeResult(400);
-        }
-
-        [HttpGet]
-        public async Task<List<Movie>> GetThem()
-        {
-            return await _movieLogic.GetAllMovies();
-        }
-
-        [HttpGet("byActor/{actor}")]
-        public ActionResult<List<Movie>> GetAllMoviesByActor(string actor)
-        {
-            List<Movie> movies =  _movieLogic.getAllMoviesByActor(actor);
-            if (movies == null)
-            {
-                return new StatusCodeResult(404);
-            }
-            new StatusCodeResult(200);
-            return movies;
-        }
-
-        [HttpGet("byGenre/{genre}")]
-        public  ActionResult<List<Movie>> GetAllMoviesByGenre(string genre)
-        {
-            List<Movie> movies =  _movieLogic.getAllMoviesByGenre(genre);
-            if (movies == null)
-            {
-                return new StatusCodeResult(404);
-            }
-            new StatusCodeResult(200);
-            return movies;
-        }
-        [HttpGet("byDirector/{director}")]
-        public  ActionResult<List<Movie>> GetAllMoviesByDir(string director)
-        { 
-            List<Movie> movies =  _movieLogic.getAllMoviesByDirector(director);
-            if (movies == null)
-            {
-                return new StatusCodeResult(404);
-            }
-            new StatusCodeResult(200);
-            return movies;
-
-        }
-
-        [HttpGet("byLanguage/{language}")]
-        public  ActionResult<List<Movie>> GetAllMoviesByLanguage(string language)
-        {
-            List<Movie> movies =  _movieLogic.getAllMoviesByLanguage(language);
-            if (movies == null)
-            {
-                return new StatusCodeResult(404);
-            }
-            new StatusCodeResult(200);
-            return movies;
-        }
-
-        [HttpGet("byIMDB/{imdb}")]
-        public async Task<ActionResult<Movie>> getOneM(string imdb)
-        {
-            var movie = await _movieLogic.getOneMovie(imdb);
-            if (movie == null)
-            {
-                return  new StatusCodeResult(404);
-            }
-            new StatusCodeResult(200);
-            return movie;
-        }
-        [HttpPatch("update/{imdb}")]
-        public async Task<ActionResult> updateMovie(string imdb,Movie movie)
-        {
-            var movieExist = await _movieLogic.getOneMovie(imdb);
-
-            if (movieExist != null)
-            {
-                movie.ImdbId = movieExist.ImdbId;
-                _movieLogic.UpdatedPlotMovie(movie);
-                return new StatusCodeResult(200);
-            }
-
-            return new StatusCodeResult(404);
-
-        }
-
-        /// <summary>
-        /// Example for using authentication
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("users")]
-        [Authorize]
-        public async Task<ActionResult<string>> GetExample()
-        {
-            return "Success";
         }
     }
 }
