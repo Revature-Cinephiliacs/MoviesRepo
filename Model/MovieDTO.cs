@@ -12,6 +12,9 @@ namespace Model
         
         [Required]
         public string Title { get; set; }
+        
+        [Required]
+        public string RatingName { get; set; }
 
         [RegularExpression( @"[12]\d\d\d-[01]\d-[0123]\d")]
         public DateTime? ReleaseDate { get; set; }
@@ -20,8 +23,6 @@ namespace Model
         public bool? IsReleased { get; set; }
         public string Plot { get; set; }
         public string PosterUrl { get; set; }
-
-        public string RatingName { get; set; }
         public List<string> MovieActors { get; set; }
         public List<string> MovieDirectors { get; set; }
         public List<string> MovieGenres { get; set; }

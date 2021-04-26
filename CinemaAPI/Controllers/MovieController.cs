@@ -39,7 +39,7 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="filters"></param>
         /// <returns></returns>
-        [HttpGet("tag/search")]
+        [HttpGet("search")]
         public ActionResult<List<string>> SearchMovies([FromBody] Dictionary<string, string> filters)
         {
             var movies = _movieLogic.SearchMovies(filters);
@@ -51,10 +51,48 @@ namespace CinemaAPI.Controllers
             return movies;
         }
 
+        /// <summary>
+        /// Updates every field of the movie with a matching ImdbId to
+        /// the provided values. Sets missing values to null. Adds the
+        /// movie if it does not exist.
+        /// </summary>
+        /// <param name="movieDTO"></param>
+        /// <returns></returns>
         [HttpPatch("update")]
-        public ActionResult UpdateMovie([FromBody] MovieDTO movieDTO)
+        public async Task<ActionResult> UpdateMovie([FromBody] MovieDTO movieDTO)
         {
-            if(_movieLogic.UpdateMovie(movieDTO))
+            if(!ModelState.IsValid)
+            {
+                return StatusCode(400);
+            }
+            if(await _movieLogic.UpdateMovie(movieDTO))
+            {
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(400);
+            }
+        }
+
+        /// <summary>
+        /// Updates the fields of the movie with a matching ImdbId to the
+        /// provided non-null/empty values. If any of the passed-in values
+        /// are null/empty, they will remain unchanged. The passed-in array
+        /// fields will be appened to the existing lists. Pre-existing entries
+        /// in the lists will remain. If the movie does not yet exist, the
+        /// movie is first added via the public movie API.
+        /// </summary>
+        /// <param name="movieDTO"></param>
+        /// <returns></returns>
+        [HttpPatch("append")]
+        public async Task<ActionResult> AppendMovie([FromBody] MovieDTO movieDTO)
+        {
+            if(!ModelState.IsValid)
+            {
+                return StatusCode(400);
+            }
+            if(await _movieLogic.AppendMovie(movieDTO))
             {
                 return StatusCode(200);
             }

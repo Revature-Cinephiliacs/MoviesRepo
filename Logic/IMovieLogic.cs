@@ -12,7 +12,8 @@ namespace Logic
     {
         Task<MovieDTO> GetMovie(string movieid);
         List<string> SearchMovies(Dictionary<string, string> filters);
-        bool UpdateMovie(MovieDTO movieDTO);
+        Task<bool> UpdateMovie(MovieDTO movieDTO);
+        Task<bool> AppendMovie(MovieDTO movieDTO);
         bool TagMovie(TaggingDTO taggingDTO);
         bool BanTag(string tagname);
     }

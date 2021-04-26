@@ -14,7 +14,8 @@ namespace Model
         [Required]
         [StringLength(50)]
         public string TagName { get; set; }
-        public bool? IsUpvote { get; set; }
+        [Required]
+        public bool IsUpvote { get; set; }
 
         public TaggingDTO() {}   
     }

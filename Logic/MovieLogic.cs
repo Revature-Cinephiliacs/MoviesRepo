@@ -76,8 +76,14 @@ namespace Logic
 
         private void FilterMoviesByTag(List<Movie> movies, string tagName)
         {
-            foreach (var movie in movies)
+            for (int i = 0; i < movies.Count; i++)
             {
+                if(movies[i].MovieTags.FirstOrDefault(mt => mt.TagName == tagName
+                    && mt.VoteSum > 0) == null)
+                {
+                    movies.RemoveAt(i);
+                    i--;
+                }
             }
         }
 
@@ -142,11 +148,6 @@ namespace Logic
             }
         }
 
-        public bool UpdateMovie(MovieDTO movieDTO)
-        {
-            throw new NotImplementedException();
-        }
-
         public bool TagMovie(TaggingDTO taggingDTO)
         {
             if(!_repo.MovieExists(taggingDTO.MovieId))
@@ -167,18 +168,18 @@ namespace Logic
                 }
             }
             
-            MovieTag movieTag = new MovieTag();
-            movieTag.ImdbId = taggingDTO.MovieId;
-            movieTag.TagName = taggingDTO.TagName;
-            movieTag.UserId = taggingDTO.UserId;
-            movieTag.IsUpvote = taggingDTO.IsUpvote;
-            if(_repo.MovieTagExists(movieTag))
+            MovieTagUser movieTagUser = new MovieTagUser();
+            movieTagUser.ImdbId = taggingDTO.MovieId;
+            movieTagUser.TagName = taggingDTO.TagName;
+            movieTagUser.UserId = taggingDTO.UserId;
+            movieTagUser.IsUpvote = taggingDTO.IsUpvote;
+            if(_repo.MovieTagUserExists(movieTagUser))
             {
-                return _repo.UpdateMovieTag(movieTag);
+                return _repo.UpdateMovieTagUser(movieTagUser);
             }
             else
             {
-                return _repo.AddMovieTag(movieTag);
+                return _repo.AddMovieTagUser(movieTagUser);
             }
         }
 
@@ -192,6 +193,16 @@ namespace Logic
             tag.TagName = tagName;
             tag.IsBanned = true;
             return _repo.UpdateTag(tag);
+        }
+
+        public Task<bool> UpdateMovie(MovieDTO movieDTO)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> AppendMovie(MovieDTO movieDTO)
+        {
+            throw new NotImplementedException();
         }
     }
 }

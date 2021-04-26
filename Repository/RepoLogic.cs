@@ -84,9 +84,29 @@ namespace Repository
             return false;
         }
 
-        public bool AddMovieTag(MovieTag movieTag)
+        public bool AddMovieTagUser(MovieTagUser movieTagUser)
         {
-            _dbContext.MovieTags.Add(movieTag);
+            var movieTag = GetMovieTag(movieTagUser.ImdbId, movieTagUser.TagName);
+            if(movieTag == null)
+            {
+                movieTag = new MovieTag();
+                movieTag.ImdbId = movieTagUser.ImdbId;
+                movieTag.TagName = movieTagUser.TagName;
+                movieTag.VoteSum = 0;
+                _dbContext.MovieTags.Add(movieTag);
+            }
+            bool isUpvote = movieTagUser.IsUpvote ?? true;
+            if(isUpvote)
+            {
+                if(movieTag.VoteSum < int.MaxValue)
+                    movieTag.VoteSum += 1;
+            }
+            else
+            {
+                if(movieTag.VoteSum > int.MinValue)
+                    movieTag.VoteSum -= 1;
+            }
+            _dbContext.MovieTagUsers.Add(movieTagUser);
             if(_dbContext.SaveChanges() > 0)
             {
                 return true;
@@ -104,9 +124,29 @@ namespace Repository
             return false;
         }
 
-        public bool UpdateMovieTag(MovieTag movieTag)
+        public bool UpdateMovieTagUser(MovieTagUser movieTagUser)
         {
-            _dbContext.MovieTags.Update(movieTag);
+            var movieTag = GetMovieTag(movieTagUser.ImdbId, movieTagUser.TagName);
+            if(movieTag == null)
+            {
+                movieTag = new MovieTag();
+                movieTag.ImdbId = movieTagUser.ImdbId;
+                movieTag.TagName = movieTagUser.TagName;
+                movieTag.VoteSum = 0;
+                _dbContext.MovieTags.Add(movieTag);
+            }
+            bool isUpvote = movieTagUser.IsUpvote ?? true;
+            if(isUpvote)
+            {
+                if(movieTag.VoteSum < int.MaxValue)
+                    movieTag.VoteSum += 1;
+            }
+            else
+            {
+                if(movieTag.VoteSum > int.MinValue)
+                    movieTag.VoteSum -= 1;
+            }
+            _dbContext.MovieTagUsers.Update(movieTagUser);
             if(_dbContext.SaveChanges() > 0)
             {
                 return true;
@@ -117,6 +157,11 @@ namespace Repository
         public List<Movie> GetAllMovies()
         {
             return _dbContext.Movies.ToList<Movie>();
+        }
+
+        public MovieTag GetMovieTag(string movieId, string tagName)
+        {
+            return _dbContext.MovieTags.FirstOrDefault(mt => mt.ImdbId == movieId && mt.TagName == tagName);
         }
 
         public Movie GetMovie(string movieId)
@@ -172,10 +217,10 @@ namespace Repository
             return (_dbContext.MovieLanguages.FirstOrDefault(ml => ml.ImdbId == movieLanguage.ImdbId
                 && ml.LanguageId == movieLanguage.LanguageId) != null);
         }
-        public bool MovieTagExists(MovieTag movieTag)
+        public bool MovieTagUserExists(MovieTagUser movieTagUser)
         {
-            return (_dbContext.MovieTags.FirstOrDefault(mt => mt.ImdbId == movieTag.ImdbId
-                && mt.TagName == movieTag.TagName && mt.ImdbId == movieTag.ImdbId) != null);
+            return (_dbContext.MovieTagUsers.FirstOrDefault(mtu => mtu.ImdbId == movieTagUser.ImdbId
+                && mtu.TagName == movieTagUser.TagName && mtu.UserId == movieTagUser.UserId) != null);
         }
     }
 }
