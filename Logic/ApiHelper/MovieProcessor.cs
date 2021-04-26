@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Logic.ApiHelper
@@ -27,10 +24,17 @@ namespace Logic.ApiHelper
                     { "x-rapidapi-host", "movie-database-imdb-alternative.p.rapidapi.com" },
                 },
             };
-            using var response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            var body = await response.Content.ReadFromJsonAsync<MovieObject>();
-            return body;
+            MovieObject movieObject;
+            using(var response = await client.SendAsync(request))
+            {
+                response.EnsureSuccessStatusCode();
+                movieObject = await response.Content.ReadFromJsonAsync<MovieObject>();
+            }
+            if(String.IsNullOrEmpty(movieObject.imdbID))
+            {
+                return null;
+            }
+            return movieObject;
         }
     }
 }

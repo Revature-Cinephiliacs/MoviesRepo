@@ -29,17 +29,24 @@ namespace CinemaAPI.Controllers
         [HttpGet("{movieid}")]
         public async Task<ActionResult<MovieDTO>> GetMovie(string movieid)
         {
-            return await _movieLogic.GetMovie(movieid);
+            MovieDTO movieDTO = await _movieLogic.GetMovie(movieid);
+            if(movieDTO == null)
+            {
+                return StatusCode(404);
+            }
+            StatusCode(200);
+            return movieDTO;
         }
 
         /// <summary>
         /// Returns the movieId for each movie that matches all of the tags
         /// passed in as tag:[value] pairs. Returns a 404 response if any of
-        /// the tags are invalid.
+        /// the tags are invalid. This is a POST method because GET does not
+        /// allow body data.
         /// </summary>
         /// <param name="filters"></param>
         /// <returns></returns>
-        [HttpGet("search")]
+        [HttpPost("search")]
         public ActionResult<List<string>> SearchMovies([FromBody] Dictionary<string, string> filters)
         {
             var movies = _movieLogic.SearchMovies(filters);
@@ -59,7 +66,7 @@ namespace CinemaAPI.Controllers
         /// <param name="movieDTO"></param>
         /// <returns></returns>
         [HttpPatch("update")]
-        public ActionResult UpdateMovie([FromBody] MovieDTO movieDTO)
+        public ActionResult CreateOrUpdateMovie([FromBody] MovieDTO movieDTO)
         {
             if(!ModelState.IsValid)
             {
@@ -71,6 +78,7 @@ namespace CinemaAPI.Controllers
             }
             else
             {
+                Console.WriteLine("false 400");
                 return StatusCode(400);
             }
         }
@@ -103,6 +111,24 @@ namespace CinemaAPI.Controllers
         }
 
         /// <summary>
+        /// Removes the movie from the database. 
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <returns></returns>
+        [HttpDelete("{movieId}")]
+        public ActionResult DeleteMovie(string movieId)
+        {
+            if(_movieLogic.DeleteMovie(movieId))
+            {
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(400);
+            }
+        }
+
+        /// <summary>
         /// Submits a vote as to whether the specified tag is associated
         /// with the specified movie. Each user may have only one vote
         /// per movie/tag combination.
@@ -110,9 +136,9 @@ namespace CinemaAPI.Controllers
         /// <param name="taggingDTO"></param>
         /// <returns></returns>
         [HttpPost("tag/movie")]
-        public ActionResult TagMovie([FromBody] TaggingDTO taggingDTO)
+        public async Task<ActionResult> TagMovie([FromBody] TaggingDTO taggingDTO)
         {
-            if(_movieLogic.TagMovie(taggingDTO))
+            if(await _movieLogic.TagMovie(taggingDTO))
             {
                 return StatusCode(200);
             }
@@ -137,7 +163,7 @@ namespace CinemaAPI.Controllers
             }
             else
             {
-                return StatusCode(400);
+                return StatusCode(404);
             }
         }
 
@@ -145,7 +171,7 @@ namespace CinemaAPI.Controllers
         /// Example for using authentication
         /// </summary>
         /// <returns></returns>
-        [HttpGet("users")]
+        [HttpGet("authexample")]
         [Authorize]
         public ActionResult<string> GetExample()
         {

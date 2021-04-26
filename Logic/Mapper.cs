@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Model;
 using Repository.Models;
@@ -20,17 +21,18 @@ namespace Logic
                 RatingName = movieObject.Rated
             };
 
-            try{
-                movieDTO.ReleaseDate = DateTime.Parse(movieObject.Released);
+            try {
+                movieDTO.ReleaseDate = DateTime.Parse(movieObject.Released).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
                 movieDTO.IsReleased = true;
             }
-            catch(Exception) {
+            catch {
                 movieDTO.ReleaseDate = null;
                 movieDTO.IsReleased = false;
             }
 
-            try{
-                movieDTO.RuntimeMinutes = short.Parse(movieObject.RunTime);
+            try {
+                string runtimeMinutes = movieObject.RunTime.Split(' ')[0];
+                movieDTO.RuntimeMinutes = short.Parse(runtimeMinutes);
             }
             catch {
                 movieDTO.RuntimeMinutes = null;
@@ -69,9 +71,8 @@ namespace Logic
         {
             var movieDTO = new MovieDTO()
             {
-                ImdbId = movie.ImdbId ,
-                Title = movie.Title ,
-                ReleaseDate = movie.ReleaseDate, 
+                ImdbId = movie.ImdbId,
+                Title = movie.Title,
                 ReleaseCountry = movie.ReleaseCountry,
                 RuntimeMinutes = movie.RuntimeMinutes,
                 IsReleased = movie.IsReleased,
@@ -79,6 +80,16 @@ namespace Logic
                 PosterUrl = movie.PosterUrl,
                 RatingName = movie.Rating.RatingName
             };
+
+            if(movie.ReleaseDate == null)
+            {
+                movieDTO.ReleaseDate = null;
+            }
+            else
+            {
+                DateTime releaseDate = movie.ReleaseDate ?? DateTime.Now;
+                movieDTO.ReleaseDate = releaseDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            }
 
             movieDTO.MovieActors = new List<string>();
             foreach (var movieActor in movie.MovieActors)
@@ -119,13 +130,21 @@ namespace Logic
             {
                 ImdbId = movieDTO.ImdbId,
                 Title = movieDTO.Title,
-                ReleaseDate = movieDTO.ReleaseDate,
                 ReleaseCountry = movieDTO.ReleaseCountry,
                 RuntimeMinutes = movieDTO.RuntimeMinutes,
                 IsReleased = movieDTO.IsReleased,
                 Plot = movieDTO.Plot,
                 PosterUrl = movieDTO.PosterUrl
             };
+
+            if(String.IsNullOrEmpty(movieDTO.ReleaseDate))
+            {
+                movie.ReleaseDate = null;
+            }
+            else
+            {
+                movie.ReleaseDate = DateTime.ParseExact(movieDTO.ReleaseDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            }
 
             return movie;
         }

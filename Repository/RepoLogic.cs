@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Repository.Models;
 
 namespace Repository
@@ -434,26 +435,38 @@ namespace Repository
 
         public void ClearMovieActors(string imdbId)
         {
-            var thisMoviesActors = _dbContext.MovieActors.Where(ma => ma.ImdbId == imdbId).ToList();
-            _dbContext.MovieActors.RemoveRange(thisMoviesActors);
+            _dbContext.MovieActors.RemoveRange(_dbContext.MovieActors.Where(ma => ma.ImdbId == imdbId));
         }
 
         public void ClearMovieDirectors(string imdbId)
         {
-            var thisMoviesDirectors = _dbContext.MovieDirectors.Where(md => md.ImdbId == imdbId).ToList();
-            _dbContext.MovieDirectors.RemoveRange(thisMoviesDirectors);
+            _dbContext.MovieDirectors.RemoveRange(_dbContext.MovieDirectors.Where(md => md.ImdbId == imdbId));
         }
 
         public void ClearMovieGenres(string imdbId)
         {
-            var thisMoviesGenres = _dbContext.MovieGenres.Where(mg => mg.ImdbId == imdbId).ToList();
-            _dbContext.MovieGenres.RemoveRange(thisMoviesGenres);
+            _dbContext.MovieGenres.RemoveRange(_dbContext.MovieGenres.Where(mg => mg.ImdbId == imdbId));
         }
 
         public void ClearMovieLanguages(string imdbId)
         {
-            var thisMoviesLanguages = _dbContext.MovieLanguages.Where(ml => ml.ImdbId == imdbId).ToList();
-            _dbContext.MovieLanguages.RemoveRange(thisMoviesLanguages);
+            _dbContext.MovieLanguages.RemoveRange(_dbContext.MovieLanguages.Where(ml => ml.ImdbId == imdbId));
+        }
+
+        public bool DeleteMovie(string movieId)
+        {
+            _dbContext.MovieTags.RemoveRange(_dbContext.MovieTags.Where(mt => mt.ImdbId == movieId));
+            _dbContext.MovieTagUsers.RemoveRange(_dbContext.MovieTagUsers.Where(mtu => mtu.ImdbId == movieId));
+            _dbContext.MovieActors.RemoveRange(_dbContext.MovieActors.Where(ma => ma.ImdbId == movieId));
+            _dbContext.MovieDirectors.RemoveRange(_dbContext.MovieDirectors.Where(md => md.ImdbId == movieId));
+            _dbContext.MovieGenres.RemoveRange(_dbContext.MovieGenres.Where(mg => mg.ImdbId == movieId));
+            _dbContext.MovieLanguages.RemoveRange(_dbContext.MovieLanguages.Where(ml => ml.ImdbId == movieId));
+            _dbContext.Movies.RemoveRange(_dbContext.Movies.Where(m => m.ImdbId == movieId));
+            if(_dbContext.SaveChanges() > 0)
+            {
+                return true;
+            }
+            return false;
         }
 
         public bool MovieExists(string movieId)
@@ -468,42 +481,67 @@ namespace Repository
         {
             return (_dbContext.Ratings.FirstOrDefault(r => r.RatingName == ratingName) != null);
         }
-        public bool ActorExists(string actor)
+        public bool ActorExists(string actorName)
         {
-            return (_dbContext.Actors.FirstOrDefault(a => a.ActorName == actor) != null);
+            return (_dbContext.Actors.FirstOrDefault(a => a.ActorName == actorName) != null);
         }
-        public bool LanguageExists(string language)
+        public bool LanguageExists(string languageName)
         {
-            return (_dbContext.Languages.FirstOrDefault(l => l.LanguageName == language) != null);
+            return (_dbContext.Languages.FirstOrDefault(l => l.LanguageName == languageName) != null);
         }
-        public bool DirectorExists(string director)
+        public bool DirectorExists(string directorName)
         {
-            return (_dbContext.Directors.FirstOrDefault(d => d.DirectorName == director) != null);
+            return (_dbContext.Directors.FirstOrDefault(d => d.DirectorName == directorName) != null);
         }
-        public bool GenreExists(string genre)
+        public bool GenreExists(string genreName)
         {
-            return (_dbContext.Genres.FirstOrDefault(g => g.GenreName == genre) != null);
+            return (_dbContext.Genres.FirstOrDefault(g => g.GenreName == genreName) != null);
         }
-        public bool MovieActorExists(MovieActor movieActor)
+        public bool MovieActorExists(string movieId, string actorName)
         {
-            return (_dbContext.MovieActors.FirstOrDefault(ma => ma.ImdbId == movieActor.ImdbId
-                && ma.ActorId == movieActor.ActorId) != null);
+            Actor actor = _dbContext.Actors.FirstOrDefault(a => a.ActorName == actorName);
+            if(actor == null)
+            {
+                return false;
+            }
+            
+            return (_dbContext.MovieActors.FirstOrDefault(ma => ma.ImdbId == movieId
+                && ma.ActorId == actor.ActorId) != null);
         }
-        public bool MovieDirectorExists(MovieDirector movieDirector)
+        public bool MovieDirectorExists(string movieId, string directorName)
         {
-            return (_dbContext.MovieDirectors.FirstOrDefault(md => md.ImdbId == movieDirector.ImdbId
-                && md.DirectorId == movieDirector.DirectorId) != null);
-        }
-        public bool MovieGenreExists(MovieGenre movieGenre)
-        {
-            return (_dbContext.MovieGenres.FirstOrDefault(mg => mg.ImdbId == movieGenre.ImdbId
-                && mg.GenreId == movieGenre.GenreId) != null);
+            Director director = _dbContext.Directors.FirstOrDefault(d => d.DirectorName == directorName);
+            if(director == null)
+            {
+                return false;
+            }
+
+            return (_dbContext.MovieDirectors.FirstOrDefault(md => md.ImdbId == movieId
+                && md.DirectorId == director.DirectorId) != null);
         }
 
-        public bool MovieLanguageExists(MovieLanguage movieLanguage)
+        public bool MovieGenreExists(string movieId, string genreName)
         {
-            return (_dbContext.MovieLanguages.FirstOrDefault(ml => ml.ImdbId == movieLanguage.ImdbId
-                && ml.LanguageId == movieLanguage.LanguageId) != null);
+            Genre genre = _dbContext.Genres.FirstOrDefault(g => g.GenreName == genreName);
+            if(genre == null)
+            {
+                return false;
+            }
+
+            return (_dbContext.MovieGenres.FirstOrDefault(mg => mg.ImdbId == movieId
+                && mg.GenreId == genre.GenreId) != null);
+        }
+
+        public bool MovieLanguageExists(string movieId, string languageName)
+        {
+            Language language = _dbContext.Languages.FirstOrDefault(l => l.LanguageName == languageName);
+            if(language == null)
+            {
+                return false;
+            }
+
+            return (_dbContext.MovieLanguages.FirstOrDefault(ml => ml.ImdbId == movieId
+                && ml.LanguageId == language.LanguageId) != null);
         }
         public bool MovieTagUserExists(MovieTagUser movieTagUser)
         {

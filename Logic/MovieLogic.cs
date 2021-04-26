@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Model;
@@ -38,6 +39,7 @@ namespace Logic
             List<Movie> movies = _repo.GetAllMovies();
             foreach (var filter in filters)
             {
+                Console.WriteLine(filter.Key + ": " + filter.Value);
                 switch (filter.Key)
                 {
                     case "tag":
@@ -61,7 +63,7 @@ namespace Logic
                 }
                 if(movies.Count == 0)
                 {
-                    return null;
+                    return new List<string>();
                 }
             }
 
@@ -164,6 +166,10 @@ namespace Logic
             {
                 ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor
                     .LoadMovieAsync(taggingDTO.MovieId);
+                if(movieObject == null)
+                {
+                    return false;
+                }
                 MovieDTO movieDTO = Mapper.MovieObjectToMovieDTO(movieObject);
                 if(!CreateMovie(movieDTO))
                 {
@@ -206,25 +212,11 @@ namespace Logic
             {
                 return CreateMovie(movieDTO);
             }
-
+            
             Movie movie = _repo.GetMovie(movieDTO.ImdbId);
 
-            if(!String.IsNullOrEmpty(movieDTO.Title))
-            {
-                movie.Title = movieDTO.Title;
-            }
-            if(!String.IsNullOrEmpty(movieDTO.RatingName))
-            {
-                if(!_repo.RatingExists(movieDTO.RatingName))
-                {
-                    Rating newRating = new Rating();
-                    newRating.RatingName = movieDTO.RatingName;
-                    _repo.AddRating(newRating);
-                }
-                movie.RatingId = _repo.GetRating(movieDTO.RatingName).RatingId;
-            }
-
             UpdateMoviesOptionalProperties(movie, movieDTO);
+            _repo.UpdateMovie(movie);
 
             if(movieDTO.MovieActors != null)
             {
@@ -237,6 +229,7 @@ namespace Logic
                     }
                 }
             }
+
             if(movieDTO.MovieDirectors != null)
             {
                 _repo.ClearMovieDirectors(movieDTO.ImdbId);
@@ -284,27 +277,6 @@ namespace Logic
         {
             Movie movie = new Movie();
             movie.ImdbId = movieDTO.ImdbId;
-
-            if(String.IsNullOrEmpty(movieDTO.Title))
-            {
-                return false;
-            }
-            movie.Title = movieDTO.Title;
-
-            if(String.IsNullOrEmpty(movieDTO.RatingName))
-            {
-                return false;
-            }
-            if(!_repo.RatingExists(movieDTO.RatingName))
-            {
-                Rating newRating = new Rating();
-                newRating.RatingName = movieDTO.RatingName;
-                if(!_repo.AddRating(newRating))
-                {
-                    return false;
-                }
-            }
-            movie.RatingId = _repo.GetRating(movieDTO.RatingName).RatingId;
             
             UpdateMoviesOptionalProperties(movie, movieDTO);
 
@@ -358,10 +330,25 @@ namespace Logic
 
         public void UpdateMoviesOptionalProperties(Movie movie, MovieDTO movieDTO)
         {
-            if(movieDTO.ReleaseDate != null)
+            if(!String.IsNullOrEmpty(movieDTO.Title))
             {
-                DateTime date = movieDTO.ReleaseDate ?? DateTime.Now;
-                movie.ReleaseDate = date;
+                movie.Title = movieDTO.Title;
+            }
+
+            if(!String.IsNullOrEmpty(movieDTO.RatingName))
+            {
+                if(!_repo.RatingExists(movieDTO.RatingName))
+                {
+                    Rating newRating = new Rating();
+                    newRating.RatingName = movieDTO.RatingName;
+                    _repo.AddRating(newRating);
+                }
+                movie.RatingId = _repo.GetRating(movieDTO.RatingName).RatingId;
+            }
+
+            if(!String.IsNullOrEmpty(movieDTO.ReleaseDate))
+            {
+                movie.ReleaseDate = DateTime.ParseExact(movieDTO.ReleaseDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
                 movie.IsReleased = true;
             }
             if(!String.IsNullOrEmpty(movieDTO.ReleaseCountry))
@@ -388,11 +375,11 @@ namespace Logic
             {
                 ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor
                     .LoadMovieAsync(movieDTO.ImdbId);
-                MovieDTO newMovieDTO = Mapper.MovieObjectToMovieDTO(movieObject);
-                if(newMovieDTO == null)
+                if(movieObject == null)
                 {
-                    return null;
+                    return false;
                 }
+                MovieDTO newMovieDTO = Mapper.MovieObjectToMovieDTO(movieObject);
                 if(!CreateMovie(newMovieDTO))
                 {
                     return false;
@@ -406,7 +393,80 @@ namespace Logic
                 return false;
             }
 
+            UpdateMoviesOptionalProperties(movie, movieDTO);
 
+            _repo.UpdateMovie(movie);
+            
+            if(movieDTO.MovieActors != null)
+            {
+                foreach (var movieActorName in movieDTO.MovieActors)
+                {
+                    if(!_repo.MovieActorExists(movieDTO.ImdbId, movieActorName))
+                    {
+                        if(!_repo.AddMovieActor(movieDTO.ImdbId, movieActorName))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            if(movieDTO.MovieDirectors != null)
+            {
+                foreach (var movieDirectorName in movieDTO.MovieDirectors)
+                {
+                    if(!_repo.MovieDirectorExists(movieDTO.ImdbId, movieDirectorName))
+                    {
+                        if(!_repo.AddMovieDirector(movieDTO.ImdbId, movieDirectorName))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            if(movieDTO.MovieGenres != null)
+            {
+                foreach (var movieGenreName in movieDTO.MovieGenres)
+                {
+                    if(!_repo.MovieGenreExists(movieDTO.ImdbId, movieGenreName))
+                    {
+                        if(!_repo.AddMovieGenre(movieDTO.ImdbId, movieGenreName))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            if(movieDTO.MovieLanguages != null)
+            {
+                foreach (var movieLanguageName in movieDTO.MovieLanguages)
+                {
+                    if(!_repo.MovieLanguageExists(movieDTO.ImdbId, movieLanguageName))
+                    {
+                        if(!_repo.AddMovieLanguage(movieDTO.ImdbId, movieLanguageName))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Deletes the Movie from the database. Also deletes all associated
+        /// entries in: Movie_Actor, Movie_Director, Movie_Genre, Movie_Language,
+        /// Movie_Tag, Movie_Tag_User
+        /// Returns true if successful.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <returns></returns>
+        public bool DeleteMovie(string movieId)
+        {
+            if(!_repo.MovieExists(movieId))
+            {
+                return false;
+            }
+            return _repo.DeleteMovie(movieId);
         }
     }
 }

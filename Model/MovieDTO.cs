@@ -10,14 +10,12 @@ namespace Model
         [StringLength(20)]
         public string ImdbId { get; set; }
         
-        [Required]
         public string Title { get; set; }
         
-        [Required]
         public string RatingName { get; set; }
 
         [RegularExpression( @"[12]\d\d\d-[01]\d-[0123]\d")]
-        public DateTime? ReleaseDate { get; set; }
+        public string ReleaseDate { get; set; }
         public string ReleaseCountry { get; set; }
         public short? RuntimeMinutes { get; set; }
         public bool? IsReleased { get; set; }

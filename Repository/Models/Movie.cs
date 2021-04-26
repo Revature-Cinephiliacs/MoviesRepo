@@ -19,7 +19,7 @@ namespace Repository.Models
 
         public string ImdbId { get; set; }
         public string Title { get; set; }
-        public int RatingId { get; set; }
+        public int? RatingId { get; set; }
         public DateTime? ReleaseDate { get; set; }
         public string ReleaseCountry { get; set; }
         public short? RuntimeMinutes { get; set; }
