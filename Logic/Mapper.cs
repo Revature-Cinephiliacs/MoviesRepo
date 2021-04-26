@@ -17,7 +17,7 @@ namespace Logic
                 Title = movieObject.Title,
                 ReleaseCountry = movieObject.Country,
                 Plot = movieObject.Plot,
-                PosterUrl = movieObject.Poster,
+                PosterURL = movieObject.Poster,
                 RatingName = movieObject.Rated
             };
 
@@ -77,7 +77,7 @@ namespace Logic
                 RuntimeMinutes = movie.RuntimeMinutes,
                 IsReleased = movie.IsReleased,
                 Plot = movie.Plot,
-                PosterUrl = movie.PosterUrl,
+                PosterURL = movie.PosterUrl,
                 RatingName = movie.Rating.RatingName
             };
 
@@ -134,7 +134,7 @@ namespace Logic
                 RuntimeMinutes = movieDTO.RuntimeMinutes,
                 IsReleased = movieDTO.IsReleased,
                 Plot = movieDTO.Plot,
-                PosterUrl = movieDTO.PosterUrl
+                PosterUrl = movieDTO.PosterURL
             };
 
             if(String.IsNullOrEmpty(movieDTO.ReleaseDate))

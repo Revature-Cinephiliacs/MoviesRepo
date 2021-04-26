@@ -432,6 +432,10 @@ namespace Repository
         {
             return _dbContext.Languages.FirstOrDefault(l => l.LanguageName == languageName);
         }
+        public Tag GetTag(string tagName)
+        {
+            return _dbContext.Tags.FirstOrDefault(t => t.TagName == tagName);
+        }
 
         public void ClearMovieActors(string imdbId)
         {

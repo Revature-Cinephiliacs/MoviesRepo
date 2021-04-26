@@ -157,7 +157,26 @@ namespace CinemaAPI.Controllers
         [HttpPost("tag/ban/{tagname}")]
         public ActionResult BanTag(string tagname)
         {
-            if(_movieLogic.BanTag(tagname))
+            if(_movieLogic.SetTagBanStatus(tagname, true))
+            {
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(404);
+            }
+        }
+
+        /// <summary>
+        /// Unbans the specified tag. This is only available to Moderators
+        /// and Administrators.
+        /// </summary>
+        /// <param name="tagname"></param>
+        /// <returns></returns>
+        [HttpPost("tag/unban/{tagname}")]
+        public ActionResult UnbanTag(string tagname)
+        {
+            if(_movieLogic.SetTagBanStatus(tagname, false))
             {
                 return StatusCode(200);
             }

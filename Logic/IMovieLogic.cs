@@ -15,7 +15,7 @@ namespace Logic
         bool UpdateMovie(MovieDTO movieDTO);
         Task<bool> AppendMovie(MovieDTO movieDTO);
         Task<bool> TagMovie(TaggingDTO taggingDTO);
-        bool BanTag(string tagname);
+        bool SetTagBanStatus(string tagname, bool IsBan);
         bool DeleteMovie(string movieId);
     }
 }

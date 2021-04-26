@@ -194,15 +194,14 @@ namespace Logic
             }
         }
 
-        public bool BanTag(string tagName)
+        public bool SetTagBanStatus(string tagName, bool isBan)
         {
             if(!_repo.TagExists(tagName))
             {
                 return false;
             }
-            Tag tag = new Tag();
-            tag.TagName = tagName;
-            tag.IsBanned = true;
+            Tag tag = _repo.GetTag(tagName);
+            tag.IsBanned = isBan;
             return _repo.UpdateTag(tag);
         }
 
@@ -363,9 +362,9 @@ namespace Logic
             {
                 movie.Plot = movieDTO.Plot;
             }
-            if(!String.IsNullOrEmpty(movieDTO.PosterUrl))
+            if(!String.IsNullOrEmpty(movieDTO.PosterURL))
             {
-                movie.PosterUrl = movieDTO.PosterUrl;
+                movie.PosterUrl = movieDTO.PosterURL;
             }
         }
 

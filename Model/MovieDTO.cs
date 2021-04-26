@@ -20,7 +20,7 @@ namespace Model
         public short? RuntimeMinutes { get; set; }
         public bool? IsReleased { get; set; }
         public string Plot { get; set; }
-        public string PosterUrl { get; set; }
+        public string PosterURL { get; set; }
         public List<string> MovieActors { get; set; }
         public List<string> MovieDirectors { get; set; }
         public List<string> MovieGenres { get; set; }
