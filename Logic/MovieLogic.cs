@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Model;
 using Repository;
@@ -26,7 +25,7 @@ namespace Logic
                 return Mapper.MovieToMovieDTO(movie);
             }
 
-            ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor.LoadMovie(movieId);
+            ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor.LoadMovieAsync(movieId);
             if(movieObject == null || movieObject.imdbID != movieId)
             {
                 return null;
@@ -148,26 +147,32 @@ namespace Logic
             }
         }
 
-        public bool TagMovie(TaggingDTO taggingDTO)
+        /// <summary>
+        /// Adds a User's Tag Vote for a Movie to the database.
+        /// Creates the Movie if it does not exist, based on the
+        /// information from the public movie API.
+        /// Adds the Tag to the database if it does not exist.
+        /// Adds the MovieTag to the database if it does not
+        /// exist.
+        /// Returns true if successful; false otherwise.
+        /// </summary>
+        /// <param name="taggingDTO"></param>
+        /// <returns></returns>
+        public async Task<bool> TagMovie(TaggingDTO taggingDTO)
         {
             if(!_repo.MovieExists(taggingDTO.MovieId))
             {
-                return false;
-            }
-
-// Call the User microservice to make sure the user exists
-
-            if(!_repo.TagExists(taggingDTO.TagName))
-            {
-                Tag tag = new Tag();
-                tag.TagName = taggingDTO.TagName;
-                tag.IsBanned = false;
-                if(!_repo.AddTag(tag))
+                ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor
+                    .LoadMovieAsync(taggingDTO.MovieId);
+                MovieDTO movieDTO = Mapper.MovieObjectToMovieDTO(movieObject);
+                if(!CreateMovie(movieDTO))
                 {
                     return false;
                 }
             }
-            
+
+// Call the User microservice to make sure the user exists
+
             MovieTagUser movieTagUser = new MovieTagUser();
             movieTagUser.ImdbId = taggingDTO.MovieId;
             movieTagUser.TagName = taggingDTO.TagName;
@@ -195,14 +200,213 @@ namespace Logic
             return _repo.UpdateTag(tag);
         }
 
-        public Task<bool> UpdateMovie(MovieDTO movieDTO)
+        public bool UpdateMovie(MovieDTO movieDTO)
         {
-            throw new NotImplementedException();
+            if(!_repo.MovieExists(movieDTO.ImdbId))
+            {
+                return CreateMovie(movieDTO);
+            }
+
+            Movie movie = _repo.GetMovie(movieDTO.ImdbId);
+
+            if(!String.IsNullOrEmpty(movieDTO.Title))
+            {
+                movie.Title = movieDTO.Title;
+            }
+            if(!String.IsNullOrEmpty(movieDTO.RatingName))
+            {
+                if(!_repo.RatingExists(movieDTO.RatingName))
+                {
+                    Rating newRating = new Rating();
+                    newRating.RatingName = movieDTO.RatingName;
+                    _repo.AddRating(newRating);
+                }
+                movie.RatingId = _repo.GetRating(movieDTO.RatingName).RatingId;
+            }
+
+            UpdateMoviesOptionalProperties(movie, movieDTO);
+
+            if(movieDTO.MovieActors != null)
+            {
+                _repo.ClearMovieActors(movieDTO.ImdbId);
+                foreach (var movieActorName in movieDTO.MovieActors)
+                {
+                    if(!_repo.AddMovieActor(movieDTO.ImdbId, movieActorName))
+                    {
+                        return false;
+                    }
+                }
+            }
+            if(movieDTO.MovieDirectors != null)
+            {
+                _repo.ClearMovieDirectors(movieDTO.ImdbId);
+                foreach (var movieDirectorName in movieDTO.MovieDirectors)
+                {
+                    if(!_repo.AddMovieDirector(movieDTO.ImdbId, movieDirectorName))
+                    {
+                        return false;
+                    }
+                }
+            }
+            if(movieDTO.MovieGenres != null)
+            {
+                _repo.ClearMovieGenres(movieDTO.ImdbId);
+                foreach (var movieGenreName in movieDTO.MovieGenres)
+                {
+                    if(!_repo.AddMovieGenre(movieDTO.ImdbId, movieGenreName))
+                    {
+                        return false;
+                    }
+                }
+            }
+            if(movieDTO.MovieLanguages != null)
+            {
+                _repo.ClearMovieLanguages(movieDTO.ImdbId);
+                foreach (var movieLanguageName in movieDTO.MovieLanguages)
+                {
+                    if(!_repo.AddMovieLanguage(movieDTO.ImdbId, movieLanguageName))
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
-        public Task<bool> AppendMovie(MovieDTO movieDTO)
+        /// <summary>
+        /// Creates a new Movie entry from the information within
+        /// the MovieDTO argument.
+        /// Returns true if successful.
+        /// </summary>
+        /// <param name="movieDTO"></param>
+        /// <returns></returns>
+        public bool CreateMovie(MovieDTO movieDTO)
         {
-            throw new NotImplementedException();
+            Movie movie = new Movie();
+            movie.ImdbId = movieDTO.ImdbId;
+
+            if(String.IsNullOrEmpty(movieDTO.Title))
+            {
+                return false;
+            }
+            movie.Title = movieDTO.Title;
+
+            if(String.IsNullOrEmpty(movieDTO.RatingName))
+            {
+                return false;
+            }
+            if(!_repo.RatingExists(movieDTO.RatingName))
+            {
+                Rating newRating = new Rating();
+                newRating.RatingName = movieDTO.RatingName;
+                if(!_repo.AddRating(newRating))
+                {
+                    return false;
+                }
+            }
+            movie.RatingId = _repo.GetRating(movieDTO.RatingName).RatingId;
+            
+            UpdateMoviesOptionalProperties(movie, movieDTO);
+
+            if(!_repo.AddMovie(movie))
+            {
+                return false;
+            }
+            
+            if(movieDTO.MovieActors != null)
+            {
+                foreach (var movieActorName in movieDTO.MovieActors)
+                {
+                    if(!_repo.AddMovieActor(movieDTO.ImdbId, movieActorName))
+                    {
+                        return false;
+                    }
+                }
+            }
+            if(movieDTO.MovieDirectors != null)
+            {
+                foreach (var movieDirectorName in movieDTO.MovieDirectors)
+                {
+                    if(!_repo.AddMovieDirector(movieDTO.ImdbId, movieDirectorName))
+                    {
+                        return false;
+                    }
+                }
+            }
+            if(movieDTO.MovieGenres != null)
+            {
+                foreach (var movieGenreName in movieDTO.MovieGenres)
+                {
+                    if(!_repo.AddMovieGenre(movieDTO.ImdbId, movieGenreName))
+                    {
+                        return false;
+                    }
+                }
+            }
+            if(movieDTO.MovieLanguages != null)
+            {
+                foreach (var movieLanguageName in movieDTO.MovieLanguages)
+                {
+                    if(!_repo.AddMovieLanguage(movieDTO.ImdbId, movieLanguageName))
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        public void UpdateMoviesOptionalProperties(Movie movie, MovieDTO movieDTO)
+        {
+            if(movieDTO.ReleaseDate != null)
+            {
+                DateTime date = movieDTO.ReleaseDate ?? DateTime.Now;
+                movie.ReleaseDate = date;
+                movie.IsReleased = true;
+            }
+            if(!String.IsNullOrEmpty(movieDTO.ReleaseCountry))
+            {
+                movie.ReleaseCountry = movieDTO.ReleaseCountry;
+            }
+            if(movieDTO.RuntimeMinutes != null)
+            {
+                movie.RuntimeMinutes = movieDTO.RuntimeMinutes;
+            }
+            if(!String.IsNullOrEmpty(movieDTO.Plot))
+            {
+                movie.Plot = movieDTO.Plot;
+            }
+            if(!String.IsNullOrEmpty(movieDTO.PosterUrl))
+            {
+                movie.PosterUrl = movieDTO.PosterUrl;
+            }
+        }
+
+        public async Task<bool> AppendMovie(MovieDTO movieDTO)
+        {
+            if(!_repo.MovieExists(movieDTO.ImdbId))
+            {
+                ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor
+                    .LoadMovieAsync(movieDTO.ImdbId);
+                MovieDTO newMovieDTO = Mapper.MovieObjectToMovieDTO(movieObject);
+                if(newMovieDTO == null)
+                {
+                    return null;
+                }
+                if(!CreateMovie(newMovieDTO))
+                {
+                    return false;
+                }
+            }
+
+            Movie movie = _repo.GetMovie(movieDTO.ImdbId);
+
+            if(movie == null)
+            {
+                return false;
+            }
+
+
         }
     }
 }

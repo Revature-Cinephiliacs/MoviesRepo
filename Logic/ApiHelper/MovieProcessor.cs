@@ -11,7 +11,7 @@ namespace Logic.ApiHelper
 {
     public class MovieProcessor
     {
-        public static async Task<MovieObject> LoadMovie( string searchMovie)
+        public static async Task<MovieObject> LoadMovieAsync( string searchMovie)
         {
             var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Clear();

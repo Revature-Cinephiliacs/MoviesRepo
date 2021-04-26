@@ -59,13 +59,13 @@ namespace CinemaAPI.Controllers
         /// <param name="movieDTO"></param>
         /// <returns></returns>
         [HttpPatch("update")]
-        public async Task<ActionResult> UpdateMovie([FromBody] MovieDTO movieDTO)
+        public ActionResult UpdateMovie([FromBody] MovieDTO movieDTO)
         {
             if(!ModelState.IsValid)
             {
                 return StatusCode(400);
             }
-            if(await _movieLogic.UpdateMovie(movieDTO))
+            if(_movieLogic.UpdateMovie(movieDTO))
             {
                 return StatusCode(200);
             }
