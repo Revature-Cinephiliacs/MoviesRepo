@@ -29,8 +29,8 @@ This microservice is part of the Cinephiliacs application. It manages all data d
 * JS_Object (JavaScript Object)
   * JS_Object["key1"] = "value1";
   * JS_Object["key2"] = "value2";
-Where the keys are one of these keywords: "Tag", "Actor", "Director", "Genre", "Language"
-and the values are a string that is an instance of the key, i.e.: "Tag":"Scary" or "Actor":"Harrison Ford"
+#### Where the keys are one of these keywords: "Tag", "Actor", "Director", "Genre", "Language"
+#### and the values are a string that is an instance of the key, i.e.: "Tag":"Scary" or "Actor":"Harrison Ford"
 
 ### Object usage within an endpoint is denoted by placing the object name with parenthesis: (Object)
 ## Endpoints
