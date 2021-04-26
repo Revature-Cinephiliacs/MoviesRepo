@@ -13,12 +13,13 @@ namespace Repository.Models
             MovieDirectors = new HashSet<MovieDirector>();
             MovieGenres = new HashSet<MovieGenre>();
             MovieLanguages = new HashSet<MovieLanguage>();
+            MovieTagUsers = new HashSet<MovieTagUser>();
             MovieTags = new HashSet<MovieTag>();
         }
 
         public string ImdbId { get; set; }
         public string Title { get; set; }
-        public int RatingId { get; set; }
+        public int? RatingId { get; set; }
         public DateTime? ReleaseDate { get; set; }
         public string ReleaseCountry { get; set; }
         public short? RuntimeMinutes { get; set; }
@@ -31,6 +32,7 @@ namespace Repository.Models
         public virtual ICollection<MovieDirector> MovieDirectors { get; set; }
         public virtual ICollection<MovieGenre> MovieGenres { get; set; }
         public virtual ICollection<MovieLanguage> MovieLanguages { get; set; }
+        public virtual ICollection<MovieTagUser> MovieTagUsers { get; set; }
         public virtual ICollection<MovieTag> MovieTags { get; set; }
     }
 }

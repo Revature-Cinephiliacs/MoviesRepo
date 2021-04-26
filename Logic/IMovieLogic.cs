@@ -3,20 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Model;
 using Repository.Models;
 
 namespace Logic
 {
     public interface IMovieLogic
     {
-        Task<bool> CreateMovie(string movieId);
-        Task<List<Movie>> GetAllMovies();
-
-        List<Movie> getAllMoviesByActor(string actor);
-        List<Movie> getAllMoviesByGenre(string genre);
-        List<Movie> getAllMoviesByLanguage(string language);
-        List<Movie> getAllMoviesByDirector(string director);
-        Task<Movie> getOneMovie(string imdb); 
-        Movie UpdatedPlotMovie(Movie movie);
+        Task<MovieDTO> GetMovie(string movieid);
+        List<string> SearchMovies(Dictionary<string, string> filters);
+        bool UpdateMovie(MovieDTO movieDTO);
+        Task<bool> AppendMovie(MovieDTO movieDTO);
+        Task<bool> TagMovie(TaggingDTO taggingDTO);
+        bool SetTagBanStatus(string tagname, bool IsBan);
+        bool DeleteMovie(string movieId);
     }
 }
