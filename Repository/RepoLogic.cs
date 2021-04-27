@@ -32,22 +32,6 @@ namespace Repository
         }
 
         /// <summary>
-        /// Adds a Tag to the database. Returns true if
-        /// successful; false otherwise.
-        /// </summary>
-        /// <param name="tag"></param>
-        /// <returns></returns>
-        public bool AddTag(Tag tag)
-        {
-            _dbContext.Tags.Add(tag);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
         /// Adds a Rating to the database. Returns true if
         /// successful; false otherwise.
         /// </summary>

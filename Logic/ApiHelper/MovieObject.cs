@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Logic.ApiHelper
 {
+    /// <summary>
+    /// A data transfer object for retrieving movie details from a public API.
+    /// </summary>
     public class MovieObject
     {
         public string Title { get; set; }

@@ -75,6 +75,12 @@ namespace Logic
             return movieIds;
         }
 
+        /// <summary>
+        /// Removes any movies from the list argument that are not tagged
+        /// with the provided tag name.
+        /// </summary>
+        /// <param name="movies"></param>
+        /// <param name="tagName"></param>
         private void FilterMoviesByTag(List<Movie> movies, string tagName)
         {
             for (int i = 0; i < movies.Count; i++)
@@ -88,6 +94,12 @@ namespace Logic
             }
         }
 
+        /// <summary>
+        /// Removes all movies from the list argument that do not have the
+        /// rating that is specified in the argument.
+        /// </summary>
+        /// <param name="movies"></param>
+        /// <param name="ratingName"></param>
         private void FilterMoviesByRating(List<Movie> movies, string ratingName)
         {
 
@@ -101,6 +113,12 @@ namespace Logic
             }
         }
 
+        /// <summary>
+        /// Removes all movies from the list argument that do not have the
+        /// actor that is specified in the argument.
+        /// </summary>
+        /// <param name="movies"></param>
+        /// <param name="actorName"></param>
         private void FilterMoviesByActor(List<Movie> movies, string actorName)
         {
             for (int i = 0; i < movies.Count; i++)
@@ -113,6 +131,12 @@ namespace Logic
             }
         }
 
+        /// <summary>
+        /// Removes all movies from the list argument that do not have the
+        /// director that is specified in the argument.
+        /// </summary>
+        /// <param name="movies"></param>
+        /// <param name="directorName"></param>
         private void FilterMoviesByDirector(List<Movie> movies, string directorName)
         {
             for (int i = 0; i < movies.Count; i++)
@@ -125,6 +149,12 @@ namespace Logic
             }
         }
 
+        /// <summary>
+        /// Removes all movies from the list argument that do not have the
+        /// genre that is specified in the argument.
+        /// </summary>
+        /// <param name="movies"></param>
+        /// <param name="genreName"></param>
         private void FilterMoviesByGenre(List<Movie> movies, string genreName)
         {
             for (int i = 0; i < movies.Count; i++)
@@ -137,6 +167,12 @@ namespace Logic
             }
         }
 
+        /// <summary>
+        /// Removes all movies from the list argument that do not have the
+        /// language that is specified in the argument.
+        /// </summary>
+        /// <param name="movies"></param>
+        /// <param name="languageName"></param>
         private void FilterMoviesByLanguage(List<Movie> movies, string languageName)
         {
             for (int i = 0; i < movies.Count; i++)
@@ -149,17 +185,6 @@ namespace Logic
             }
         }
 
-        /// <summary>
-        /// Adds a User's Tag Vote for a Movie to the database.
-        /// Creates the Movie if it does not exist, based on the
-        /// information from the public movie API.
-        /// Adds the Tag to the database if it does not exist.
-        /// Adds the MovieTag to the database if it does not
-        /// exist.
-        /// Returns true if successful; false otherwise.
-        /// </summary>
-        /// <param name="taggingDTO"></param>
-        /// <returns></returns>
         public async Task<bool> TagMovie(TaggingDTO taggingDTO)
         {
             if(!_repo.MovieExists(taggingDTO.MovieId))
@@ -205,7 +230,7 @@ namespace Logic
             return _repo.UpdateTag(tag);
         }
 
-        public bool UpdateMovie(MovieDTO movieDTO)
+        public bool CreateOrUpdateMovie(MovieDTO movieDTO)
         {
             if(!_repo.MovieExists(movieDTO.ImdbId))
             {
@@ -214,7 +239,77 @@ namespace Logic
             
             Movie movie = _repo.GetMovie(movieDTO.ImdbId);
 
-            UpdateMoviesOptionalProperties(movie, movieDTO);
+            if(String.IsNullOrEmpty(movieDTO.Title))
+            {
+                movie.Title = null;
+            }
+            else
+            {
+                movie.Title = movieDTO.Title;
+            }
+
+            if(String.IsNullOrEmpty(movieDTO.RatingName))
+            {
+                movie.RatingId = null;
+            }
+            else
+            {
+                if(!_repo.RatingExists(movieDTO.RatingName))
+                {
+                    Rating newRating = new Rating();
+                    newRating.RatingName = movieDTO.RatingName;
+                    _repo.AddRating(newRating);
+                }
+                movie.RatingId = _repo.GetRating(movieDTO.RatingName).RatingId;
+            }
+
+            if(String.IsNullOrEmpty(movieDTO.ReleaseDate))
+            {
+                movie.ReleaseDate = null;
+                movie.IsReleased = null;
+            }
+            else
+            {
+                movie.ReleaseDate = DateTime.ParseExact(movieDTO.ReleaseDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+                movie.IsReleased = true;
+            }
+
+            if(String.IsNullOrEmpty(movieDTO.ReleaseCountry))
+            {
+                movie.ReleaseCountry = null;
+            }
+            else
+            {
+                movie.ReleaseCountry = movieDTO.ReleaseCountry;
+            }
+
+            if(movieDTO.RuntimeMinutes == null)
+            {
+                movie.RuntimeMinutes = null;
+            }
+            else
+            {
+                movie.RuntimeMinutes = movieDTO.RuntimeMinutes;
+            }
+
+            if(String.IsNullOrEmpty(movieDTO.Plot))
+            {
+                movie.Plot = null;
+            }
+            else
+            {
+                movie.Plot = movieDTO.Plot;
+            }
+
+            if(String.IsNullOrEmpty(movieDTO.PosterURL))
+            {
+                movie.PosterUrl = null;
+            }
+            else
+            {
+                movie.PosterUrl = movieDTO.PosterURL;
+            }
+
             _repo.UpdateMovie(movie);
 
             if(movieDTO.MovieActors != null)
@@ -277,7 +372,7 @@ namespace Logic
             Movie movie = new Movie();
             movie.ImdbId = movieDTO.ImdbId;
             
-            UpdateMoviesOptionalProperties(movie, movieDTO);
+            AppendMoviesOptionalProperties(movie, movieDTO);
 
             if(!_repo.AddMovie(movie))
             {
@@ -327,7 +422,14 @@ namespace Logic
             return true;
         }
 
-        public void UpdateMoviesOptionalProperties(Movie movie, MovieDTO movieDTO)
+        /// <summary>
+        /// Updates all of the optional, non-List properties of the Movie argument
+        /// to the properties supplied in the MovieDTO argument. Any null property
+        /// of the MovieDTO remains unchanged in the Movie object.
+        /// </summary>
+        /// <param name="movie"></param>
+        /// <param name="movieDTO"></param>
+        public void AppendMoviesOptionalProperties(Movie movie, MovieDTO movieDTO)
         {
             if(!String.IsNullOrEmpty(movieDTO.Title))
             {
@@ -392,7 +494,7 @@ namespace Logic
                 return false;
             }
 
-            UpdateMoviesOptionalProperties(movie, movieDTO);
+            AppendMoviesOptionalProperties(movie, movieDTO);
 
             _repo.UpdateMovie(movie);
             
@@ -451,14 +553,6 @@ namespace Logic
             return true;
         }
 
-        /// <summary>
-        /// Deletes the Movie from the database. Also deletes all associated
-        /// entries in: Movie_Actor, Movie_Director, Movie_Genre, Movie_Language,
-        /// Movie_Tag, Movie_Tag_User
-        /// Returns true if successful.
-        /// </summary>
-        /// <param name="movieId"></param>
-        /// <returns></returns>
         public bool DeleteMovie(string movieId)
         {
             if(!_repo.MovieExists(movieId))

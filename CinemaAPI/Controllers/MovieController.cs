@@ -40,9 +40,8 @@ namespace CinemaAPI.Controllers
 
         /// <summary>
         /// Returns the movieId for each movie that matches all of the tags
-        /// passed in as tag:[value] pairs. Returns a 404 response if any of
-        /// the tags are invalid. This is a POST method because GET does not
-        /// allow body data.
+        /// passed in as tag:[value] pairs. This is a POST method because 
+        /// GET does not allow body data.
         /// </summary>
         /// <param name="filters"></param>
         /// <returns></returns>
@@ -72,7 +71,7 @@ namespace CinemaAPI.Controllers
             {
                 return StatusCode(400);
             }
-            if(_movieLogic.UpdateMovie(movieDTO))
+            if(_movieLogic.CreateOrUpdateMovie(movieDTO))
             {
                 return StatusCode(200);
             }
