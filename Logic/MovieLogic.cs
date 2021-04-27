@@ -23,7 +23,6 @@ namespace Logic
             if(_repo.MovieExists(movieId))
             {
                 Movie movie = _repo.GetMovie(movieId);
-                Console.WriteLine(movie.ImdbId);
                 return Mapper.MovieToMovieDTO(movie);
             }
 
