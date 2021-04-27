@@ -32,22 +32,6 @@ namespace Repository
         }
 
         /// <summary>
-        /// Adds a Tag to the database. Returns true if
-        /// successful; false otherwise.
-        /// </summary>
-        /// <param name="tag"></param>
-        /// <returns></returns>
-        public bool AddTag(Tag tag)
-        {
-            _dbContext.Tags.Add(tag);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
         /// Adds a Rating to the database. Returns true if
         /// successful; false otherwise.
         /// </summary>
@@ -69,7 +53,7 @@ namespace Repository
         /// </summary>
         /// <param name="actor"></param>
         /// <returns></returns>
-        public bool AddActor(Actor actor)
+        private bool AddActor(Actor actor)
         {
             _dbContext.Actors.Add(actor);
             if(_dbContext.SaveChanges() > 0)
@@ -85,7 +69,7 @@ namespace Repository
         /// </summary>
         /// <param name="director"></param>
         /// <returns></returns>
-        public bool AddDirector(Director director)
+        private bool AddDirector(Director director)
         {
             _dbContext.Directors.Add(director);
             if(_dbContext.SaveChanges() > 0)
@@ -101,7 +85,7 @@ namespace Repository
         /// </summary>
         /// <param name="genre"></param>
         /// <returns></returns>
-        public bool AddGenre(Genre genre)
+        private bool AddGenre(Genre genre)
         {
             _dbContext.Genres.Add(genre);
             if(_dbContext.SaveChanges() > 0)
@@ -117,7 +101,7 @@ namespace Repository
         /// </summary>
         /// <param name="language"></param>
         /// <returns></returns>
-        public bool AddLanguage(Language language)
+        private bool AddLanguage(Language language)
         {
             _dbContext.Languages.Add(language);
             if(_dbContext.SaveChanges() > 0)
@@ -335,7 +319,7 @@ namespace Repository
         }
 
         /// <summary>
-        /// 
+        /// Updates an existing Movie in the database.
         /// </summary>
         /// <param name="movie"></param>
         /// <returns></returns>
@@ -353,6 +337,11 @@ namespace Repository
             return false;
         }
 
+        /// <summary>
+        /// Updates an existing Tag in the database.
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <returns></returns>
         public bool UpdateTag(Tag tag)
         {
             _dbContext.Tags.Update(tag);
@@ -363,6 +352,11 @@ namespace Repository
             return false;
         }
 
+        /// <summary>
+        /// Updates a User's existing Movie Tag in the database.
+        /// </summary>
+        /// <param name="movieTagUser"></param>
+        /// <returns></returns>
         public bool UpdateMovieTagUser(MovieTagUser movieTagUser)
         {
             var movieTag = GetMovieTag(movieTagUser.ImdbId, movieTagUser.TagName);
@@ -393,70 +387,153 @@ namespace Repository
             return false;
         }
 
+        /// <summary>
+        /// Returns a list of all Movies in the database.
+        /// </summary>
+        /// <returns></returns>
         public List<Movie> GetAllMovies()
         {
             return _dbContext.Movies.ToList<Movie>();
         }
 
-        public MovieTag GetMovieTag(string movieId, string tagName)
+        /// <summary>
+        /// Gets a MovieTag whose movieId and Tag name match the provided
+        /// arguments. Returns null if no match is found.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <param name="tagName"></param>
+        /// <returns></returns>
+        private MovieTag GetMovieTag(string movieId, string tagName)
         {
             return _dbContext.MovieTags.FirstOrDefault(mt => mt.ImdbId == movieId && mt.TagName == tagName);
         }
 
+        /// <summary>
+        /// Gets the Movie whose movieId matches the provided argument.
+        /// Returns null if no match is found.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <returns></returns>
         public Movie GetMovie(string movieId)
         {
             return _dbContext.Movies.FirstOrDefault(m => m.ImdbId == movieId);
         }
 
+        /// <summary>
+        /// Gets the Rating whose name matches the provided argument.
+        /// Returns null if no match is found.
+        /// </summary>
+        /// <param name="ratingName"></param>
+        /// <returns></returns>
         public Rating GetRating(string ratingName)
         {
             return _dbContext.Ratings.FirstOrDefault(r => r.RatingName == ratingName);
         }
 
-        public Actor GetActor(string actorName)
+        /// <summary>
+        /// Gets the Actor whose name matches the provided argument.
+        /// Returns null if no match is found.
+        /// </summary>
+        /// <param name="actorName"></param>
+        /// <returns></returns>
+        private Actor GetActor(string actorName)
         {
             return _dbContext.Actors.FirstOrDefault(a => a.ActorName == actorName);
         }
 
-        public Director GetDirector(string directorName)
+        /// <summary>
+        /// Gets the Director whose name matches the provided argument.
+        /// Returns null if no match is found.
+        /// </summary>
+        /// <param name="directorName"></param>
+        /// <returns></returns>
+        private Director GetDirector(string directorName)
         {
             return _dbContext.Directors.FirstOrDefault(d => d.DirectorName == directorName);
         }
 
-        public Genre GetGenre(string genreName)
+        /// <summary>
+        /// Gets the Genre whose name matches the provided argument.
+        /// Returns null if no match is found.
+        /// </summary>
+        /// <param name="genreName"></param>
+        /// <returns></returns>
+        private Genre GetGenre(string genreName)
         {
             return _dbContext.Genres.FirstOrDefault(g => g.GenreName == genreName);
         }
 
-        public Language GetLanguage(string languageName)
+        /// <summary>
+        /// Gets the Language whose name matches the provided argument.
+        /// Returns null if no match is found.
+        /// </summary>
+        /// <param name="languageName"></param>
+        /// <returns></returns>
+        private Language GetLanguage(string languageName)
         {
             return _dbContext.Languages.FirstOrDefault(l => l.LanguageName == languageName);
         }
+
+        /// <summary>
+        /// Gets the Tag whose name matches the provided argument.
+        /// Returns null if no match is found.
+        /// </summary>
+        /// <param name="tagName"></param>
+        /// <returns></returns>
         public Tag GetTag(string tagName)
         {
             return _dbContext.Tags.FirstOrDefault(t => t.TagName == tagName);
         }
 
+        /// <summary>
+        /// Removes all actors from the Movie assocaited with the
+        /// provided movie Id.
+        /// </summary>
+        /// <param name="imdbId"></param>
         public void ClearMovieActors(string imdbId)
         {
             _dbContext.MovieActors.RemoveRange(_dbContext.MovieActors.Where(ma => ma.ImdbId == imdbId));
         }
 
+        /// <summary>
+        /// Removes all directors from the Movie assocaited with the
+        /// provided movie Id.
+        /// </summary>
+        /// <param name="imdbId"></param>
         public void ClearMovieDirectors(string imdbId)
         {
             _dbContext.MovieDirectors.RemoveRange(_dbContext.MovieDirectors.Where(md => md.ImdbId == imdbId));
         }
 
+        /// <summary>
+        /// Removes all genres from the Movie assocaited with the
+        /// provided movie Id.
+        /// </summary>
+        /// <param name="imdbId"></param>
         public void ClearMovieGenres(string imdbId)
         {
             _dbContext.MovieGenres.RemoveRange(_dbContext.MovieGenres.Where(mg => mg.ImdbId == imdbId));
         }
 
+        /// <summary>
+        /// Removes all languages from the Movie assocaited with the
+        /// provided movie Id.
+        /// </summary>
+        /// <param name="imdbId"></param>
         public void ClearMovieLanguages(string imdbId)
         {
             _dbContext.MovieLanguages.RemoveRange(_dbContext.MovieLanguages.Where(ml => ml.ImdbId == imdbId));
         }
 
+        /// <summary>
+        /// Deletes the movie associated with the provided movie Id.
+        /// Removes the movie's references to all Tags, Actors,
+        /// Directors, Genres, and Languages as well; but does not
+        /// delete the Tags, Actors, etc. themselves, only the references
+        /// between these entities and the specified movie.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <returns></returns>
         public bool DeleteMovie(string movieId)
         {
             _dbContext.MovieTags.RemoveRange(_dbContext.MovieTags.Where(mt => mt.ImdbId == movieId));
@@ -473,34 +550,90 @@ namespace Repository
             return false;
         }
 
+        /// <summary>
+        /// Returns true iff the Movie specified by the argument
+        /// exists.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <returns></returns>
         public bool MovieExists(string movieId)
         {
             return (_dbContext.Movies.FirstOrDefault(m => m.ImdbId == movieId) != null);
         }
+
+        /// <summary>
+        /// Returns true iff the Tag specified by the argument
+        /// exists.
+        /// </summary>
+        /// <param name="tagName"></param>
+        /// <returns></returns>
         public bool TagExists(string tagName)
         {
             return (_dbContext.Tags.FirstOrDefault(t => t.TagName == tagName) != null);
         }
+
+        /// <summary>
+        /// Returns true iff the Rating specified by the argument
+        /// exists.
+        /// </summary>
+        /// <param name="ratingName"></param>
+        /// <returns></returns>
         public bool RatingExists(string ratingName)
         {
             return (_dbContext.Ratings.FirstOrDefault(r => r.RatingName == ratingName) != null);
         }
+
+        /// <summary>
+        /// Returns true iff the Actor specified by the argument
+        /// exists.
+        /// </summary>
+        /// <param name="actorName"></param>
+        /// <returns></returns>
         public bool ActorExists(string actorName)
         {
             return (_dbContext.Actors.FirstOrDefault(a => a.ActorName == actorName) != null);
         }
+
+        /// <summary>
+        /// Returns true iff the Language specified by the argument
+        /// exists.
+        /// </summary>
+        /// <param name="languageName"></param>
+        /// <returns></returns>
         public bool LanguageExists(string languageName)
         {
             return (_dbContext.Languages.FirstOrDefault(l => l.LanguageName == languageName) != null);
         }
+
+        /// <summary>
+        /// Returns true iff the Director specified by the argument
+        /// exists.
+        /// </summary>
+        /// <param name="directorName"></param>
+        /// <returns></returns>
         public bool DirectorExists(string directorName)
         {
             return (_dbContext.Directors.FirstOrDefault(d => d.DirectorName == directorName) != null);
         }
+
+        /// <summary>
+        /// Returns true iff the Genre specified by the argument
+        /// exists.
+        /// </summary>
+        /// <param name="genreName"></param>
+        /// <returns></returns>
         public bool GenreExists(string genreName)
         {
             return (_dbContext.Genres.FirstOrDefault(g => g.GenreName == genreName) != null);
         }
+
+        /// <summary>
+        /// Returns true iff the MovieActor specified by the
+        /// argument exists.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <param name="actorName"></param>
+        /// <returns></returns>
         public bool MovieActorExists(string movieId, string actorName)
         {
             Actor actor = _dbContext.Actors.FirstOrDefault(a => a.ActorName == actorName);
@@ -512,6 +645,14 @@ namespace Repository
             return (_dbContext.MovieActors.FirstOrDefault(ma => ma.ImdbId == movieId
                 && ma.ActorId == actor.ActorId) != null);
         }
+
+        /// <summary>
+        /// Returns true iff the MovieDirector specified by the
+        /// argument exists.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <param name="directorName"></param>
+        /// <returns></returns>
         public bool MovieDirectorExists(string movieId, string directorName)
         {
             Director director = _dbContext.Directors.FirstOrDefault(d => d.DirectorName == directorName);
@@ -524,6 +665,13 @@ namespace Repository
                 && md.DirectorId == director.DirectorId) != null);
         }
 
+        /// <summary>
+        /// Returns true iff the MovieGenre specified by the
+        /// argument exists.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <param name="genreName"></param>
+        /// <returns></returns>
         public bool MovieGenreExists(string movieId, string genreName)
         {
             Genre genre = _dbContext.Genres.FirstOrDefault(g => g.GenreName == genreName);
@@ -536,6 +684,13 @@ namespace Repository
                 && mg.GenreId == genre.GenreId) != null);
         }
 
+        /// <summary>
+        /// Returns true iff the MovieLanguage specified by the
+        /// argument exists.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <param name="languageName"></param>
+        /// <returns></returns>
         public bool MovieLanguageExists(string movieId, string languageName)
         {
             Language language = _dbContext.Languages.FirstOrDefault(l => l.LanguageName == languageName);
@@ -547,6 +702,13 @@ namespace Repository
             return (_dbContext.MovieLanguages.FirstOrDefault(ml => ml.ImdbId == movieId
                 && ml.LanguageId == language.LanguageId) != null);
         }
+
+        /// <summary>
+        /// Returns true iff the MovieTagUser specified by the
+        /// argument exists.
+        /// </summary>
+        /// <param name="movieTagUser"></param>
+        /// <returns></returns>
         public bool MovieTagUserExists(MovieTagUser movieTagUser)
         {
             return (_dbContext.MovieTagUsers.FirstOrDefault(mtu => mtu.ImdbId == movieTagUser.ImdbId

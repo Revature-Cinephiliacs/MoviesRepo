@@ -8,7 +8,13 @@ namespace Logic.ApiHelper
 {
     public class MovieProcessor
     {
-        public static async Task<MovieObject> LoadMovieAsync( string searchMovie)
+        /// <summary>
+        /// Retrieves the details for a movie based on an IMDB identification number, imdbId,
+        /// from a public API endpoint. Returns null if the imdbId is not found.
+        /// </summary>
+        /// <param name="searchMovie"></param>
+        /// <returns></returns>
+        public static async Task<MovieObject> LoadMovieAsync(string imdbId)
         {
             var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Clear();
@@ -17,7 +23,7 @@ namespace Logic.ApiHelper
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"https://movie-database-imdb-alternative.p.rapidapi.com/?i= {searchMovie}"),
+                RequestUri = new Uri($"https://movie-database-imdb-alternative.p.rapidapi.com/?i= {imdbId}"),
                 Headers =
                 {
                     { "x-rapidapi-key", "e157b8d687msh431e30623e70dd3p174a1cjsn7ea0d090c0f9" },
