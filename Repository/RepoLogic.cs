@@ -16,99 +16,69 @@ namespace Repository
         }
 
         /// <summary>
-        /// Adds a Movie to the database. Returns true if
-        /// successful; false otherwise.
+        /// Adds a Movie to the database.
         /// </summary>
         /// <param name="movie"></param>
         /// <returns></returns>
-        public bool AddMovie(Movie movie)
+        public void AddMovie(Movie movie)
         {
             _dbContext.Movies.Add(movie);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
+            _dbContext.SaveChanges();
         }
 
         /// <summary>
-        /// Adds a Rating to the database. Returns true if
-        /// successful; false otherwise.
+        /// Adds a Rating to the database.
         /// </summary>
         /// <param name="rating"></param>
         /// <returns></returns>
-        public bool AddRating(Rating rating)
+        public void AddRating(Rating rating)
         {
             _dbContext.Ratings.Add(rating);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
+            _dbContext.SaveChanges();
         }
 
         /// <summary>
-        /// Adds an Actor to the database. Returns true if
-        /// successful; false otherwise.
+        /// Adds an Actor to the database.
         /// </summary>
         /// <param name="actor"></param>
         /// <returns></returns>
-        private bool AddActor(Actor actor)
+        private void AddActor(Actor actor)
         {
             _dbContext.Actors.Add(actor);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
+            _dbContext.SaveChanges();
         }
 
         /// <summary>
-        /// Adds a Director to the database. Returns true if
-        /// successful; false otherwise.
+        /// Adds a Director to the database.
         /// </summary>
         /// <param name="director"></param>
         /// <returns></returns>
-        private bool AddDirector(Director director)
+        private void AddDirector(Director director)
         {
             _dbContext.Directors.Add(director);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
+            _dbContext.SaveChanges();
         }
 
         /// <summary>
-        /// Adds a Genre to the database. Returns true if
-        /// successful; false otherwise.
+        /// Adds a Genre to the database.
         /// </summary>
         /// <param name="genre"></param>
         /// <returns></returns>
-        private bool AddGenre(Genre genre)
+        private void AddGenre(Genre genre)
         {
             _dbContext.Genres.Add(genre);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
+            _dbContext.SaveChanges();
         }
 
         /// <summary>
-        /// Adds a Language to the database. Returns true if
-        /// successful; false otherwise.
+        /// Adds a Language to the database.
         /// </summary>
         /// <param name="language"></param>
         /// <returns></returns>
-        private bool AddLanguage(Language language)
+        private void AddLanguage(Language language)
         {
             _dbContext.Languages.Add(language);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
+            _dbContext.SaveChanges();
         }
 
         /// <summary>
@@ -117,11 +87,10 @@ namespace Repository
         /// Adds the Tag to the database if it does not exist.
         /// Adds the MovieTag to the database if it does not
         /// exist.
-        /// Returns true if successful; false otherwise.
         /// </summary>
         /// <param name="movieTagUser"></param>
         /// <returns></returns>
-        public bool AddMovieTagUser(MovieTagUser movieTagUser)
+        public void AddMovieTagUser(MovieTagUser movieTagUser)
         {
             if(!TagExists(movieTagUser.TagName))
             {
@@ -151,11 +120,7 @@ namespace Repository
                     movieTag.VoteSum -= 1;
             }
             _dbContext.MovieTagUsers.Add(movieTagUser);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
+            _dbContext.SaveChanges();
         }
 
         /// <summary>
@@ -175,10 +140,7 @@ namespace Repository
             {
                 Actor newActor = new Actor();
                 newActor.ActorName = movieActorName;
-                if(!AddActor(newActor))
-                {
-                    return false;
-                }
+                AddActor(newActor);
             }
 
             Actor actor = GetActor(movieActorName);
@@ -191,11 +153,8 @@ namespace Repository
             movieActor.ImdbId = movieId;
             movieActor.ActorId = actor.ActorId;
             _dbContext.MovieActors.Add(movieActor);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
+            _dbContext.SaveChanges();
+            return true;
         }
 
         /// <summary>
@@ -215,10 +174,7 @@ namespace Repository
             {
                 Director newDirector = new Director();
                 newDirector.DirectorName = movieDirectorName;
-                if(!AddDirector(newDirector))
-                {
-                    return false;
-                }
+                AddDirector(newDirector);
             }
 
             Director director = GetDirector(movieDirectorName);
@@ -231,11 +187,8 @@ namespace Repository
             movieDirector.ImdbId = movieId;
             movieDirector.DirectorId = director.DirectorId;
             _dbContext.MovieDirectors.Add(movieDirector);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
+            _dbContext.SaveChanges();
+            return true;
         }
 
         /// <summary>
@@ -255,10 +208,7 @@ namespace Repository
             {
                 Genre newGenre = new Genre();
                 newGenre.GenreName = movieGenreName;
-                if(!AddGenre(newGenre))
-                {
-                    return false;
-                }
+                AddGenre(newGenre);
             }
 
             Genre genre = GetGenre(movieGenreName);
@@ -271,11 +221,8 @@ namespace Repository
             movieGenre.ImdbId = movieId;
             movieGenre.GenreId = genre.GenreId;
             _dbContext.MovieGenres.Add(movieGenre);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
+            _dbContext.SaveChanges();
+            return true;
         }
 
         /// <summary>
@@ -295,10 +242,7 @@ namespace Repository
             {
                 Language newLanguage = new Language();
                 newLanguage.LanguageName = movieLanguageName;
-                if(!AddLanguage(newLanguage))
-                {
-                    return false;
-                }
+                AddLanguage(newLanguage);
             }
 
             Language language = GetLanguage(movieLanguageName);
@@ -311,11 +255,8 @@ namespace Repository
             movieLanguage.ImdbId = movieId;
             movieLanguage.LanguageId = language.LanguageId;
             _dbContext.MovieLanguages.Add(movieLanguage);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
+            _dbContext.SaveChanges();
+            return true;
         }
 
         /// <summary>
@@ -330,11 +271,8 @@ namespace Repository
                 return false;
             }
             _dbContext.Movies.Update(movie);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
+            _dbContext.SaveChanges();
+            return true;
         }
 
         /// <summary>
@@ -342,14 +280,10 @@ namespace Repository
         /// </summary>
         /// <param name="tag"></param>
         /// <returns></returns>
-        public bool UpdateTag(Tag tag)
+        public void UpdateTag(Tag tag)
         {
             _dbContext.Tags.Update(tag);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
+            _dbContext.SaveChanges();
         }
 
         /// <summary>
@@ -357,7 +291,7 @@ namespace Repository
         /// </summary>
         /// <param name="movieTagUser"></param>
         /// <returns></returns>
-        public bool UpdateMovieTagUser(MovieTagUser movieTagUser)
+        public void UpdateMovieTagUser(MovieTagUser movieTagUser)
         {
             var movieTag = GetMovieTag(movieTagUser.ImdbId, movieTagUser.TagName);
             if(movieTag == null)
@@ -380,11 +314,7 @@ namespace Repository
                     movieTag.VoteSum -= 1;
             }
             _dbContext.MovieTagUsers.Update(movieTagUser);
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
+            _dbContext.SaveChanges();
         }
 
         /// <summary>
@@ -534,7 +464,7 @@ namespace Repository
         /// </summary>
         /// <param name="movieId"></param>
         /// <returns></returns>
-        public bool DeleteMovie(string movieId)
+        public void DeleteMovie(string movieId)
         {
             _dbContext.MovieTags.RemoveRange(_dbContext.MovieTags.Where(mt => mt.ImdbId == movieId));
             _dbContext.MovieTagUsers.RemoveRange(_dbContext.MovieTagUsers.Where(mtu => mtu.ImdbId == movieId));
@@ -543,11 +473,7 @@ namespace Repository
             _dbContext.MovieGenres.RemoveRange(_dbContext.MovieGenres.Where(mg => mg.ImdbId == movieId));
             _dbContext.MovieLanguages.RemoveRange(_dbContext.MovieLanguages.Where(ml => ml.ImdbId == movieId));
             _dbContext.Movies.RemoveRange(_dbContext.Movies.Where(m => m.ImdbId == movieId));
-            if(_dbContext.SaveChanges() > 0)
-            {
-                return true;
-            }
-            return false;
+            _dbContext.SaveChanges();
         }
 
         /// <summary>
