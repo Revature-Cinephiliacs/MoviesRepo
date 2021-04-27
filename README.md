@@ -44,4 +44,4 @@ This microservice is part of the Cinephiliacs application. It manages all data d
 | Submits a user's vote for/against a tag      | Post   | movie/tag/movie           | (Tag)        |          |                                                                                    |
 | (Admin) Ban a tag                            | Post   | movie/tag/ban/{tagname}   |              |          | Banned tags are not returned with movie details                                    |
 | (Admin) Unban a tag                          | Post   | movie/tag/unban/{tagname} |              |          |                                                                                    |
-| A Test method for deployment                 | Get    | movie/test                |              |          |                                                                                    |
+| A Test method for deployment                 | Get    | movie/test                |              | (Movie)  | Returns a hardcoded Movie object                                                                |
