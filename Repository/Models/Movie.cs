@@ -9,6 +9,7 @@ namespace Repository.Models
     {
         public Movie()
         {
+            FollowingMovies = new HashSet<FollowingMovie>();
             MovieActors = new HashSet<MovieActor>();
             MovieDirectors = new HashSet<MovieDirector>();
             MovieGenres = new HashSet<MovieGenre>();
@@ -28,6 +29,7 @@ namespace Repository.Models
         public string PosterUrl { get; set; }
 
         public virtual Rating Rating { get; set; }
+        public virtual ICollection<FollowingMovie> FollowingMovies { get; set; }
         public virtual ICollection<MovieActor> MovieActors { get; set; }
         public virtual ICollection<MovieDirector> MovieDirectors { get; set; }
         public virtual ICollection<MovieGenre> MovieGenres { get; set; }
