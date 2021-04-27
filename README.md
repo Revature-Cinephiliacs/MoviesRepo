@@ -2,7 +2,7 @@
 
 ## Project Description
 
-This is the microservice used to display movie information retrieved from a third party API, the {Movie Database API]( https://rapidapi.com/rapidapi/api/movie-database-imdb-alternative/). It also handles movie tags and allows users to search movies by genre, director, and actor as well as title.  
+This is the microservice used to display movie information retrieved from a third party API, the [Movie Database API]( https://rapidapi.com/rapidapi/api/movie-database-imdb-alternative/). It also handles movie tags and allows users to search movies by genre, director, and actor as well as title.  
 
 ## Technologies Used
 
