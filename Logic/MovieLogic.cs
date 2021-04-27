@@ -211,12 +211,13 @@ namespace Logic
             movieTagUser.IsUpvote = taggingDTO.IsUpvote;
             if(_repo.MovieTagUserExists(movieTagUser))
             {
-                return _repo.UpdateMovieTagUser(movieTagUser);
+                _repo.UpdateMovieTagUser(movieTagUser);
             }
             else
             {
-                return _repo.AddMovieTagUser(movieTagUser);
+                _repo.AddMovieTagUser(movieTagUser);
             }
+            return true;
         }
 
         public bool SetTagBanStatus(string tagName, bool isBan)
@@ -227,7 +228,8 @@ namespace Logic
             }
             Tag tag = _repo.GetTag(tagName);
             tag.IsBanned = isBan;
-            return _repo.UpdateTag(tag);
+            _repo.UpdateTag(tag);
+            return true;
         }
 
         public bool CreateOrUpdateMovie(MovieDTO movieDTO)
@@ -337,10 +339,7 @@ namespace Logic
             
             AppendMoviesOptionalProperties(movie, movieDTO);
 
-            if(!_repo.AddMovie(movie))
-            {
-                return false;
-            }
+            _repo.AddMovie(movie);
             
             if(movieDTO.MovieActors != null)
             {
@@ -522,7 +521,8 @@ namespace Logic
             {
                 return false;
             }
-            return _repo.DeleteMovie(movieId);
+            _repo.DeleteMovie(movieId);
+            return true;
         }
     }
 }
