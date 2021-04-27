@@ -69,7 +69,7 @@ namespace Logic
 
         public static MovieDTO MovieToMovieDTO(Movie movie)
         {
-            var movieDTO = new MovieDTO()
+            MovieDTO movieDTO = new MovieDTO()
             {
                 ImdbId = movie.ImdbId,
                 Title = movie.Title,
@@ -77,8 +77,7 @@ namespace Logic
                 RuntimeMinutes = movie.RuntimeMinutes,
                 IsReleased = movie.IsReleased,
                 Plot = movie.Plot,
-                PosterURL = movie.PosterUrl,
-                RatingName = movie.Rating.RatingName
+                PosterURL = movie.PosterUrl
             };
 
             if(movie.ReleaseDate == null)

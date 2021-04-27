@@ -19,6 +19,7 @@ namespace Repository.Models
 
         public virtual DbSet<Actor> Actors { get; set; }
         public virtual DbSet<Director> Directors { get; set; }
+        public virtual DbSet<FollowingMovie> FollowingMovies { get; set; }
         public virtual DbSet<Genre> Genres { get; set; }
         public virtual DbSet<Language> Languages { get; set; }
         public virtual DbSet<Movie> Movies { get; set; }
@@ -32,7 +33,13 @@ namespace Repository.Models
         public virtual DbSet<Tag> Tags { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        { }
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=tcp:cinephiliacs.database.windows.net,1433;Initial Catalog=Cinephiliacs_Movie;Persist Security Info=False;User ID=kugelsicher;Password=F36UWevqvcDxEmt;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -70,6 +77,28 @@ namespace Repository.Models
                     .IsRequired()
                     .HasMaxLength(255)
                     .HasColumnName("directorName");
+            });
+
+            modelBuilder.Entity<FollowingMovie>(entity =>
+            {
+                entity.HasKey(e => new { e.UserId, e.ImdbId })
+                    .HasName("user_following_movie_pk");
+
+                entity.ToTable("Following_Movies");
+
+                entity.Property(e => e.UserId)
+                    .HasMaxLength(50)
+                    .HasColumnName("userID");
+
+                entity.Property(e => e.ImdbId)
+                    .HasMaxLength(255)
+                    .HasColumnName("imdbID");
+
+                entity.HasOne(d => d.Imdb)
+                    .WithMany(p => p.FollowingMovies)
+                    .HasForeignKey(d => d.ImdbId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Following__imdbI__40058253");
             });
 
             modelBuilder.Entity<Genre>(entity =>
