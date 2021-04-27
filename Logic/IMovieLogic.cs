@@ -28,17 +28,20 @@ namespace Logic
         List<string> SearchMovies(Dictionary<string, string> filters);
 
         /// <summary>
-        /// Updates every field of the movie with a matching ImdbId to
-        /// the provided values. Sets missing values to null. Adds the
-        /// movie if it does not exist.
+        /// Updates the fields of the Movie with a matching movieId to the
+        /// values provided in the MovieDTO object. Creates the movie if it
+        /// does not exist. Missing properties are set to null. The array
+        /// properties in the MovieDTO will replace the existing lists. If
+        /// the movie does not yet exist, the movie is first added via the
+        /// public movie API.
         /// </summary>
         /// <param name="movieDTO"></param>
         /// <returns></returns>
         bool CreateOrUpdateMovie(MovieDTO movieDTO);
 
         /// <summary>
-        /// Updates the fields of the Movie with a matching ImdbId to the
-        /// values provided in the MovieDTO object. Any If any of the passed-in values
+        /// Updates the fields of the Movie with a matching movieId to the
+        /// values provided in the MovieDTO object. If any of the passed-in values
         /// are null/empty, they will remain unchanged. The passed-in array
         /// fields will be appened to the existing lists. Pre-existing entries
         /// in the lists will remain. If the movie does not yet exist, the

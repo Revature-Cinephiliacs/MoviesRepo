@@ -38,7 +38,7 @@ and the values are a string that is an instance of the key, i.e.: "Tag":"Scary" 
 |----------------------------------------------|--------|---------------------------|--------------|----------|------------------------------------------------------------------------------------|
 | Gets movie details by id                     | Get    | movie/{movieid}           |              | (Movie)  |                                                                                    |
 | Gets all movies that match all search values | Post   | movie/search              | (JS_Object)  | string[] | Returns an array of movieIDs                                                       |
-| Creates or Updates a movie's details         | Patch  | movie/update              | (Movie)      |          | Missing properties remain unchanged. Arrays overwrite existing values.             |
+| Creates or Updates a movie's details         | Patch  | movie/update              | (Movie)      |          | All values overwrite existing values.                                              |
 | Appends information to a movie's details     | Patch  | movie/append              | (Movie)      |          | Missing properties remain unchanged. Array values are appended to existing values. |
 | Deletes a movie                              | Delete | movie/{movieid}           |              |          | Also deletes associated information                                                |
 | Submits a user's vote for/against a tag      | Post   | movie/tag/movie           | (Tag)        |          |                                                                                    |

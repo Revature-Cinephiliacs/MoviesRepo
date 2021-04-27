@@ -239,14 +239,11 @@ namespace Logic
             
             Movie movie = _repo.GetMovie(movieDTO.ImdbId);
 
-            if(String.IsNullOrEmpty(movieDTO.Title))
-            {
-                movie.Title = null;
-            }
-            else
-            {
-                movie.Title = movieDTO.Title;
-            }
+            movie.Title = movieDTO.Title;
+            movie.ReleaseCountry = movieDTO.ReleaseCountry;
+            movie.RuntimeMinutes = movieDTO.RuntimeMinutes;
+            movie.Plot = movieDTO.Plot;
+            movie.PosterUrl = movieDTO.PosterURL;
 
             if(String.IsNullOrEmpty(movieDTO.RatingName))
             {
@@ -274,47 +271,11 @@ namespace Logic
                 movie.IsReleased = true;
             }
 
-            if(String.IsNullOrEmpty(movieDTO.ReleaseCountry))
-            {
-                movie.ReleaseCountry = null;
-            }
-            else
-            {
-                movie.ReleaseCountry = movieDTO.ReleaseCountry;
-            }
-
-            if(movieDTO.RuntimeMinutes == null)
-            {
-                movie.RuntimeMinutes = null;
-            }
-            else
-            {
-                movie.RuntimeMinutes = movieDTO.RuntimeMinutes;
-            }
-
-            if(String.IsNullOrEmpty(movieDTO.Plot))
-            {
-                movie.Plot = null;
-            }
-            else
-            {
-                movie.Plot = movieDTO.Plot;
-            }
-
-            if(String.IsNullOrEmpty(movieDTO.PosterURL))
-            {
-                movie.PosterUrl = null;
-            }
-            else
-            {
-                movie.PosterUrl = movieDTO.PosterURL;
-            }
-
             _repo.UpdateMovie(movie);
 
+            _repo.ClearMovieActors(movieDTO.ImdbId);
             if(movieDTO.MovieActors != null)
             {
-                _repo.ClearMovieActors(movieDTO.ImdbId);
                 foreach (var movieActorName in movieDTO.MovieActors)
                 {
                     if(!_repo.AddMovieActor(movieDTO.ImdbId, movieActorName))
@@ -324,9 +285,9 @@ namespace Logic
                 }
             }
 
+            _repo.ClearMovieDirectors(movieDTO.ImdbId);
             if(movieDTO.MovieDirectors != null)
             {
-                _repo.ClearMovieDirectors(movieDTO.ImdbId);
                 foreach (var movieDirectorName in movieDTO.MovieDirectors)
                 {
                     if(!_repo.AddMovieDirector(movieDTO.ImdbId, movieDirectorName))
@@ -335,9 +296,10 @@ namespace Logic
                     }
                 }
             }
+
+            _repo.ClearMovieGenres(movieDTO.ImdbId);
             if(movieDTO.MovieGenres != null)
             {
-                _repo.ClearMovieGenres(movieDTO.ImdbId);
                 foreach (var movieGenreName in movieDTO.MovieGenres)
                 {
                     if(!_repo.AddMovieGenre(movieDTO.ImdbId, movieGenreName))
@@ -346,9 +308,10 @@ namespace Logic
                     }
                 }
             }
+
+            _repo.ClearMovieLanguages(movieDTO.ImdbId);
             if(movieDTO.MovieLanguages != null)
             {
-                _repo.ClearMovieLanguages(movieDTO.ImdbId);
                 foreach (var movieLanguageName in movieDTO.MovieLanguages)
                 {
                     if(!_repo.AddMovieLanguage(movieDTO.ImdbId, movieLanguageName))
