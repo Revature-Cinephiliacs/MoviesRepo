@@ -142,7 +142,7 @@ namespace Tests
                 result = msr.GetAllMovies();
                 
             }
-            Assert.Equal(result.Count,3);
+            Assert.Equal(3,result.Count);
         }
 
         [Fact]
