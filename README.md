@@ -5,7 +5,7 @@ This microservice is part of the Cinephiliacs application. It manages all data d
 
 ## Endpoint Objects
 * Movie
-  * imdbId: string, [Required]
+  * imdbId: string,
   * title: string,
   * ratingName: string,
   * releaseDate: string,
