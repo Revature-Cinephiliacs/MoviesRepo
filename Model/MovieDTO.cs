@@ -6,20 +6,25 @@ namespace Model
 {
     public sealed class MovieDTO
     {
-        [Required]
         [StringLength(20)]
         public string ImdbId { get; set; }
         
+        [StringLength(255)]
         public string Title { get; set; }
         
+        [StringLength(255)]
         public string RatingName { get; set; }
 
         [RegularExpression( @"[12]\d\d\d-[01]\d-[0123]\d")]
         public string ReleaseDate { get; set; }
+
+        [StringLength(255)]
         public string ReleaseCountry { get; set; }
         public short? RuntimeMinutes { get; set; }
         public bool? IsReleased { get; set; }
         public string Plot { get; set; }
+
+        [StringLength(2048)]
         public string PosterURL { get; set; }
         public List<string> MovieActors { get; set; }
         public List<string> MovieDirectors { get; set; }
@@ -28,6 +33,99 @@ namespace Model
         public List<string> MovieTags { get; set; }
 
         public MovieDTO() {}
+
+        public override string ToString()
+        {
+            string output = ImdbId + "\n" + Title + "\n" + RatingName + "\n"
+                + ReleaseDate + "\n" + ReleaseCountry + "\n" + RuntimeMinutes + "\n"
+                + IsReleased + "\n" + Plot + "\n" + PosterURL + "\n";
+
+            output += "Actors [\n";
+            foreach (var actor in MovieActors)
+            {
+                output += "\t" + actor + "\n";
+            }
+            output += "]\n";
+
+            output += "Directors [\n";
+            foreach (var director in MovieDirectors)
+            {
+                output += "\t" + director + "\n";
+            }
+            output += "]\n";
+
+            output += "Genres [\n";
+            foreach (var genre in MovieGenres)
+            {
+                output += "\t" + genre + "\n";
+            }
+            output += "]\n";
+
+            output += "Languages [\n";
+            foreach (var language in MovieLanguages)
+            {
+                output += "\t" + language + "\n";
+            }
+            output += "]\n";
+
+            output += "Tags [\n";
+            foreach (var tag in MovieTags)
+            {
+                output += "\t" + tag + "\n";
+            }
+            output += "]\n";
+
+            return output;
+        }
+
+        public bool Equals(MovieDTO other)
+        {
+            if (Object.ReferenceEquals(other, null))
+            {
+                return false;
+            }
+
+            if (Object.ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (this.GetType() != other.GetType())
+            {
+                return false;
+            }
+
+            return ImdbId == other.ImdbId;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as MovieDTO);
+        }
+
+        public static bool operator ==(MovieDTO lhs, MovieDTO rhs)
+        {
+            if (Object.ReferenceEquals(lhs, null))
+            {
+                if (Object.ReferenceEquals(rhs, null))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            return lhs.Equals(rhs);
+        }
+
+        public static bool operator !=(MovieDTO lhs, MovieDTO rhs)
+        {
+            return !(lhs == rhs);
+        }
+
+        public override int GetHashCode()
+        {
+            return ImdbId.GetHashCode();
+        }
         
     }
 }

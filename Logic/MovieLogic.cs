@@ -23,7 +23,9 @@ namespace Logic
             if(_repo.MovieExists(movieId))
             {
                 Movie movie = _repo.GetMovie(movieId);
-                return Mapper.MovieToMovieDTO(movie);
+                return Mapper.MovieToMovieDTO(movie, _repo.GetRating(movie.RatingId ?? 0), _repo.GetMovieActorNames(movieId)
+                    , _repo.GetMovieDirectorNames(movieId), _repo.GetMovieGenreNames(movieId)
+                    , _repo.GetMovieLanguageNames(movieId), _repo.GetMovieTags(movieId));
             }
 
             ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor.LoadMovieAsync(movieId);
@@ -232,14 +234,19 @@ namespace Logic
             return true;
         }
 
-        public bool CreateOrUpdateMovie(MovieDTO movieDTO)
+        public bool UpdateMovie(string movieId, MovieDTO movieDTO)
         {
-            if(!_repo.MovieExists(movieDTO.ImdbId))
+            if(movieDTO.ImdbId != null && movieDTO.ImdbId != movieId)
+            {
+                return false;
+            }
+
+            if(!_repo.MovieExists(movieId))
             {
                 return CreateMovie(movieDTO);
             }
             
-            Movie movie = _repo.GetMovie(movieDTO.ImdbId);
+            Movie movie = _repo.GetMovie(movieId);
 
             movie.Title = movieDTO.Title;
             movie.ReleaseCountry = movieDTO.ReleaseCountry;
@@ -275,48 +282,48 @@ namespace Logic
 
             _repo.UpdateMovie(movie);
 
-            _repo.ClearMovieActors(movieDTO.ImdbId);
+            _repo.ClearMovieActors(movieId);
             if(movieDTO.MovieActors != null)
             {
                 foreach (var movieActorName in movieDTO.MovieActors)
                 {
-                    if(!_repo.AddMovieActor(movieDTO.ImdbId, movieActorName))
+                    if(!_repo.AddMovieActor(movieId, movieActorName))
                     {
                         return false;
                     }
                 }
             }
 
-            _repo.ClearMovieDirectors(movieDTO.ImdbId);
+            _repo.ClearMovieDirectors(movieId);
             if(movieDTO.MovieDirectors != null)
             {
                 foreach (var movieDirectorName in movieDTO.MovieDirectors)
                 {
-                    if(!_repo.AddMovieDirector(movieDTO.ImdbId, movieDirectorName))
+                    if(!_repo.AddMovieDirector(movieId, movieDirectorName))
                     {
                         return false;
                     }
                 }
             }
 
-            _repo.ClearMovieGenres(movieDTO.ImdbId);
+            _repo.ClearMovieGenres(movieId);
             if(movieDTO.MovieGenres != null)
             {
                 foreach (var movieGenreName in movieDTO.MovieGenres)
                 {
-                    if(!_repo.AddMovieGenre(movieDTO.ImdbId, movieGenreName))
+                    if(!_repo.AddMovieGenre(movieId, movieGenreName))
                     {
                         return false;
                     }
                 }
             }
 
-            _repo.ClearMovieLanguages(movieDTO.ImdbId);
+            _repo.ClearMovieLanguages(movieId);
             if(movieDTO.MovieLanguages != null)
             {
                 foreach (var movieLanguageName in movieDTO.MovieLanguages)
                 {
-                    if(!_repo.AddMovieLanguage(movieDTO.ImdbId, movieLanguageName))
+                    if(!_repo.AddMovieLanguage(movieId, movieLanguageName))
                     {
                         return false;
                     }
@@ -325,15 +332,13 @@ namespace Logic
             return true;
         }
 
-        /// <summary>
-        /// Creates a new Movie entry from the information within
-        /// the MovieDTO argument.
-        /// Returns true if successful.
-        /// </summary>
-        /// <param name="movieDTO"></param>
-        /// <returns></returns>
         public bool CreateMovie(MovieDTO movieDTO)
         {
+            if(movieDTO.ImdbId == null || _repo.MovieExists(movieDTO.ImdbId))
+            {
+                return false;
+            }
+
             Movie movie = new Movie();
             movie.ImdbId = movieDTO.ImdbId;
             
@@ -432,12 +437,12 @@ namespace Logic
             }
         }
 
-        public async Task<bool> AppendMovie(MovieDTO movieDTO)
+        public async Task<bool> AppendMovie(string movieId, MovieDTO movieDTO)
         {
-            if(!_repo.MovieExists(movieDTO.ImdbId))
+            if(!_repo.MovieExists(movieId))
             {
                 ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor
-                    .LoadMovieAsync(movieDTO.ImdbId);
+                    .LoadMovieAsync(movieId);
                 if(movieObject == null)
                 {
                     return false;
@@ -449,7 +454,7 @@ namespace Logic
                 }
             }
 
-            Movie movie = _repo.GetMovie(movieDTO.ImdbId);
+            Movie movie = _repo.GetMovie(movieId);
 
             if(movie == null)
             {
@@ -464,9 +469,9 @@ namespace Logic
             {
                 foreach (var movieActorName in movieDTO.MovieActors)
                 {
-                    if(!_repo.MovieActorExists(movieDTO.ImdbId, movieActorName))
+                    if(!_repo.MovieActorExists(movieId, movieActorName))
                     {
-                        if(!_repo.AddMovieActor(movieDTO.ImdbId, movieActorName))
+                        if(!_repo.AddMovieActor(movieId, movieActorName))
                         {
                             return false;
                         }
@@ -477,9 +482,9 @@ namespace Logic
             {
                 foreach (var movieDirectorName in movieDTO.MovieDirectors)
                 {
-                    if(!_repo.MovieDirectorExists(movieDTO.ImdbId, movieDirectorName))
+                    if(!_repo.MovieDirectorExists(movieId, movieDirectorName))
                     {
-                        if(!_repo.AddMovieDirector(movieDTO.ImdbId, movieDirectorName))
+                        if(!_repo.AddMovieDirector(movieId, movieDirectorName))
                         {
                             return false;
                         }
@@ -490,9 +495,9 @@ namespace Logic
             {
                 foreach (var movieGenreName in movieDTO.MovieGenres)
                 {
-                    if(!_repo.MovieGenreExists(movieDTO.ImdbId, movieGenreName))
+                    if(!_repo.MovieGenreExists(movieId, movieGenreName))
                     {
-                        if(!_repo.AddMovieGenre(movieDTO.ImdbId, movieGenreName))
+                        if(!_repo.AddMovieGenre(movieId, movieGenreName))
                         {
                             return false;
                         }
@@ -503,9 +508,9 @@ namespace Logic
             {
                 foreach (var movieLanguageName in movieDTO.MovieLanguages)
                 {
-                    if(!_repo.MovieLanguageExists(movieDTO.ImdbId, movieLanguageName))
+                    if(!_repo.MovieLanguageExists(movieId, movieLanguageName))
                     {
-                        if(!_repo.AddMovieLanguage(movieDTO.ImdbId, movieLanguageName))
+                        if(!_repo.AddMovieLanguage(movieId, movieLanguageName))
                         {
                             return false;
                         }

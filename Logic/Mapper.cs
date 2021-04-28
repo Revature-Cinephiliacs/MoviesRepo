@@ -67,7 +67,9 @@ namespace Logic
             return movieDTO;
         }
 
-        public static MovieDTO MovieToMovieDTO(Movie movie)
+        public static MovieDTO MovieToMovieDTO(Movie movie, Rating rating, List<string> actorNames
+            , List<string> directorNames, List<string> genreNames, List<string> languageNames
+            , List<MovieTag> movieTags)
         {
             MovieDTO movieDTO = new MovieDTO()
             {
@@ -80,42 +82,43 @@ namespace Logic
                 PosterURL = movie.PosterUrl
             };
 
-            if(movie.ReleaseDate == null)
+            if(rating != null)
             {
-                movieDTO.ReleaseDate = null;
+                movieDTO.RatingName = rating.RatingName;
             }
-            else
+
+            if(movie.ReleaseDate != null)
             {
                 DateTime releaseDate = movie.ReleaseDate ?? DateTime.Now;
                 movieDTO.ReleaseDate = releaseDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
             }
 
             movieDTO.MovieActors = new List<string>();
-            foreach (var movieActor in movie.MovieActors)
+            foreach (var actorName in actorNames)
             {
-                movieDTO.MovieActors.Add(movieActor.Actor.ActorName);
+                movieDTO.MovieActors.Add(actorName);
             }
             
             movieDTO.MovieDirectors = new List<string>();
-            foreach (var movieDirector in movie.MovieDirectors)
+            foreach (var directorName in directorNames)
             {
-                movieDTO.MovieDirectors.Add(movieDirector.Director.DirectorName);
+                movieDTO.MovieDirectors.Add(directorName);
             }
             
             movieDTO.MovieGenres = new List<string>();
-            foreach (var movieGenre in movie.MovieGenres)
+            foreach (var genreName in genreNames)
             {
-                movieDTO.MovieGenres.Add(movieGenre.Genre.GenreName);
+                movieDTO.MovieGenres.Add(genreName);
             }
             
             movieDTO.MovieLanguages = new List<string>();
-            foreach (var movieLanguage in movie.MovieLanguages)
+            foreach (var languageName in languageNames)
             {
-                movieDTO.MovieLanguages.Add(movieLanguage.Language.LanguageName);
+                movieDTO.MovieLanguages.Add(languageName);
             }
             
             movieDTO.MovieTags = new List<string>();
-            foreach (var movieTag in movie.MovieTags)
+            foreach (var movieTag in movieTags)
             {
                 movieDTO.MovieTags.Add(movieTag.TagName);
             }
