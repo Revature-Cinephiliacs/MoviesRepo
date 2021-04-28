@@ -17,6 +17,6 @@ namespace Model
         [Required]
         public bool IsUpvote { get; set; }
 
-        public TaggingDTO() {}   
+        public TaggingDTO() {}
     }
 }

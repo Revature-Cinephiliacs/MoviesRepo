@@ -27,21 +27,22 @@ This microservice is part of the Cinephiliacs application. It manages all data d
   * isUpvote: boolean
 
 * JS_Object (JavaScript Object)
-  * JS_Object["key1"] = "value1";
-  * JS_Object["key2"] = "value2";
-#### Where the keys are one of these keywords: "Tag", "Actor", "Director", "Genre", "Language"
-#### and the values are a string that is an instance of the key, i.e.: "Tag":"Scary" or "Actor":"Harrison Ford"
+  * JS_Object["key1"] = ["value1", "value2", "value3"];
+  * JS_Object["key2"] = ["value4"];
+#### Where the keys are one of these keywords: "Tag", "Rating", "Actor", "Director", "Genre", "Language"
+#### and the values are strings that belong to the key category, i.e.: "Tag":["Scary","Funny"] or "Actor":["Harrison Ford"]
 
-### Object usage within an endpoint is denoted by placing the object name with parenthesis: (Object)
 ## Endpoints
-| Description                                  | Type   | Path                      | Request Body | Returned | Comments                                                                           |
-|----------------------------------------------|--------|---------------------------|--------------|----------|------------------------------------------------------------------------------------|
-| Gets movie details by id                     | Get    | movie/{movieid}           |              | (Movie)  |                                                                                    |
-| Gets all movies that match all search values | Post   | movie/search              | (JS_Object)  | string[] | Returns an array of movieIDs                                                       |
-| Creates or Updates a movie's details         | Patch  | movie/update              | (Movie)      |          | All values overwrite existing values.                                              |
-| Appends information to a movie's details     | Patch  | movie/append              | (Movie)      |          | Missing properties remain unchanged. Array values are appended to existing values. |
-| Deletes a movie                              | Delete | movie/{movieid}           |              |          | Also deletes associated information                                                |
-| Submits a user's vote for/against a tag      | Post   | movie/tag/movie           | (Tag)        |          |                                                                                    |
-| (Admin) Ban a tag                            | Post   | movie/tag/ban/{tagname}   |              |          | Banned tags are not returned with movie details                                    |
-| (Admin) Unban a tag                          | Post   | movie/tag/unban/{tagname} |              |          |                                                                                    |
-| A Test method for deployment                 | Get    | movie/test                |              | (Movie)  | Returns a hardcoded Movie object                                                                |
+| Description                                  | Type   | Path                      | Request Body | Returned | Comments                                                                                                                                         |
+|----------------------------------------------|--------|---------------------------|--------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| Gets movie details by id                     | GET    | movie/{movieid}           |              | (Movie)  | If the movie does not exist, returns the data from the public movie API.                                                                         |
+| Creates a movie                              | POST   | movie                     | (Movie)      |          | Fails if the movie already exists.                                                                                                               |
+| Replaces or creates a movie                  | PUT    | movie/{movieid}           | (Movie)      |          | All movie properties are overwritten to match the provided Movie object.                                                                         |
+| Appends new data to a movie                  | PATCH  | movie/{movieid}           | (Movie)      |          | Only the provided properties are updated, missing properties remain unchanged. If movie does not exist, uses data from public movie API as base. |
+| Deletes a movie                              | DELETE | movie/{movieid}           |              |          |                                                                                                                                                  |
+| Gets all movies that match all search values | POST   |                           | (JS_Object)  | string[] | Returns an array of movieId strings. Does not search the public movie API.                                                                       |
+| Submits a user's vote for/against a tag      | POST   | movie/tag/movie           | (Tag)        |          |                                                                                                                                                  |
+| (Admin) Ban a tag                            | PUT    | movie/tag/ban/{tagname}   |              |          | Banned tags are not returned with movie details                                                                                                  |
+| (Admin) Unban a tag                          | PUT    | movie/tag/unban/{tagname} |              |          |                                                                                                                                                  |
+| A Test method for deployment                 | GET    | movie/test                |              |          |                                                                                                                                                  |
+### Object usage within an endpoint is denoted by placing the object name with parenthesis: (Object)

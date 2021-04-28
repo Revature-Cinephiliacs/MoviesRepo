@@ -46,7 +46,7 @@ namespace CinemaAPI.Controllers
         /// <param name="filters"></param>
         /// <returns></returns>
         [HttpPost("search")]
-        public ActionResult<List<string>> SearchMovies([FromBody] Dictionary<string, string> filters)
+        public ActionResult<List<string>> SearchMovies([FromBody] Dictionary<string, string[]> filters)
         {
             var movies = _movieLogic.SearchMovies(filters);
             if (movies == null)

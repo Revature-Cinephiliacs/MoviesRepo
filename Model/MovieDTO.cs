@@ -34,50 +34,6 @@ namespace Model
 
         public MovieDTO() {}
 
-        public override string ToString()
-        {
-            string output = ImdbId + "\n" + Title + "\n" + RatingName + "\n"
-                + ReleaseDate + "\n" + ReleaseCountry + "\n" + RuntimeMinutes + "\n"
-                + IsReleased + "\n" + Plot + "\n" + PosterURL + "\n";
-
-            output += "Actors [\n";
-            foreach (var actor in MovieActors)
-            {
-                output += "\t" + actor + "\n";
-            }
-            output += "]\n";
-
-            output += "Directors [\n";
-            foreach (var director in MovieDirectors)
-            {
-                output += "\t" + director + "\n";
-            }
-            output += "]\n";
-
-            output += "Genres [\n";
-            foreach (var genre in MovieGenres)
-            {
-                output += "\t" + genre + "\n";
-            }
-            output += "]\n";
-
-            output += "Languages [\n";
-            foreach (var language in MovieLanguages)
-            {
-                output += "\t" + language + "\n";
-            }
-            output += "]\n";
-
-            output += "Tags [\n";
-            foreach (var tag in MovieTags)
-            {
-                output += "\t" + tag + "\n";
-            }
-            output += "]\n";
-
-            return output;
-        }
-
         public bool Equals(MovieDTO other)
         {
             if (Object.ReferenceEquals(other, null))
