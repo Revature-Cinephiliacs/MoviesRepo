@@ -99,36 +99,20 @@ namespace Tests
                 context1.Database.EnsureCreated();
                 context1.Tags.Add(tag);
                 context1.SaveChanges();
+
             }
 
             Tag result;
-            bool result2;
             using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
             {
                 context2.Database.EnsureCreated();
                 
                 var msr = new RepoLogic(context2);
-                result = msr.GetTag(tag.TagName);
-                result.IsBanned = true;
-                result2 =  msr.UpdateTag(result);
+                msr.UpdateTag(tag);
+                result = context2.Tags.FirstOrDefault(t => t.TagName == tag.TagName);
             }
-            Assert.True(result2);
+            Assert.Equal(tag,result);
         }
-        //[Fact]
-        //public async Task TestupdateTagBadPath()
-        //{
-            
-        //    Tag result = new Tag();
-        //    bool result2;
-        //    using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
-        //    {
-        //        context2.Database.EnsureCreated();
-                
-        //        var msr = new RepoLogic(context2);
-        //        result2 =  msr.UpdateTag(result);
-        //    }
-        //    Assert.False(result2);
-        //}
         [Fact]
         public async Task TestGetAllMovies()
         {
@@ -367,41 +351,18 @@ namespace Tests
 
             }
 
-            bool result1; 
+            List<Movie> movies = new List<Movie>();
             using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
             {
                 context2.Database.EnsureCreated();
                 var msr = new RepoLogic(context2);
-                result1 = msr.DeleteMovie(sut1.ImdbId);
-                
+                 msr.DeleteMovie(sut1.ImdbId);
+                 movies = context2.Movies.ToList();
+
 
             }
-            Assert.True(result1);
+            Assert.Empty(movies);
         }
-        [Fact]
-        public async Task TestDeleteMovieBadPath()
-        {
-
-            using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
-            {
-                context1.Database.EnsureDeleted();
-                context1.Database.EnsureCreated();
-                context1.SaveChanges();
-
-            }
-
-            bool result1; 
-            using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
-            {
-                context2.Database.EnsureCreated();
-                var msr = new RepoLogic(context2);
-                result1 = msr.DeleteMovie("Anis");
-                
-
-            }
-            Assert.False(result1);
-        }
-
         [Fact]
         public async Task TestMovieExist()
         {
