@@ -17,40 +17,44 @@ namespace Tests
             new DbContextOptionsBuilder<Cinephiliacs_MovieContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
 
-        [Fact]
-        public async Task TestAddMovie()
-        {
-            var movie = new Movie() { ImdbId = "Something",Title = "Anis",};
+       
 
-         
+        [Fact]
+        public void TestAddMovie()
+        {
+            var sut = new Movie() { ImdbId = "Something",Title = "Anis",};
+            Movie result2;
             using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
             {
                 context2.Database.EnsureCreated();
                 var msr = new RepoLogic(context2);
-                msr.AddMovie(movie);
-
+                msr.AddMovie(sut);
+                context2.SaveChanges();
+                result2 = context2.Movies.FirstOrDefault(r => r.ImdbId == sut.ImdbId);
             }
-            Assert.NotNull(movie);
+            Assert.Equal(result2.Title, sut.Title);
         }
         
         [Fact]
-        public async Task TestAddRating()
+        public void TestAddRating()
         {
             var sut = new Rating() { RatingId = 43,RatingName = "Anis",};
 
-           
+            Rating result;
             using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
             {
                 context2.Database.EnsureCreated();
                 var msr = new RepoLogic(context2);
                 msr.AddRating(sut);
+                result = context2.Ratings.FirstOrDefault(r => r.RatingId == sut.RatingId);
+
 
             }
-            Assert.NotNull(sut);
+            Assert.Equal(result.RatingName,sut.RatingName);
         }
 
         [Fact]
-        public async Task TestupdateMovie()
+        public void TestupdateMovie()
         {
             var movie = new Movie() { ImdbId = "Anis", Title = "Something" };
             using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
@@ -75,7 +79,7 @@ namespace Tests
             Assert.True(result2);
         }
         [Fact]
-        public async Task TestupdateMovieBadPath()
+        public void TestupdateMovieBadPath()
         {
             
             Movie result = new Movie();
@@ -90,7 +94,7 @@ namespace Tests
             Assert.False(result2);
         }
         [Fact]
-        public async Task TestupdateTag()
+        public void TestupdateTag()
         {
             var tag = new Tag() { TagName = "Anis", IsBanned = false };
             using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
@@ -114,7 +118,7 @@ namespace Tests
             Assert.Equal(tag,result);
         }
         [Fact]
-        public async Task TestGetAllMovies()
+        public void TestGetAllMovies()
         {
             var sut1 = new Movie() { ImdbId = "Anis", Title = "Something" };
             var sut2 = new Movie() { ImdbId = "Anis3", Title = "Something" };
@@ -142,7 +146,7 @@ namespace Tests
         }
 
         [Fact]
-        public async Task TestMovie()
+        public void TestMovie()
         {
             var sut1 = new Movie() {ImdbId = "Anis", Title = "Cool"};
 
@@ -169,7 +173,7 @@ namespace Tests
             Assert.Equal(result1.Title,result2.Title);
         }
         [Fact]
-        public async Task TestRating()
+        public void TestRating()
         {
             var sut1 = new Rating() {RatingId = 45, RatingName = "Cool"};
 
@@ -196,7 +200,7 @@ namespace Tests
             Assert.Equal(result1.RatingName,result2.RatingName);
         }
         [Fact]
-        public async Task TestTag()
+        public void TestTag()
         {
             var sut1 = new Tag() {TagName = "Anis", IsBanned = false};
 
@@ -245,7 +249,7 @@ namespace Tests
                 context2.Database.EnsureCreated();
                 context2.Database.EnsureDeleted();
                 var msr = new RepoLogic(context2);
-                Task.Run(() => msr.ClearMovieActors("Anis")); 
+                msr.ClearMovieActors("Anis"); 
                 result2 = context2.MovieActors.Where(r => r.ImdbId == "Anis").ToList();
             }
             Assert.Empty(result2);
@@ -337,7 +341,7 @@ namespace Tests
             Assert.Empty(result2);
         }
         [Fact]
-        public async Task TestDeleteMovie()
+        public void TestDeleteMovie()
         {
             var sut1 = new Movie() {ImdbId = "Anis", Title = "Rombo"};
           
@@ -364,7 +368,7 @@ namespace Tests
             Assert.Empty(movies);
         }
         [Fact]
-        public async Task TestMovieExist()
+        public void  TestMovieExist()
         {
             var sut1 = new Movie() {ImdbId = "Anis", Title = "Rombo"};
           
@@ -390,7 +394,7 @@ namespace Tests
             Assert.True(result1);
         }
         [Fact]
-        public async Task TestMovieExistBadPath()
+        public void TestMovieExistBadPath()
         {
             
             using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
@@ -413,7 +417,7 @@ namespace Tests
             Assert.False(result1);
         }
         [Fact]
-        public async Task TestTagExist()
+        public void TestTagExist()
         {
             var sut1 = new Tag() {TagName = "Anis", IsBanned = true};
           
@@ -437,7 +441,7 @@ namespace Tests
             Assert.True(result1);
         }
         [Fact]
-        public async Task TestTagExistBadPath()
+        public void TestTagExistBadPath()
         {
             bool result1; 
             using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
@@ -451,7 +455,7 @@ namespace Tests
             Assert.False(result1);
         }
         [Fact]
-        public async Task TestRatingExist()
+        public void TestRatingExist()
         {
             var sut1 = new Rating() {RatingName = "Anis", RatingId = 45};
           
@@ -475,7 +479,7 @@ namespace Tests
             Assert.True(result1);
         }
         [Fact]
-        public async Task TestRatingExistBadPath()
+        public void TestRatingExistBadPath()
         {
             bool result1; 
             using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
@@ -489,7 +493,7 @@ namespace Tests
             Assert.False(result1);
         }
         [Fact]
-        public async Task TestActorExist()
+        public void TestActorExist()
         {
             var sut1 = new Actor() {ActorId = Guid.NewGuid(), ActorName = "Anis"};
           
@@ -513,7 +517,7 @@ namespace Tests
             Assert.True(result1);
         }
         [Fact]
-        public async Task TestActorExistBadPath()
+        public void TestActorExistBadPath()
         {
             bool result1; 
             using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
@@ -527,7 +531,7 @@ namespace Tests
             Assert.False(result1);
         }
         [Fact]
-        public async Task TestLanguageExist()
+        public void TestLanguageExist()
         {
             var sut1 = new Language() {LanguageId = Guid.NewGuid(), LanguageName = "French"};
           
@@ -551,7 +555,7 @@ namespace Tests
             Assert.True(result1);
         }
         [Fact]
-        public async Task TestLanguageExistBadPath()
+        public void TestLanguageExistBadPath()
         {
             bool result1; 
             using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
@@ -565,7 +569,7 @@ namespace Tests
             Assert.False(result1);
         }
         [Fact]
-        public async Task TestDirectorExist()
+        public void TestDirectorExist()
         {
             var sut1 = new Director() {DirectorName = "Anis", DirectorId = Guid.NewGuid()};
           
@@ -589,7 +593,7 @@ namespace Tests
             Assert.True(result1);
         }
         [Fact]
-        public async Task TestDirectorExistBadPath()
+        public void TestDirectorExistBadPath()
         {
             bool result1; 
             using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
@@ -603,7 +607,7 @@ namespace Tests
             Assert.False(result1);
         }
         [Fact]
-        public async Task TestGenreExist()
+        public void TestGenreExist()
         {
             var sut1 = new Genre() {GenreName = "Anis", GenreId = Guid.NewGuid()};
           
@@ -627,7 +631,7 @@ namespace Tests
             Assert.True(result1);
         }
         [Fact]
-        public async Task TestGenreExistBadPath()
+        public void TestGenreExistBadPath()
         {
             bool result1; 
             using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
@@ -641,7 +645,7 @@ namespace Tests
             Assert.False(result1);
         }
         [Fact]
-        public async Task TestMovieGenreExist()
+        public void TestMovieGenreExist()
         {
             var sut1 = new MovieGenre() {ImdbId = "Anis", GenreId = Guid.NewGuid(),Genre = new Genre(){GenreId = Guid.NewGuid(),GenreName = "Romance"}};
                 
@@ -665,7 +669,7 @@ namespace Tests
             Assert.True(result1);
         }
         [Fact]
-        public async Task TestMovieGenreExistBadPath()
+        public void TestMovieGenreExistBadPath()
         {
             var sut1 = new MovieGenre() {ImdbId = "Anis", GenreId = Guid.NewGuid()};
                 
@@ -689,7 +693,7 @@ namespace Tests
             Assert.False(result1);
         }
         [Fact]
-        public async Task TestMovieLanguageExist()
+        public void TestMovieLanguageExist()
         {
             var sut1 = new MovieLanguage() {ImdbId = "Anis", LanguageId = Guid.NewGuid(),Language = new Language(){LanguageId = Guid.NewGuid(),LanguageName = "french"}};
                 
@@ -713,7 +717,7 @@ namespace Tests
             Assert.True(result1);
         }
         [Fact]
-        public async Task TestMovieLanguageExistBadPath()
+        public void TestMovieLanguageExistBadPath()
         {
             var sut1 = new MovieLanguage() {ImdbId = "Anis", LanguageId = Guid.NewGuid()};
                 
@@ -737,7 +741,7 @@ namespace Tests
             Assert.False(result1);
         }
         [Fact]
-        public async Task TestMovieTagUserExist()
+        public void TestMovieTagUserExist()
         {
             var sut1 = new MovieTagUser() {ImdbId = "Anis", TagName = "Bad",UserId = "12345"};
                 
@@ -761,7 +765,7 @@ namespace Tests
             Assert.True(result1);
         }
         [Fact]
-        public async Task TestMovieActorExist()
+        public void TestMovieActorExist()
         {
             var sut1 = new MovieActor() {ImdbId = "Anis",ActorId = Guid.NewGuid(),Actor = new Actor(){ActorId = Guid.NewGuid(),ActorName = "Anis2"}};
                 
@@ -785,7 +789,7 @@ namespace Tests
             Assert.True(result1);
         }
         [Fact]
-        public async Task TestMovieActorExistBadPath()
+        public void TestMovieActorExistBadPath()
         {
             var sut1 = new MovieActor() {ImdbId = "Anis", ActorId = Guid.NewGuid(),Actor = new Actor(){ActorId = Guid.NewGuid()}};
                 
@@ -809,7 +813,7 @@ namespace Tests
             Assert.False(result1);
         }
         [Fact]
-        public async Task TestMovieDirectorExist()
+        public void TestMovieDirectorExist()
         {
             var sut1 = new MovieDirector() {ImdbId = "Anis",DirectorId = Guid.NewGuid(),Director = new Director(){DirectorId = Guid.NewGuid(),DirectorName = "Anis2"}};
                 
@@ -833,7 +837,7 @@ namespace Tests
             Assert.True(result1);
         }
         [Fact]
-        public async Task TestMovieDirectorExistBadPath()
+        public void TestMovieDirectorExistBadPath()
         {
             var sut1 = new MovieDirector() {ImdbId = "Anis", DirectorId = Guid.NewGuid(),Director = new Director(){DirectorId = Guid.NewGuid()}};
                 
