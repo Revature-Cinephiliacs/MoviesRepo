@@ -20,7 +20,8 @@ namespace CinemaAPI
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>()
+                    .ConfigureAppConfiguration(c => c.AddJsonFile("secrets/app-secrets.json", optional: true));
                 });
     }
 }
