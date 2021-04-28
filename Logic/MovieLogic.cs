@@ -236,9 +236,14 @@ namespace Logic
 
         public bool UpdateMovie(string movieId, MovieDTO movieDTO)
         {
-            if(!_repo.MovieExists(movieId))
+            if(movieDTO.ImdbId != null && movieDTO.ImdbId != movieId)
             {
                 return false;
+            }
+
+            if(!_repo.MovieExists(movieId))
+            {
+                return CreateMovie(movieDTO);
             }
             
             Movie movie = _repo.GetMovie(movieId);

@@ -12,6 +12,13 @@ namespace Tests
         const int maxListItemCount = 6;
         static int nextMovieIdNumber = 0;
         static Random randomGen = new Random();
+
+        /// <summary>
+        /// Returns a MovieDTO object with all properties, including lists,
+        /// populated with random values. Values are bounded to a range
+        /// where appropriate.
+        /// </summary>
+        /// <returns></returns>
         internal static MovieDTO GetRandomMovie()
         {
             MovieDTO movieDTO = new MovieDTO();
@@ -80,7 +87,7 @@ namespace Tests
         /// <summary>
         /// Adds the provided Movie and all associated information (Actors, Directors, Genres,
         /// Languages, Tags) to the provided context. Assumes the all Movie information is
-        /// unique, GetRandomMovie() provides a Movie with information that is extremely
+        /// unique, GetRandomMovie() provides a Movie with information that is astronomically
         /// unlikely to repeat.
         /// </summary>
         /// <param name="context"></param>

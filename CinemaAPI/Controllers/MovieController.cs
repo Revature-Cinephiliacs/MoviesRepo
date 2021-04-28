@@ -58,8 +58,7 @@ namespace CinemaAPI.Controllers
         }
 
         /// <summary>
-        /// Creates a movie based on the information in the argument,
-        /// that is extracted from the body.
+        /// Creates a movie based on the information in the argument.
         /// </summary>
         /// <param name="movieDTO"></param>
         /// <returns></returns>
