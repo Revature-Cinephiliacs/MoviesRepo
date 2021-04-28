@@ -33,11 +33,11 @@ namespace Logic
         /// does not exist. Missing properties are set to null. The array
         /// properties in the MovieDTO will replace the existing lists. If
         /// the movie does not yet exist, the movie is first added via the
-        /// public movie API.
+        /// public movie API. Returns true if successful.
         /// </summary>
         /// <param name="movieDTO"></param>
         /// <returns></returns>
-        bool CreateOrUpdateMovie(MovieDTO movieDTO);
+        bool UpdateMovie(string movieId, MovieDTO movieDTO);
 
         /// <summary>
         /// Updates the fields of the Movie with a matching movieId to the
@@ -45,11 +45,20 @@ namespace Logic
         /// are null/empty, they will remain unchanged. The passed-in array
         /// fields will be appened to the existing lists. Pre-existing entries
         /// in the lists will remain. If the movie does not yet exist, the
-        /// movie is first added via the public movie API.
+        /// movie is first added via the public movie API. Returns true
+        /// if successful.
         /// </summary>
         /// <param name="movieDTO"></param>
         /// <returns></returns>
-        Task<bool> AppendMovie(MovieDTO movieDTO);
+        Task<bool> AppendMovie(string movieId, MovieDTO movieDTO);
+
+        /// <summary>
+        /// Creates a new Movie entry from the information within the MovieDTO
+        /// argument. Returns true if successful.
+        /// </summary>
+        /// <param name="movieDTO"></param>
+        /// <returns></returns>
+        bool CreateMovie(MovieDTO movieDTO);
 
         /// <summary>
         /// Adds a User's Tag Vote for a Movie to the database.

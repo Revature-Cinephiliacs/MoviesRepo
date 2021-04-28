@@ -26,10 +26,10 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="movieid"></param>
         /// <returns></returns>
-        [HttpGet("{movieid}")]
-        public async Task<ActionResult<MovieDTO>> GetMovie(string movieid)
+        [HttpGet("{movieId}")]
+        public async Task<ActionResult<MovieDTO>> GetMovie(string movieId)
         {
-            MovieDTO movieDTO = await _movieLogic.GetMovie(movieid);
+            MovieDTO movieDTO = await _movieLogic.GetMovie(movieId);
             if(movieDTO == null)
             {
                 return StatusCode(404);
@@ -58,32 +58,54 @@ namespace CinemaAPI.Controllers
         }
 
         /// <summary>
-        /// Updates every field of the movie with a matching ImdbId to
-        /// the provided values. Sets missing values to null. Adds the
-        /// movie if it does not exist.
+        /// Creates a movie based on the information in the argument,
+        /// that is extracted from the body.
         /// </summary>
         /// <param name="movieDTO"></param>
         /// <returns></returns>
-        [HttpPatch("update")]
-        public ActionResult CreateOrUpdateMovie([FromBody] MovieDTO movieDTO)
+        [HttpPost]
+        public ActionResult CreateMovie([FromBody] MovieDTO movieDTO)
         {
             if(!ModelState.IsValid)
             {
                 return StatusCode(400);
             }
-            if(_movieLogic.CreateOrUpdateMovie(movieDTO))
+            if(_movieLogic.CreateMovie(movieDTO))
             {
                 return StatusCode(200);
             }
             else
             {
-                Console.WriteLine("false 400");
                 return StatusCode(400);
             }
         }
 
         /// <summary>
-        /// Updates the fields of the movie with a matching ImdbId to the
+        /// Updates every field of the movie with a matching movieId to
+        /// the provided values. Sets missing values to null. Adds the
+        /// movie if it does not exist.
+        /// </summary>
+        /// <param name="movieDTO"></param>
+        /// <returns></returns>
+        [HttpPut("{movieId}")]
+        public ActionResult UpdateMovie(string movieId, [FromBody] MovieDTO movieDTO)
+        {
+            if(!ModelState.IsValid)
+            {
+                return StatusCode(400);
+            }
+            if(_movieLogic.UpdateMovie(movieId, movieDTO))
+            {
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(400);
+            }
+        }
+
+        /// <summary>
+        /// Updates the fields of the movie with a matching movieId to the
         /// provided non-null/empty values. If any of the passed-in values
         /// are null/empty, they will remain unchanged. The passed-in array
         /// fields will be appened to the existing lists. Pre-existing entries
@@ -92,14 +114,14 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="movieDTO"></param>
         /// <returns></returns>
-        [HttpPatch("append")]
-        public async Task<ActionResult> AppendMovie([FromBody] MovieDTO movieDTO)
+        [HttpPatch("{movieId}")]
+        public async Task<ActionResult> AppendMovie(string movieId, [FromBody] MovieDTO movieDTO)
         {
             if(!ModelState.IsValid)
             {
                 return StatusCode(400);
             }
-            if(await _movieLogic.AppendMovie(movieDTO))
+            if(await _movieLogic.AppendMovie(movieId, movieDTO))
             {
                 return StatusCode(200);
             }
@@ -153,7 +175,7 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="tagname"></param>
         /// <returns></returns>
-        [HttpPost("tag/ban/{tagname}")]
+        [HttpPut("tag/ban/{tagname}")]
         public ActionResult BanTag(string tagname)
         {
             if(_movieLogic.SetTagBanStatus(tagname, true))
@@ -172,7 +194,7 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="tagname"></param>
         /// <returns></returns>
-        [HttpPost("tag/unban/{tagname}")]
+        [HttpPut("tag/unban/{tagname}")]
         public ActionResult UnbanTag(string tagname)
         {
             if(_movieLogic.SetTagBanStatus(tagname, false))

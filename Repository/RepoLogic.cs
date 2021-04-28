@@ -361,6 +361,17 @@ namespace Repository
         }
 
         /// <summary>
+        /// Gets the Rating whose ratingId matches the provided argument.
+        /// Returns null if no match is found.
+        /// </summary>
+        /// <param name="ratingId"></param>
+        /// <returns></returns>
+        public Rating GetRating(int ratingId)
+        {
+            return _dbContext.Ratings.FirstOrDefault(r => r.RatingId == ratingId);
+        }
+
+        /// <summary>
         /// Gets the Actor whose name matches the provided argument.
         /// Returns null if no match is found.
         /// </summary>
@@ -413,6 +424,109 @@ namespace Repository
         public Tag GetTag(string tagName)
         {
             return _dbContext.Tags.FirstOrDefault(t => t.TagName == tagName);
+        }
+
+        /// <summary>
+        /// Returns a list containing the name of each Actor associated with
+        /// the movieId provided in the argument.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <returns></returns>
+        public List<string> GetMovieActorNames(string movieId)
+        {
+            var movieActors = _dbContext.MovieActors.Where(ma => ma.ImdbId == movieId);
+            var movieActorIds = new List<Guid>();
+            foreach (var movieActor in movieActors)
+            {
+                movieActorIds.Add(movieActor.ActorId);
+            }
+            var movieActorNames = new List<string>();
+            foreach (var movieActorId in movieActorIds)
+            {
+                var actor = _dbContext.Actors.FirstOrDefault(a => a.ActorId == movieActorId);
+                movieActorNames.Add(actor.ActorName);
+            }
+            return movieActorNames;
+        }
+
+        /// <summary>
+        /// Returns a list containing the name of each Director associated with
+        /// the movieId provided in the argument.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <returns></returns>
+        public List<string> GetMovieDirectorNames(string movieId)
+        {
+            var movieDirectors = _dbContext.MovieDirectors.Where(ma => ma.ImdbId == movieId);
+            var movieDirectorIds = new List<Guid>();
+            foreach (var movieDirector in movieDirectors)
+            {
+                movieDirectorIds.Add(movieDirector.DirectorId);
+            }
+            var movieDirectorNames = new List<string>();
+            foreach (var movieDirectorId in movieDirectorIds)
+            {
+                var actor = _dbContext.Directors.FirstOrDefault(a => a.DirectorId == movieDirectorId);
+                movieDirectorNames.Add(actor.DirectorName);
+            }
+            return movieDirectorNames;
+        }
+
+        /// <summary>
+        /// Returns a list containing the name of each Genre associated with
+        /// the movieId provided in the argument.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <returns></returns>
+        public List<string> GetMovieGenreNames(string movieId)
+        {
+            var movieGenres = _dbContext.MovieGenres.Where(ma => ma.ImdbId == movieId);
+            var movieGenreIds = new List<Guid>();
+            foreach (var movieGenre in movieGenres)
+            {
+                movieGenreIds.Add(movieGenre.GenreId);
+            }
+            var movieGenreNames = new List<string>();
+            foreach (var movieGenreId in movieGenreIds)
+            {
+                var actor = _dbContext.Genres.FirstOrDefault(a => a.GenreId == movieGenreId);
+                movieGenreNames.Add(actor.GenreName);
+            }
+            return movieGenreNames;
+        }
+
+        /// <summary>
+        /// Returns a list containing the name of each Language associated with
+        /// the movieId provided in the argument.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <returns></returns>
+        public List<string> GetMovieLanguageNames(string movieId)
+        {
+            var movieLanguages = _dbContext.MovieLanguages.Where(ma => ma.ImdbId == movieId);
+            var movieLanguageIds = new List<Guid>();
+            foreach (var movieLanguage in movieLanguages)
+            {
+                movieLanguageIds.Add(movieLanguage.LanguageId);
+            }
+            var movieLanguageNames = new List<string>();
+            foreach (var movieLanguageId in movieLanguageIds)
+            {
+                var actor = _dbContext.Languages.FirstOrDefault(a => a.LanguageId == movieLanguageId);
+                movieLanguageNames.Add(actor.LanguageName);
+            }
+            return movieLanguageNames;
+        }
+
+        /// <summary>
+        /// Returns a list containing all MovieTag objects associated with
+        /// the movieId provided in the argument.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <returns></returns>
+        public List<MovieTag> GetMovieTags(string movieId)
+        {
+            return _dbContext.MovieTags.Where(mt => mt.ImdbId == movieId).ToList();
         }
 
         /// <summary>
