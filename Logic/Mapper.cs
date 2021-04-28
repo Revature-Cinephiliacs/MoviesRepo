@@ -69,7 +69,7 @@ namespace Logic
 
         public static MovieDTO MovieToMovieDTO(Movie movie, Rating rating, List<string> actorNames
             , List<string> directorNames, List<string> genreNames, List<string> languageNames
-            , List<MovieTag> movieTags)
+            , List<string> tagNames)
         {
             MovieDTO movieDTO = new MovieDTO()
             {
@@ -118,9 +118,9 @@ namespace Logic
             }
             
             movieDTO.MovieTags = new List<string>();
-            foreach (var movieTag in movieTags)
+            foreach (var tagName in tagNames)
             {
-                movieDTO.MovieTags.Add(movieTag.TagName);
+                movieDTO.MovieTags.Add(tagName);
             }
 
             return movieDTO;
