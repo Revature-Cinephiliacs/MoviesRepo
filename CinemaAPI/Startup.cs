@@ -41,9 +41,8 @@ namespace CinemaAPI
                     options.UseSqlServer(myConnectionString);
                 }
             });
+
             services.AddScoped<IMovieLogic, MovieLogic>();
-
-
             services.AddScoped<RepoLogic>();
 
             // for authentication

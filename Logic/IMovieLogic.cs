@@ -20,12 +20,12 @@ namespace Logic
 
         /// <summary>
         /// Returns a movieId for each movie that matches all of the filters
-        /// in the argument. Filters are passed as key:value pairs, where
-        /// the key is the category (Tag, Actor, Director, etc.).
+        /// in the argument. Filters are passed as keys with arrays of values
+        /// where the key is the category (Tag, Actor, Director, etc.).
         /// </summary>
         /// <param name="filters"></param>
         /// <returns></returns>
-        List<string> SearchMovies(Dictionary<string, string> filters);
+        List<string> SearchMovies(Dictionary<string, string[]> filters);
 
         /// <summary>
         /// Updates the fields of the Movie with a matching movieId to the

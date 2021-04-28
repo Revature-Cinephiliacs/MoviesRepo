@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Model;
 using Repository.Models;
 
@@ -13,6 +14,12 @@ namespace Tests
         const int _maxListItemCount = 6;
         static int nextMovieIdNumber = 0;
         static Random randomGen = new Random();
+
+        internal static DbContextOptions<TContext> GetUniqueContextOptions<TContext>() where TContext : Microsoft.EntityFrameworkCore.DbContext
+        {
+            return new DbContextOptionsBuilder<TContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
+        }
 
         /// <summary>
         /// Returns a MovieDTO object with all properties populated with
@@ -39,9 +46,7 @@ namespace Tests
         {
             MovieDTO movieDTO = new MovieDTO();
 
-            movieDTO.ImdbId = Guid.NewGuid().ToString().Substring(0, 10)
-                + (nextMovieIdNumber).ToString();
-            nextMovieIdNumber++;
+            movieDTO.ImdbId = GetNextMovieId();
 
             movieDTO.Title = Guid.NewGuid().ToString();
             movieDTO.RatingName = Guid.NewGuid().ToString();
@@ -91,6 +96,21 @@ namespace Tests
             DateTime dateTime = DateTime.Now;
             
             return dateTime.AddDays(-1*randomGen.Next(10000));
+        }
+
+        private static string GetNextMovieId()
+        {
+            return Guid.NewGuid().ToString().Substring(0, 10) + (nextMovieIdNumber++).ToString();
+        }
+
+        public static TaggingDTO GetRandomTaggingDTO(string movieId)
+        {
+            TaggingDTO taggingDTO = new TaggingDTO();
+            taggingDTO.MovieId = movieId;
+            taggingDTO.TagName = Guid.NewGuid().ToString();
+            taggingDTO.UserId = Guid.NewGuid().ToString();
+            taggingDTO.IsUpvote = true;
+            return taggingDTO;
         }
 
         /// <summary>
@@ -202,6 +222,15 @@ namespace Tests
                 context.MovieTags.Add(movieTag);
                 context.SaveChanges();
             }
+        }
+
+        internal static void AddTagToDatabase(Cinephiliacs_MovieContext context, TaggingDTO inputTag, bool isBanned)
+        {
+            var tag = new Tag();
+            tag.TagName = inputTag.TagName;
+            tag.IsBanned = isBanned;
+            context.Tags.Add(tag);
+            context.SaveChanges();
         }
     }
 }
