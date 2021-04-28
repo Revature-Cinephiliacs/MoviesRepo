@@ -172,12 +172,12 @@ namespace CinemaAPI.Controllers
         /// Bans the specified tag. This is only available to Moderators
         /// and Administrators.
         /// </summary>
-        /// <param name="tagname"></param>
+        /// <param name="tagName"></param>
         /// <returns></returns>
-        [HttpPut("tag/ban/{tagname}")]
-        public ActionResult BanTag(string tagname)
+        [HttpPut("tag/ban/{tagName}")]
+        public ActionResult BanTag(string tagName)
         {
-            if(_movieLogic.SetTagBanStatus(tagname, true))
+            if(_movieLogic.SetTagBanStatus(tagName, true))
             {
                 return StatusCode(200);
             }
@@ -191,12 +191,12 @@ namespace CinemaAPI.Controllers
         /// Unbans the specified tag. This is only available to Moderators
         /// and Administrators.
         /// </summary>
-        /// <param name="tagname"></param>
+        /// <param name="tagName"></param>
         /// <returns></returns>
-        [HttpPut("tag/unban/{tagname}")]
-        public ActionResult UnbanTag(string tagname)
+        [HttpPut("tag/unban/{tagName}")]
+        public ActionResult UnbanTag(string tagName)
         {
-            if(_movieLogic.SetTagBanStatus(tagname, false))
+            if(_movieLogic.SetTagBanStatus(tagName, false))
             {
                 return StatusCode(200);
             }
@@ -204,6 +204,55 @@ namespace CinemaAPI.Controllers
             {
                 return StatusCode(404);
             }
+        }
+
+        /// <summary>
+        /// Adds the movie to the user's following-movies list.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpPost("follow/{movieId}/{userId}")]
+        public ActionResult FollowMovie(string movieId, string userId)
+        {
+            if(_movieLogic.FollowMovie(movieId, userId))
+            {
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(404);
+            }
+        }
+
+        /// <summary>
+        /// Removes the movie from the user's following-movies list.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpPost("unfollow/{movieId}/{userId}")]
+        public ActionResult UnfollowMovie(string movieId, string userId)
+        {
+            if(_movieLogic.UnfollowMovie(movieId, userId))
+            {
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(404);
+            }
+        }
+
+        /// <summary>
+        /// Returns all movies that the user is following.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpGet("following/{userid}")]
+        public ActionResult<List<string>> GetFollowingMovies(string userId)
+        {
+            return _movieLogic.GetFollowingMovies(userId);
         }
 
         /// <summary>

@@ -551,5 +551,36 @@ namespace Logic
             _repo.DeleteMovie(movieId);
             return true;
         }
+
+        public bool FollowMovie(string movieId, string userId)
+        {
+            if(!_repo.MovieExists(movieId))
+            {
+                return false;
+            }
+
+// Call the User microservice to make sure the user exists
+
+            _repo.AddFollowingMovie(movieId, userId);
+            return true;
+        }
+
+        public bool UnfollowMovie(string movieId, string userId)
+        {
+            if(!_repo.MovieExists(movieId))
+            {
+                return false;
+            }
+
+// Call the User microservice to make sure the user exists
+
+            _repo.DeleteFollowingMovie(movieId, userId);
+            return true;
+        }
+
+        public List<string> GetFollowingMovies(string userId)
+        {
+            return _repo.GetFollowingMovies(userId);
+        }
     }
 }

@@ -260,6 +260,24 @@ namespace Repository
         }
 
         /// <summary>
+        /// Adds the movie specified in the argument to the user
+        /// specified in the argument's following movie list.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <param name="userId"></param>
+        public void AddFollowingMovie(string movieId, string userId)
+        {
+            if(FollowingMovieExists(movieId, userId))
+            {
+                return;
+            }
+            var followingMovie = new FollowingMovie();
+            followingMovie.ImdbId = movieId;
+            followingMovie.UserId = userId;
+            _dbContext.FollowingMovies.Add(followingMovie);
+        }
+
+        /// <summary>
         /// Updates an existing Movie in the database.
         /// </summary>
         /// <param name="movie"></param>
@@ -530,6 +548,23 @@ namespace Repository
         }
 
         /// <summary>
+        /// Returns a list containing the name of every Movie that the user
+        /// specified in the argument is following.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public List<string> GetFollowingMovies(string userId)
+        {
+            var followingMovies = _dbContext.FollowingMovies.Where(fm => fm.UserId == userId);
+            var movieNames = new List<string>();
+            foreach (var followingMovie in followingMovies)
+            {
+                movieNames.Add(followingMovie.ImdbId);
+            }
+            return movieNames;
+        }
+
+        /// <summary>
         /// Removes all actors from the Movie assocaited with the
         /// provided movie Id.
         /// </summary>
@@ -588,6 +623,22 @@ namespace Repository
             _dbContext.MovieLanguages.RemoveRange(_dbContext.MovieLanguages.Where(ml => ml.ImdbId == movieId));
             _dbContext.Movies.RemoveRange(_dbContext.Movies.Where(m => m.ImdbId == movieId));
             _dbContext.SaveChanges();
+        }
+
+        /// <summary>
+        /// Removes the movie specified in the argument from the user
+        /// specified in the argument's following movie list.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <param name="userId"></param>
+        public void DeleteFollowingMovie(string movieId, string userId)
+        {
+            if(!FollowingMovieExists(movieId, userId))
+            {
+                return;
+            }
+            _dbContext.FollowingMovies.Remove(_dbContext.FollowingMovies.FirstOrDefault(fm =>
+                fm.ImdbId == movieId && fm.UserId == userId));
         }
 
         /// <summary>
@@ -753,6 +804,12 @@ namespace Repository
         {
             return (_dbContext.MovieTagUsers.FirstOrDefault(mtu => mtu.ImdbId == movieTagUser.ImdbId
                 && mtu.TagName == movieTagUser.TagName && mtu.UserId == movieTagUser.UserId) != null);
+        }
+
+        public bool FollowingMovieExists(string movieId, string userId)
+        {
+            return (_dbContext.FollowingMovies.FirstOrDefault(fm => fm.ImdbId == movieId 
+                && fm.UserId == userId) != null);
         }
     }
 }

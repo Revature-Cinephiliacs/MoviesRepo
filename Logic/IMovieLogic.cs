@@ -91,5 +91,28 @@ namespace Logic
         /// <param name="movieId"></param>
         /// <returns></returns>
         bool DeleteMovie(string movieId);
+
+        /// <summary>
+        /// Adds the Movie to the User's following list.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        bool FollowMovie(string movieId, string userId);
+
+        /// <summary>
+        /// Removes the Movie to the User's following list.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        bool UnfollowMovie(string movieId, string userId);
+
+        /// <summary>
+        /// Returns all movies that the user is following.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        List<string> GetFollowingMovies(string userId);
     }
 }
