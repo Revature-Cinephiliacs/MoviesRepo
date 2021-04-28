@@ -29,8 +29,8 @@ This microservice is part of the Cinephiliacs application. It manages all data d
 * JS_Object (JavaScript Object)
   * JS_Object["key1"] = ["value1", "value2", "value3"];
   * JS_Object["key2"] = ["value4"];
-#### Where the keys are one of these keywords: "Tag", "Rating", "Actor", "Director", "Genre", "Language"
-#### and the values are strings that belong to the key category, i.e.: "Tag":["Scary","Funny"] or "Actor":["Harrison Ford"]
+#### Where the keys are one of these keywords: "Tags", "Rating", "Actors", "Directors", "Genres", "Languages"
+#### and the values are strings that belong to the key category, i.e.: "Tags":["Scary","Funny"] or "Actors":["Harrison Ford"]
 
 ## Endpoints
 | Description                                      | Type   | Path                              | Request Body | Returned | Comments                                                                                                                                         |
@@ -44,8 +44,8 @@ This microservice is part of the Cinephiliacs application. It manages all data d
 | Submits a user's vote for/against a tag          | POST   | movie/tag/movie                   | (Tag)        |          |                                                                                                                                                  |
 | (Admin) Ban a tag                                | PUT    | movie/tag/ban/{tagname}           |              |          | Banned tags are not returned with movie details                                                                                                  |
 | (Admin) Unban a tag                              | PUT    | movie/tag/unban/{tagname}         |              |          |                                                                                                                                                  |
-| Adds the movie to the user's following list      | POST   | movie/follow/{movieid}/{userid}   |              |          |                                                                                                                                                  |
-| Removes the movie from the user's following list | POST   | movie/unfollow/{movieid}/{userid} |              |          |                                                                                                                                                  |
-| Gets all movies that the user is following       | GET    | movie/following/{userid}          |              |          | Returns a list containing the movieid of each movie.                                                                                             |
+| Adds the movie to the user's following list      | PUT    | movie/follow/{movieid}/{userid}   |              |          |                                                                                                                                                  |
+| Removes the movie from the user's following list | DELETE | movie/follow/{movieid}/{userid} |              |          |                                                                                                                                                  |
+| Gets all movies that the user is following       | GET    | movie/follow/{userid}          |              |          | Returns a list containing the movieid of each movie.                                                                                             |
 | A Test method for deployment                     | GET    | movie/test                        |              |          |                                                                                                                                                  |
 ### Object usage within an endpoint is denoted by placing the object name with parenthesis: (Object)

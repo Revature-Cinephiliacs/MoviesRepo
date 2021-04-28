@@ -23,9 +23,20 @@ namespace Logic
             if(_repo.MovieExists(movieId))
             {
                 Movie movie = _repo.GetMovie(movieId);
+                var movieTags = _repo.GetMovieTags(movieId);
+                var tagNames = new List<string>();
+                foreach (var movieTag in movieTags)
+                {
+                    var tag = _repo.GetTag(movieTag.TagName);
+                    if(tag != null && tag.IsBanned == false)
+                    {
+                        tagNames.Add(tag.TagName);
+                    }
+                }
+
                 return Mapper.MovieToMovieDTO(movie, _repo.GetRating(movie.RatingId ?? 0), _repo.GetMovieActorNames(movieId)
                     , _repo.GetMovieDirectorNames(movieId), _repo.GetMovieGenreNames(movieId)
-                    , _repo.GetMovieLanguageNames(movieId), _repo.GetMovieTags(movieId));
+                    , _repo.GetMovieLanguageNames(movieId), tagNames);
             }
 
             ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor.LoadMovieAsync(movieId);
@@ -43,21 +54,26 @@ namespace Logic
             {
                 switch (filter.Key.ToLower())
                 {
+                    case "tags":
                     case "tag":
                         FilterMoviesByTags(movies, filter.Value);
                     break;
                     case "rating":
                         FilterMoviesByRatings(movies, filter.Value);
                     break;
+                    case "actors":
                     case "actor":
                         FilterMoviesByActors(movies, filter.Value);
                     break;
+                    case "directors":
                     case "director":
                         FilterMoviesByDirectors(movies, filter.Value);
                     break;
+                    case "genres":
                     case "genre":
                         FilterMoviesByGenres(movies, filter.Value);
                     break;
+                    case "languages":
                     case "language":
                         FilterMoviesByLanguages(movies, filter.Value);
                     break;

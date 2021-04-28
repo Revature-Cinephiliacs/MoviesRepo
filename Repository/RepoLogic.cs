@@ -275,6 +275,7 @@ namespace Repository
             followingMovie.ImdbId = movieId;
             followingMovie.UserId = userId;
             _dbContext.FollowingMovies.Add(followingMovie);
+            _dbContext.SaveChanges();
         }
 
         /// <summary>
@@ -639,6 +640,7 @@ namespace Repository
             }
             _dbContext.FollowingMovies.Remove(_dbContext.FollowingMovies.FirstOrDefault(fm =>
                 fm.ImdbId == movieId && fm.UserId == userId));
+            _dbContext.SaveChanges();
         }
 
         /// <summary>

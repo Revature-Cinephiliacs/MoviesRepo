@@ -212,7 +212,7 @@ namespace CinemaAPI.Controllers
         /// <param name="movieId"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        [HttpPost("follow/{movieId}/{userId}")]
+        [HttpPut("follow/{movieId}/{userId}")]
         public ActionResult FollowMovie(string movieId, string userId)
         {
             if(_movieLogic.FollowMovie(movieId, userId))
@@ -231,7 +231,7 @@ namespace CinemaAPI.Controllers
         /// <param name="movieId"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        [HttpPost("unfollow/{movieId}/{userId}")]
+        [HttpDelete("follow/{movieId}/{userId}")]
         public ActionResult UnfollowMovie(string movieId, string userId)
         {
             if(_movieLogic.UnfollowMovie(movieId, userId))
@@ -249,7 +249,7 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        [HttpGet("following/{userid}")]
+        [HttpGet("follow/{userId}")]
         public ActionResult<List<string>> GetFollowingMovies(string userId)
         {
             return _movieLogic.GetFollowingMovies(userId);
