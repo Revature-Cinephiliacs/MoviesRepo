@@ -479,7 +479,7 @@ namespace Tests
                 tag = context.Tags.FirstOrDefault(t => t.TagName == inputTag.TagName);
             }
 
-            Assert.Equal(tag.IsBanned, true);
+            Assert.True(tag.IsBanned);
         }
         
         [Fact]
@@ -512,7 +512,7 @@ namespace Tests
                 tag = context.Tags.FirstOrDefault(t => t.TagName == inputTag.TagName);
             }
 
-            Assert.Equal(tag.IsBanned, false);
+            Assert.False(tag.IsBanned);
         }
     }
 }

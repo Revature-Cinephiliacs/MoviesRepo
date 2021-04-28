@@ -28,7 +28,7 @@ namespace Tests
                 msr.AddMovieTagUser(sut1);
                 result1 = context2.MovieTagUsers.FirstOrDefault(ma => ma.ImdbId == "Anis");
             }
-            Assert.Equal(result1.ImdbId,"Anis");
+            Assert.Equal("Anis",result1.ImdbId);
         }
 
         [Fact]
