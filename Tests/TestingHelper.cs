@@ -9,17 +9,33 @@ namespace Tests
 {
     internal static class TestingHelper
     {
-        const int maxListItemCount = 6;
+        /// <summary>6</summary>
+        const int _maxListItemCount = 6;
         static int nextMovieIdNumber = 0;
         static Random randomGen = new Random();
 
         /// <summary>
-        /// Returns a MovieDTO object with all properties, including lists,
-        /// populated with random values. Values are bounded to a range
-        /// where appropriate.
+        /// Returns a MovieDTO object with all properties populated with
+        /// random values. Values are bounded to a range where appropriate.
+        /// The number of entries in each list is a random number between
+        /// 0 and <inheritdoc cref="_maxListItemCount"/>
         /// </summary>
         /// <returns></returns>
         internal static MovieDTO GetRandomMovie()
+        {
+            return GetRandomMovie(randomGen.Next(_maxListItemCount), randomGen.Next(_maxListItemCount), 
+                randomGen.Next(_maxListItemCount), randomGen.Next(_maxListItemCount), 
+                randomGen.Next(_maxListItemCount));
+        }
+
+        /// <summary>
+        /// Returns a MovieDTO object with all properties populated with
+        /// random values. Values are bounded to a range where appropriate.
+        /// The number of entries in each list is set by the arguments.
+        /// </summary>
+        /// <returns></returns>
+        internal static MovieDTO GetRandomMovie(int numberOfActors, int numberOfDirectors,
+            int numberofGenres, int numberOfLanguages, int numberOfTags)
         {
             MovieDTO movieDTO = new MovieDTO();
 
@@ -36,40 +52,33 @@ namespace Tests
             movieDTO.ReleaseDate = GetRandomDateTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
             movieDTO.RuntimeMinutes = (short)randomGen.Next(200);
             movieDTO.IsReleased = randomGen.Next(1) == 1;
-
-            int smallRandomInt;
             
             movieDTO.MovieActors = new List<string>();
-            smallRandomInt = randomGen.Next(maxListItemCount);
-            for (int i = 0; i < smallRandomInt; i++)
+            for (int i = 0; i < numberOfActors; i++)
             {
                 movieDTO.MovieActors.Add(Guid.NewGuid().ToString());
             }
             
             movieDTO.MovieDirectors = new List<string>();
-            smallRandomInt = randomGen.Next(maxListItemCount);
-            for (int i = 0; i < smallRandomInt; i++)
+            for (int i = 0; i < numberOfDirectors; i++)
             {
                 movieDTO.MovieDirectors.Add(Guid.NewGuid().ToString());
             }
             
             movieDTO.MovieGenres = new List<string>();
-            smallRandomInt = randomGen.Next(maxListItemCount);
-            for (int i = 0; i < smallRandomInt; i++)
+            for (int i = 0; i < numberofGenres; i++)
             {
                 movieDTO.MovieGenres.Add(Guid.NewGuid().ToString());
             }
             
             movieDTO.MovieLanguages = new List<string>();
-            smallRandomInt = randomGen.Next(maxListItemCount);
-            for (int i = 0; i < smallRandomInt; i++)
+            for (int i = 0; i < numberOfLanguages; i++)
             {
                 movieDTO.MovieLanguages.Add(Guid.NewGuid().ToString());
             }
             
             movieDTO.MovieTags = new List<string>();
-            smallRandomInt = randomGen.Next(maxListItemCount);
-            for (int i = 0; i < smallRandomInt; i++)
+            for (int i = 0; i < numberOfTags; i++)
             {
                 movieDTO.MovieTags.Add(Guid.NewGuid().ToString());
             }

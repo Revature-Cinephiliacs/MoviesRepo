@@ -8,6 +8,7 @@ using Model;
 using Logic;
 using CinemaAPI.Controllers;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Tests
 {
@@ -160,6 +161,37 @@ namespace Tests
             }
 
             Assert.NotEqual(inputMovie.Title, outputMovie.Title);
+        }
+
+        [Fact]
+        public void SearchTest()
+        {
+            MovieDTO inputMovie = TestingHelper.GetRandomMovie(1, 1, 1, 1, 1);
+            List<string> searchResults;
+
+            Dictionary<string, string> filters = new Dictionary<string, string>();
+            filters.Add("Actor", inputMovie.MovieActors[0]);
+
+            // Seed the test database
+            using(var context = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
+
+                TestingHelper.AddMovieDTOToDatabase(context, inputMovie);
+                
+            }
+
+            using(var context = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                RepoLogic repoLogic = new RepoLogic(context);
+                IMovieLogic movieLogic = new MovieLogic(repoLogic);
+                MovieController movieController = new MovieController(movieLogic);
+                // Test SearchMovies()
+                searchResults = movieController.SearchMovies(filters).Value;
+            }
+
+            Assert.Equal(inputMovie.ImdbId, searchResults[0]);
         }
     }
 }
