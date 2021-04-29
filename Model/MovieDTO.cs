@@ -1,74 +1,87 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 
 namespace Model
 {
-    public sealed class MovieDTO : IEquatable<MovieDTO>
+    public sealed class MovieDTO
+    {
+        [StringLength(20)]
+        public string ImdbId { get; set; }
+        
+        [StringLength(255)]
+        public string Title { get; set; }
+        
+        [StringLength(255)]
+        public string RatingName { get; set; }
+
+        [RegularExpression( @"[12]\d\d\d-[01]\d-[0123]\d")]
+        public string ReleaseDate { get; set; }
+
+        [StringLength(255)]
+        public string ReleaseCountry { get; set; }
+        public short? RuntimeMinutes { get; set; }
+        public bool? IsReleased { get; set; }
+        public string Plot { get; set; }
+
+        [StringLength(2048)]
+        public string PosterURL { get; set; }
+        public List<string> MovieActors { get; set; }
+        public List<string> MovieDirectors { get; set; }
+        public List<string> MovieGenres { get; set; }
+        public List<string> MovieLanguages { get; set; }
+        public List<string> MovieTags { get; set; }
+
+        public MovieDTO() {}
+
+        public bool Equals(MovieDTO other)
         {
-
-            [Required]
-            [StringLength(20)]
-            public string ImdbId { get; set; }
-            [Required]
-            [StringLength(35)]
-            public string Title { get; set; }
-            
-            public DateTime? ReleaseDate { get; set; }
-            public string ReleaseCountry { get; set; }
-            public int? RuntimeMinutes { get; set; }
-            public bool? IsReleased { get; set; }
-
-            [Required]
-            [StringLength(350)]
-            public string Plot { get; set; }
-
-            public MovieDTO() {}
-
-            public MovieDTO(string ImdbId,string Title,DateTime? ReleaseDate,string ReleaseCountry,int? RuntimeMinutes,bool? IsReleased,string Plot)
+            if (Object.ReferenceEquals(other, null))
             {
-                this.ImdbId = ImdbId;
-                this.Title = Title;
-                this.ReleaseDate = ReleaseDate;
-                this.ReleaseCountry = ReleaseCountry;
-                this.RuntimeMinutes = RuntimeMinutes;
-                this.IsReleased = IsReleased;
-                this.Plot = Plot;
+                return false;
             }
 
-
-            public bool Equals(MovieDTO other)
+            if (Object.ReferenceEquals(this, other))
             {
-                if (Object.ReferenceEquals(other, null))
-                {
-                    return false;
-                }
+                return true;
+            }
 
-                if (Object.ReferenceEquals(this, other))
+            if (this.GetType() != other.GetType())
+            {
+                return false;
+            }
+
+            return ImdbId == other.ImdbId;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as MovieDTO);
+        }
+
+        public static bool operator ==(MovieDTO lhs, MovieDTO rhs)
+        {
+            if (Object.ReferenceEquals(lhs, null))
+            {
+                if (Object.ReferenceEquals(rhs, null))
                 {
                     return true;
                 }
 
-                if (this.GetType() != other.GetType())
-                {
-                    return false;
-                }
-
-                return ImdbId == other.ImdbId;
+                return false;
             }
+            return lhs.Equals(rhs);
+        }
 
-            public override bool Equals(object obj)
-            {
-                return Equals(obj as MovieDTO);
-            }
+        public static bool operator !=(MovieDTO lhs, MovieDTO rhs)
+        {
+            return !(lhs == rhs);
+        }
 
-            public override int GetHashCode()
-            {
-                return ImdbId.GetHashCode();
-            }
+        public override int GetHashCode()
+        {
+            return ImdbId.GetHashCode();
+        }
         
     }
 }
