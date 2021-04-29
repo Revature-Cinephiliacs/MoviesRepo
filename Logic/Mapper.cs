@@ -9,6 +9,12 @@ namespace Logic
 {
     public static class Mapper
     {
+        /// <summary>
+        /// Returns a new MovieDTO object containing the information provided in
+        /// the MovieObject
+        /// </summary>
+        /// <param name="movieObject"></param>
+        /// <returns></returns>
         public static MovieDTO MovieObjectToMovieDTO(ApiHelper.MovieObject movieObject)
         {
             var movieDTO = new MovieDTO()
@@ -67,6 +73,18 @@ namespace Logic
             return movieDTO;
         }
 
+        /// <summary>
+        /// Returns a new MovieDTO object containing the information provided in
+        /// the Movie object, Rating object, and name lists.
+        /// </summary>
+        /// <param name="movie"></param>
+        /// <param name="rating"></param>
+        /// <param name="actorNames"></param>
+        /// <param name="directorNames"></param>
+        /// <param name="genreNames"></param>
+        /// <param name="languageNames"></param>
+        /// <param name="tagNames"></param>
+        /// <returns></returns>
         public static MovieDTO MovieToMovieDTO(Movie movie, Rating rating, List<string> actorNames
             , List<string> directorNames, List<string> genreNames, List<string> languageNames
             , List<string> tagNames)
@@ -126,6 +144,12 @@ namespace Logic
             return movieDTO;
         }
 
+        /// <summary>
+        /// Returns a new Movie object containing the information provided in
+        /// the MovieDTO object
+        /// </summary>
+        /// <param name="movieDTO"></param>
+        /// <returns></returns>
         public static Movie MovieDTOToMovie(MovieDTO movieDTO)
         {
             var movie = new Movie()
