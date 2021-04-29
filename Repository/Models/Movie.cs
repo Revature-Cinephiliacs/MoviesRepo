@@ -7,6 +7,9 @@ namespace Repository.Models
 {
     public partial class Movie
     {
+        /// <summary>
+        /// Contains all of the information associated with a movie.
+        /// </summary>
         public Movie()
         {
             FollowingMovies = new HashSet<FollowingMovie>();

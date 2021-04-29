@@ -4,6 +4,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Model
 {
+    /// <summary>
+    /// Contains the movie information that is sent from and returned
+    /// to the frontend.
+    /// </summary>
     public sealed class MovieDTO
     {
         [StringLength(20)]

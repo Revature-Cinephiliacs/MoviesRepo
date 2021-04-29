@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 namespace Repository.Models
 {
+    /// <summary>
+    /// Associates a language with a movie.
+    /// </summary>
     public partial class MovieLanguage
     {
         public string ImdbId { get; set; }

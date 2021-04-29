@@ -155,7 +155,7 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="taggingDTO"></param>
         /// <returns></returns>
-        [HttpPost("tag")]
+        [HttpPost("tags")]
         public async Task<ActionResult> TagMovie([FromBody] TaggingDTO taggingDTO)
         {
             if(await _movieLogic.TagMovie(taggingDTO))
@@ -166,6 +166,23 @@ namespace CinemaAPI.Controllers
             {
                 return StatusCode(400);
             }
+        }
+
+        /// <summary>
+        /// Returns all currently existing tag names, excluding banned
+        /// tags.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("tags")]
+        public ActionResult<List<string>> GetAllTags()
+        {
+            List<string> tagNames = _movieLogic.GetAllTags();
+            if(tagNames == null)
+            {
+                return StatusCode(400);
+            }
+            StatusCode(200);
+            return tagNames;
         }
 
         /// <summary>

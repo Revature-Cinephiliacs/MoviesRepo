@@ -9,6 +9,7 @@ using Repository.Models;
 
 namespace Logic
 {
+    // Comments for methods implemented from IMovieLogic reside in the interface.
     public class MovieLogic : IMovieLogic
     {
         private readonly RepoLogic _repo;
@@ -90,139 +91,6 @@ namespace Logic
                 movieIds.Add(movie.ImdbId);
             }
             return movieIds;
-        }
-
-        /// <summary>
-        /// Removes any movies from the list argument that are not tagged
-        /// with all of the provided tag names.
-        /// </summary>
-        /// <param name="movies"></param>
-        /// <param name="tagName"></param>
-        private void FilterMoviesByTags(List<Movie> movies, string[] tagNames)
-        {
-            foreach (var tagName in tagNames)
-            {
-                for (int i = 0; i < movies.Count; i++)
-                {
-                    List<MovieTag> movieTags = _repo.GetMovieTags(movies[i].ImdbId);
-                    if(movieTags.FirstOrDefault(mt => mt.TagName == tagName
-                        && mt.VoteSum > 0) == null)
-                    {
-                        movies.RemoveAt(i);
-                        i--;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Removes all movies from the list argument that do not have the
-        /// rating that is specified in the argument.
-        /// </summary>
-        /// <param name="movies"></param>
-        /// <param name="ratingName"></param>
-        private void FilterMoviesByRatings(List<Movie> movies, string[] ratingNames)
-        {
-            foreach (var ratingName in ratingNames)
-            {
-                for (int i = 0; i < movies.Count; i++)
-                {
-                    var ratingId = _repo.GetRating(ratingName).RatingId;
-                    if(movies[i].RatingId != ratingId)
-                    {
-                        movies.RemoveAt(i);
-                        i--;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Removes all movies from the list argument that do not have all of the
-        /// actors that are specified in the argument.
-        /// </summary>
-        /// <param name="movies"></param>
-        /// <param name="actorName"></param>
-        private void FilterMoviesByActors(List<Movie> movies, string[] actorNames)
-        {
-            foreach (var actorName in actorNames)
-            {
-                for (int i = 0; i < movies.Count; i++)
-                {
-                    List<string> movieActorNames = _repo.GetMovieActorNames(movies[i].ImdbId);
-                    if(!movieActorNames.Contains(actorName))
-                    {
-                        movies.RemoveAt(i);
-                        i--;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Removes all movies from the list argument that do not have all of the
-        /// directors that are specified in the argument.
-        /// </summary>
-        /// <param name="movies"></param>
-        /// <param name="directorName"></param>
-        private void FilterMoviesByDirectors(List<Movie> movies, string[] directorNames)
-        {
-            foreach (var directorName in directorNames)
-            {
-                for (int i = 0; i < movies.Count; i++)
-                {
-                    List<string> movieDirectorNames = _repo.GetMovieDirectorNames(movies[i].ImdbId);
-                    if(!movieDirectorNames.Contains(directorName))
-                    {
-                        movies.RemoveAt(i);
-                        i--;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Removes all movies from the list argument that do not have all of the
-        /// genres that are specified in the argument.
-        /// </summary>
-        /// <param name="movies"></param>
-        /// <param name="genreName"></param>
-        private void FilterMoviesByGenres(List<Movie> movies, string[] genreNames)
-        {
-            foreach (var genreName in genreNames)
-            {
-                for (int i = 0; i < movies.Count; i++)
-                {
-                    List<string> movieGenreNames = _repo.GetMovieGenreNames(movies[i].ImdbId);
-                    if(!movieGenreNames.Contains(genreName))
-                    {
-                        movies.RemoveAt(i);
-                        i--;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Removes all movies from the list argument that do not have all of the
-        /// languages that are specified in the argument.
-        /// </summary>
-        /// <param name="movies"></param>
-        /// <param name="languageName"></param>
-        private void FilterMoviesByLanguages(List<Movie> movies, string[] languageNames)
-        {
-            foreach (var languageName in languageNames)
-            {
-                for (int i = 0; i < movies.Count; i++)
-                {
-                    List<string> movieLanguageNames = _repo.GetMovieLanguageNames(movies[i].ImdbId);
-                    if(!movieLanguageNames.Contains(languageName))
-                    {
-                        movies.RemoveAt(i);
-                        i--;
-                    }
-                }
-            }
         }
 
         public async Task<bool> TagMovie(TaggingDTO taggingDTO)
@@ -427,54 +295,6 @@ namespace Logic
             return true;
         }
 
-        /// <summary>
-        /// Updates all of the optional, non-List properties of the Movie argument
-        /// to the properties supplied in the MovieDTO argument. Any null property
-        /// of the MovieDTO remains unchanged in the Movie object.
-        /// </summary>
-        /// <param name="movie"></param>
-        /// <param name="movieDTO"></param>
-        public void AppendMoviesOptionalProperties(Movie movie, MovieDTO movieDTO)
-        {
-            if(!String.IsNullOrEmpty(movieDTO.Title))
-            {
-                movie.Title = movieDTO.Title;
-            }
-
-            if(!String.IsNullOrEmpty(movieDTO.RatingName))
-            {
-                if(!_repo.RatingExists(movieDTO.RatingName))
-                {
-                    Rating newRating = new Rating();
-                    newRating.RatingName = movieDTO.RatingName;
-                    _repo.AddRating(newRating);
-                }
-                movie.RatingId = _repo.GetRating(movieDTO.RatingName).RatingId;
-            }
-
-            if(!String.IsNullOrEmpty(movieDTO.ReleaseDate))
-            {
-                movie.ReleaseDate = DateTime.ParseExact(movieDTO.ReleaseDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-                movie.IsReleased = true;
-            }
-            if(!String.IsNullOrEmpty(movieDTO.ReleaseCountry))
-            {
-                movie.ReleaseCountry = movieDTO.ReleaseCountry;
-            }
-            if(movieDTO.RuntimeMinutes != null)
-            {
-                movie.RuntimeMinutes = movieDTO.RuntimeMinutes;
-            }
-            if(!String.IsNullOrEmpty(movieDTO.Plot))
-            {
-                movie.Plot = movieDTO.Plot;
-            }
-            if(!String.IsNullOrEmpty(movieDTO.PosterURL))
-            {
-                movie.PosterUrl = movieDTO.PosterURL;
-            }
-        }
-
         public async Task<bool> AppendMovie(string movieId, MovieDTO movieDTO)
         {
             if(!_repo.MovieExists(movieId))
@@ -597,6 +417,206 @@ namespace Logic
         public List<string> GetFollowingMovies(string userId)
         {
             return _repo.GetFollowingMovies(userId);
+        }
+
+        public List<string> GetAllTags()
+        {
+            var tags = _repo.GetAllTags();
+            if(tags == null)
+            {
+                return null;
+            }
+
+            var tagNames = new List<string>();
+            foreach (var tag in tags)
+            {
+                if(!tag.IsBanned)
+                {
+                    tagNames.Add(tag.TagName);
+                }
+            }
+            return tagNames;
+        }
+
+        /// <summary>
+        /// Removes any movies from the list argument that are not tagged
+        /// with all of the provided tag names.
+        /// </summary>
+        /// <param name="movies"></param>
+        /// <param name="tagName"></param>
+        private void FilterMoviesByTags(List<Movie> movies, string[] tagNames)
+        {
+            foreach (var tagName in tagNames)
+            {
+                for (int i = 0; i < movies.Count; i++)
+                {
+                    List<MovieTag> movieTags = _repo.GetMovieTags(movies[i].ImdbId);
+                    if(movieTags.FirstOrDefault(mt => mt.TagName == tagName
+                        && mt.VoteSum > 0) == null)
+                    {
+                        movies.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Removes all movies from the list argument that do not have the
+        /// rating that is specified in the argument.
+        /// </summary>
+        /// <param name="movies"></param>
+        /// <param name="ratingName"></param>
+        private void FilterMoviesByRatings(List<Movie> movies, string[] ratingNames)
+        {
+            foreach (var ratingName in ratingNames)
+            {
+                for (int i = 0; i < movies.Count; i++)
+                {
+                    var ratingId = _repo.GetRating(ratingName).RatingId;
+                    if(movies[i].RatingId != ratingId)
+                    {
+                        movies.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Removes all movies from the list argument that do not have all of the
+        /// actors that are specified in the argument.
+        /// </summary>
+        /// <param name="movies"></param>
+        /// <param name="actorName"></param>
+        private void FilterMoviesByActors(List<Movie> movies, string[] actorNames)
+        {
+            foreach (var actorName in actorNames)
+            {
+                for (int i = 0; i < movies.Count; i++)
+                {
+                    List<string> movieActorNames = _repo.GetMovieActorNames(movies[i].ImdbId);
+                    if(!movieActorNames.Contains(actorName))
+                    {
+                        movies.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Removes all movies from the list argument that do not have all of the
+        /// directors that are specified in the argument.
+        /// </summary>
+        /// <param name="movies"></param>
+        /// <param name="directorName"></param>
+        private void FilterMoviesByDirectors(List<Movie> movies, string[] directorNames)
+        {
+            foreach (var directorName in directorNames)
+            {
+                for (int i = 0; i < movies.Count; i++)
+                {
+                    List<string> movieDirectorNames = _repo.GetMovieDirectorNames(movies[i].ImdbId);
+                    if(!movieDirectorNames.Contains(directorName))
+                    {
+                        movies.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Removes all movies from the list argument that do not have all of the
+        /// genres that are specified in the argument.
+        /// </summary>
+        /// <param name="movies"></param>
+        /// <param name="genreName"></param>
+        private void FilterMoviesByGenres(List<Movie> movies, string[] genreNames)
+        {
+            foreach (var genreName in genreNames)
+            {
+                for (int i = 0; i < movies.Count; i++)
+                {
+                    List<string> movieGenreNames = _repo.GetMovieGenreNames(movies[i].ImdbId);
+                    if(!movieGenreNames.Contains(genreName))
+                    {
+                        movies.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Removes all movies from the list argument that do not have all of the
+        /// languages that are specified in the argument.
+        /// </summary>
+        /// <param name="movies"></param>
+        /// <param name="languageName"></param>
+        private void FilterMoviesByLanguages(List<Movie> movies, string[] languageNames)
+        {
+            foreach (var languageName in languageNames)
+            {
+                for (int i = 0; i < movies.Count; i++)
+                {
+                    List<string> movieLanguageNames = _repo.GetMovieLanguageNames(movies[i].ImdbId);
+                    if(!movieLanguageNames.Contains(languageName))
+                    {
+                        movies.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates all of the optional, non-List properties of the Movie argument
+        /// to the properties supplied in the MovieDTO argument. Any null property
+        /// of the MovieDTO remains unchanged in the Movie object.
+        /// </summary>
+        /// <param name="movie"></param>
+        /// <param name="movieDTO"></param>
+        public void AppendMoviesOptionalProperties(Movie movie, MovieDTO movieDTO)
+        {
+            if(!String.IsNullOrEmpty(movieDTO.Title))
+            {
+                movie.Title = movieDTO.Title;
+            }
+
+            if(!String.IsNullOrEmpty(movieDTO.RatingName))
+            {
+                if(!_repo.RatingExists(movieDTO.RatingName))
+                {
+                    Rating newRating = new Rating();
+                    newRating.RatingName = movieDTO.RatingName;
+                    _repo.AddRating(newRating);
+                }
+                movie.RatingId = _repo.GetRating(movieDTO.RatingName).RatingId;
+            }
+
+            if(!String.IsNullOrEmpty(movieDTO.ReleaseDate))
+            {
+                movie.ReleaseDate = DateTime.ParseExact(movieDTO.ReleaseDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+                movie.IsReleased = true;
+            }
+            if(!String.IsNullOrEmpty(movieDTO.ReleaseCountry))
+            {
+                movie.ReleaseCountry = movieDTO.ReleaseCountry;
+            }
+            if(movieDTO.RuntimeMinutes != null)
+            {
+                movie.RuntimeMinutes = movieDTO.RuntimeMinutes;
+            }
+            if(!String.IsNullOrEmpty(movieDTO.Plot))
+            {
+                movie.Plot = movieDTO.Plot;
+            }
+            if(!String.IsNullOrEmpty(movieDTO.PosterURL))
+            {
+                movie.PosterUrl = movieDTO.PosterURL;
+            }
         }
     }
 }
