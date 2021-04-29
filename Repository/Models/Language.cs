@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 namespace Repository.Models
 {
+    /// <summary>
+    /// Contains all information about a language.
+    /// </summary>
     public partial class Language
     {
         public Language()

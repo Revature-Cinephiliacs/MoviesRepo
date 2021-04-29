@@ -344,6 +344,15 @@ namespace Repository
         {
             return _dbContext.Movies.ToList<Movie>();
         }
+        
+        /// <summary>
+        /// Returns a list of all Tags in the database.
+        /// </summary>
+        /// <returns></returns>
+        public List<Tag> GetAllTags()
+        {
+            return _dbContext.Tags.ToList<Tag>();
+        }
 
         /// <summary>
         /// Gets a MovieTag whose movieId and Tag name match the provided

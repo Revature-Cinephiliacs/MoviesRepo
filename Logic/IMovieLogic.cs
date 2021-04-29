@@ -114,5 +114,12 @@ namespace Logic
         /// <param name="userId"></param>
         /// <returns></returns>
         List<string> GetFollowingMovies(string userId);
+
+        /// <summary>
+        /// Returns a list containing the names of all tags that
+        /// are not banned.
+        /// </summary>
+        /// <returns></returns>
+        List<string> GetAllTags();
     }
 }
