@@ -155,7 +155,7 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="taggingDTO"></param>
         /// <returns></returns>
-        [HttpPost("tag/movie")]
+        [HttpPost("tag")]
         public async Task<ActionResult> TagMovie([FromBody] TaggingDTO taggingDTO)
         {
             if(await _movieLogic.TagMovie(taggingDTO))
@@ -193,7 +193,7 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="tagName"></param>
         /// <returns></returns>
-        [HttpPut("tag/unban/{tagName}")]
+        [HttpDelete("tag/ban/{tagName}")]
         public ActionResult UnbanTag(string tagName)
         {
             if(_movieLogic.SetTagBanStatus(tagName, false))
