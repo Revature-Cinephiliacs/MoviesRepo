@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 namespace Repository.Models
 {
+    /// <summary>
+    /// Relates a movie to a user who is following that movie.
+    /// </summary>
     public partial class FollowingMovie
     {
         public string UserId { get; set; }

@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 namespace Repository.Models
 {
+    /// <summary>
+    /// Associates a genre with a movie.
+    /// </summary>
     public partial class MovieGenre
     {
         public string ImdbId { get; set; }

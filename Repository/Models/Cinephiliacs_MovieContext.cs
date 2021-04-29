@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Repository.Models
 {
+    /// <summary>
+    /// Defines the context for the Movie database.
+    /// </summary>
     public partial class Cinephiliacs_MovieContext : DbContext
     {
         public Cinephiliacs_MovieContext()

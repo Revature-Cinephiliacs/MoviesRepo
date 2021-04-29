@@ -5,6 +5,10 @@ using System.Collections.Generic;
 
 namespace Repository.Models
 {
+    /// <summary>
+    /// Keeps track of the sum of votes for/against associating a
+    /// specific tag with a specific movie.
+    /// </summary>
     public partial class MovieTag
     {
         public string ImdbId { get; set; }

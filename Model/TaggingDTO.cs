@@ -3,6 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Model
 {
+    /// <summary>
+    /// Contains the information required for a user to tag a movie.
+    /// This is passed into the TagMovie endpoint.
+    /// </summary>
     public sealed class TaggingDTO
     {
         [Required]
