@@ -75,19 +75,11 @@ namespace Logic
 
         /// <summary>
         /// Returns a new MovieDTO object containing the information provided in
-        /// the Movie object, Rating object, and name lists.
+        /// the Movie object.
         /// </summary>
         /// <param name="movie"></param>
-        /// <param name="rating"></param>
-        /// <param name="actorNames"></param>
-        /// <param name="directorNames"></param>
-        /// <param name="genreNames"></param>
-        /// <param name="languageNames"></param>
-        /// <param name="tagNames"></param>
         /// <returns></returns>
-        public static MovieDTO MovieToMovieDTO(Movie movie, Rating rating, List<string> actorNames
-            , List<string> directorNames, List<string> genreNames, List<string> languageNames
-            , List<string> tagNames)
+        public static MovieDTO MovieToMovieDTO(Movie movie)
         {
             MovieDTO movieDTO = new MovieDTO()
             {
@@ -100,9 +92,9 @@ namespace Logic
                 PosterURL = movie.PosterUrl
             };
 
-            if(rating != null)
+            if(movie.Rating != null)
             {
-                movieDTO.RatingName = rating.RatingName;
+                movieDTO.RatingName = movie.Rating.RatingName;
             }
 
             if(movie.ReleaseDate != null)
@@ -112,33 +104,36 @@ namespace Logic
             }
 
             movieDTO.MovieActors = new List<string>();
-            foreach (var actorName in actorNames)
+            foreach (var movieActors in movie.MovieActors)
             {
-                movieDTO.MovieActors.Add(actorName);
+                movieDTO.MovieActors.Add(movieActors.Actor.ActorName);
             }
             
             movieDTO.MovieDirectors = new List<string>();
-            foreach (var directorName in directorNames)
+            foreach (var movieDirector in movie.MovieDirectors)
             {
-                movieDTO.MovieDirectors.Add(directorName);
+                movieDTO.MovieDirectors.Add(movieDirector.Director.DirectorName);
             }
             
             movieDTO.MovieGenres = new List<string>();
-            foreach (var genreName in genreNames)
+            foreach (var movieGenre in movie.MovieGenres)
             {
-                movieDTO.MovieGenres.Add(genreName);
+                movieDTO.MovieGenres.Add(movieGenre.Genre.GenreName);
             }
             
             movieDTO.MovieLanguages = new List<string>();
-            foreach (var languageName in languageNames)
+            foreach (var movieLanguage in movie.MovieLanguages)
             {
-                movieDTO.MovieLanguages.Add(languageName);
+                movieDTO.MovieLanguages.Add(movieLanguage.Language.LanguageName);
             }
             
             movieDTO.MovieTags = new List<string>();
-            foreach (var tagName in tagNames)
+            foreach (var movieTag in movie.MovieTags)
             {
-                movieDTO.MovieTags.Add(tagName);
+                if(!movieTag.TagNameNavigation.IsBanned)
+                {
+                    movieDTO.MovieTags.Add(movieTag.TagName);
+                }
             }
 
             return movieDTO;
