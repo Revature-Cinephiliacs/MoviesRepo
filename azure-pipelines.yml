@@ -14,7 +14,7 @@ variables:
   dockerRegistryServiceConnection: '4b6e6936-841a-4c76-85e7-de19fe595021'
   imageRepository: 'movieservice'
   containerRegistry: '03012021batchp3acr.azurecr.io'
-  dockerfilePath: '.'
+  dockerfilePath: 'Dockerfile'
   tag: '$(Build.BuildId)'
   imagePullSecret: '03012021batchp3acr60bd-auth'
 
