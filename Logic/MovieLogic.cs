@@ -23,10 +23,10 @@ namespace Logic
         {
             if(_repo.MovieExists(movieId))
             {
-                Movie movie = _repo.GetMovie(movieId);
-                var movieTags = _repo.GetMovieTags(movieId);
+                Movie movie = _repo.GetMovieFullInfo(movieId);
+
                 var tagNames = new List<string>();
-                foreach (var movieTag in movieTags)
+                foreach (var movieTag in movie.MovieTags)
                 {
                     var tag = _repo.GetTag(movieTag.TagName);
                     if(tag != null && tag.IsBanned == false)
@@ -35,9 +35,7 @@ namespace Logic
                     }
                 }
 
-                return Mapper.MovieToMovieDTO(movie, _repo.GetRating(movie.RatingId ?? 0), _repo.GetMovieActorNames(movieId)
-                    , _repo.GetMovieDirectorNames(movieId), _repo.GetMovieGenreNames(movieId)
-                    , _repo.GetMovieLanguageNames(movieId), tagNames);
+                return Mapper.MovieToMovieDTO(movie);
             }
 
             ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor.LoadMovieAsync(movieId);
@@ -59,9 +57,6 @@ namespace Logic
                     case "tag":
                         FilterMoviesByTags(movies, filter.Value);
                     break;
-                    case "rating":
-                        FilterMoviesByRatings(movies, filter.Value);
-                    break;
                     case "actors":
                     case "actor":
                         FilterMoviesByActors(movies, filter.Value);
@@ -70,13 +65,16 @@ namespace Logic
                     case "director":
                         FilterMoviesByDirectors(movies, filter.Value);
                     break;
+                    case "languages":
+                    case "language":
+                        FilterMoviesByLanguages(movies, filter.Value);
+                    break;
                     case "genres":
                     case "genre":
                         FilterMoviesByGenres(movies, filter.Value);
                     break;
-                    case "languages":
-                    case "language":
-                        FilterMoviesByLanguages(movies, filter.Value);
+                    case "rating":
+                        FilterMoviesByRatings(movies, filter.Value);
                     break;
                 }
                 if(movies.Count == 0)
@@ -450,8 +448,7 @@ namespace Logic
             {
                 for (int i = 0; i < movies.Count; i++)
                 {
-                    List<MovieTag> movieTags = _repo.GetMovieTags(movies[i].ImdbId);
-                    if(movieTags.FirstOrDefault(mt => mt.TagName == tagName
+                    if(movies[i].MovieTags.FirstOrDefault(mt => mt.TagName == tagName
                         && mt.VoteSum > 0) == null)
                     {
                         movies.RemoveAt(i);
@@ -493,10 +490,10 @@ namespace Logic
         {
             foreach (var actorName in actorNames)
             {
+                var actorId = _repo.GetActor(actorName).ActorId;
                 for (int i = 0; i < movies.Count; i++)
                 {
-                    List<string> movieActorNames = _repo.GetMovieActorNames(movies[i].ImdbId);
-                    if(!movieActorNames.Contains(actorName))
+                    if(movies[i].MovieActors.FirstOrDefault(ma => ma.ActorId == actorId) == null)
                     {
                         movies.RemoveAt(i);
                         i--;
@@ -515,10 +512,10 @@ namespace Logic
         {
             foreach (var directorName in directorNames)
             {
+                var directorId = _repo.GetDirector(directorName).DirectorId;
                 for (int i = 0; i < movies.Count; i++)
                 {
-                    List<string> movieDirectorNames = _repo.GetMovieDirectorNames(movies[i].ImdbId);
-                    if(!movieDirectorNames.Contains(directorName))
+                    if(movies[i].MovieDirectors.FirstOrDefault(md => md.DirectorId == directorId) == null)
                     {
                         movies.RemoveAt(i);
                         i--;
@@ -537,10 +534,10 @@ namespace Logic
         {
             foreach (var genreName in genreNames)
             {
+                var genreId = _repo.GetGenre(genreName).GenreId;
                 for (int i = 0; i < movies.Count; i++)
                 {
-                    List<string> movieGenreNames = _repo.GetMovieGenreNames(movies[i].ImdbId);
-                    if(!movieGenreNames.Contains(genreName))
+                    if(movies[i].MovieGenres.FirstOrDefault(mg => mg.GenreId == genreId) == null)
                     {
                         movies.RemoveAt(i);
                         i--;
@@ -559,10 +556,10 @@ namespace Logic
         {
             foreach (var languageName in languageNames)
             {
+                var languageId = _repo.GetLanguage(languageName).LanguageId;
                 for (int i = 0; i < movies.Count; i++)
                 {
-                    List<string> movieLanguageNames = _repo.GetMovieLanguageNames(movies[i].ImdbId);
-                    if(!movieLanguageNames.Contains(languageName))
+                    if(movies[i].MovieLanguages.FirstOrDefault(ml => ml.LanguageId == languageId) == null)
                     {
                         movies.RemoveAt(i);
                         i--;
