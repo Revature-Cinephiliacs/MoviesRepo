@@ -615,5 +615,17 @@ namespace Logic
                 movie.PosterUrl = movieDTO.PosterURL;
             }
         }
+
+        public List<MovieDTO> RecommendationsByMovie(string movieId)
+        {
+            var dtoList = new List<MovieDTO>();
+            var nlist = _repo.RecommendationsByMovie(movieId);
+            foreach (var rec in nlist)
+
+                dtoList.Add(Mapper.MovieToMovieDTO(rec));
+
+            return dtoList;
+
+        }
     }
 }

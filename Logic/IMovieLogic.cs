@@ -121,5 +121,13 @@ namespace Logic
         /// </summary>
         /// <returns></returns>
         List<string> GetAllTags();
+
+        ///<summary>
+        ///Returens list of movies based on single movies
+        ///tags. 
+        ///</summary>
+        ///<param name="movieId"></param>
+        ///<retuns></retuns>
+        List<MovieDTO> RecommendationsByMovie(string movieId);
     }
 }

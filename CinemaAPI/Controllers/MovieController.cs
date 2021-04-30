@@ -317,5 +317,28 @@ namespace CinemaAPI.Controllers
             mo.Response = "Test Str";
             return mo;
         }
+
+        ///<summary>
+        ///Returens list of movies based on single movies
+        ///tags. 
+        ///</summary>
+        ///<param name="movieId"></param>
+        ///<retuns></retuns>
+
+        [HttpGet("RecommendationsByMovie/{movieId}")]
+        public ActionResult<List<MovieDTO>> RecommendationsByMovie(string movieId)
+        {
+            List<MovieDTO> recommendedMovies = new();
+            if (movieId != null)
+            {
+                recommendedMovies = _movieLogic.RecommendationsByMovie(movieId);
+                return null;
+            }
+            else
+                return StatusCode(404);
+        }
     }
+
+
 }
+
