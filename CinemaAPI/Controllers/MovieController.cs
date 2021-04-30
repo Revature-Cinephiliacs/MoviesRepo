@@ -283,6 +283,13 @@ namespace CinemaAPI.Controllers
             return "Success";
         }
 
+        [HttpPost("seed/{path}")]
+        public async Task<ActionResult> SeedDatabase(string path)
+        {
+            await _movieLogic.SeedDbFromCSV(path);
+            return StatusCode(200);
+        }
+
         /// <summary>
         /// Temporary endpoint for testing the Kubernetes deployment.
         /// </summary>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -38,7 +39,7 @@ namespace Logic
                 return Mapper.MovieToMovieDTO(movie);
             }
 
-            ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor.LoadMovieAsync(movieId);
+            ApiHelper.MovieObject movieObject = await ApiHelper.PublicAPIProcessor.LoadMovieAsync(movieId);
             if(movieObject == null || movieObject.imdbID != movieId)
             {
                 return null;
@@ -95,7 +96,7 @@ namespace Logic
         {
             if(!_repo.MovieExists(taggingDTO.MovieId))
             {
-                ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor
+                ApiHelper.MovieObject movieObject = await ApiHelper.PublicAPIProcessor
                     .LoadMovieAsync(taggingDTO.MovieId);
                 if(movieObject == null)
                 {
@@ -297,7 +298,7 @@ namespace Logic
         {
             if(!_repo.MovieExists(movieId))
             {
-                ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor
+                ApiHelper.MovieObject movieObject = await ApiHelper.PublicAPIProcessor
                     .LoadMovieAsync(movieId);
                 if(movieObject == null)
                 {
@@ -614,6 +615,53 @@ namespace Logic
             {
                 movie.PosterUrl = movieDTO.PosterURL;
             }
+        }
+
+        public async Task<bool> SeedDbFromCSV(string path)
+        {
+            StreamReader reader = new StreamReader(path);
+            int counter = 0;
+            try
+            {
+                do
+                {
+                    var movieId = reader.ReadLine();
+                    movieId = movieId.Trim();
+                    await SeedMovie(movieId);
+                    counter++;
+                }
+                while(reader.Peek()!= -1 && counter < 100);
+            }
+            finally
+            {
+                reader.Close();
+            }
+            return true;
+        }
+
+        public async Task<bool> SeedMovie(string movieId)
+        {
+            Console.Write(movieId + ": ");
+            if(!_repo.MovieExists(movieId))
+            {
+                ApiHelper.MovieObject movieObject = await ApiHelper.PublicAPIProcessor
+                    .LoadMovieAsync(movieId);
+                if(movieObject == null)
+                {
+                    Console.Write("Public API returned nothing!\n");
+                    return false;
+                }
+                MovieDTO newMovieDTO = Mapper.MovieObjectToMovieDTO(movieObject);
+                if(!CreateMovie(newMovieDTO))
+                {
+                    Console.Write("Creation failed!\n");
+                    return false;
+                }
+                Console.Write("Success!\n");
+                return true;
+            }
+            Console.Write("Movie already exists!\n");
+            return false;
         }
     }
 }

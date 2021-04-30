@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Logic.ApiHelper
 {
-    public class MovieProcessor
+    public class PublicAPIProcessor
     {
         /// <summary>
         /// Retrieves the details for a movie based on an IMDB identification number, imdbId,
@@ -41,6 +41,25 @@ namespace Logic.ApiHelper
                 return null;
             }
             return movieObject;
+        }
+
+        public static async Task<DefinitionObject> GetDefinitionAsync(string word)
+        {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri($"https://wordsapiv1.p.rapidapi.com/words/{word}/definitions"),
+                Headers =
+                {
+                    { "x-rapidapi-key", "6d0ccdf5b5msh34c1c1dd38ee7f3p126f2cjsn773549c669d8" },
+                    { "x-rapidapi-host", "wordsapiv1.p.rapidapi.com" },
+                },
+            };
+            return new DefinitionObject();
         }
     }
 }
