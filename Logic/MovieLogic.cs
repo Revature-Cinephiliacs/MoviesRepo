@@ -620,15 +620,27 @@ namespace Logic
         public async Task<bool> SeedDbFromCSV(string path)
         {
             StreamReader reader = new StreamReader(path);
+            const int maxNumberTasks = 10;
             int counter = 0;
+
+            var seedTaskList = new List<Task<string>>();
             try
             {
                 do
                 {
                     var movieId = reader.ReadLine();
                     movieId = movieId.Trim();
-                    await SeedMovie(movieId);
+
+                    seedTaskList.Add(SeedMovie(movieId));
+                    ConsoleWrite
+
                     counter++;
+                    while(seedTaskList.Count >= maxNumberTasks && counter < 100)
+                    {
+                        var completedTask = await Task<string>.WhenAny(seedTaskList);
+                        Console.WriteLine(completedTask.Result);
+                        seedTaskList.Remove(completedTask);
+                    }
                 }
                 while(reader.Peek()!= -1 && counter < 100);
             }
@@ -636,32 +648,34 @@ namespace Logic
             {
                 reader.Close();
             }
+            while(seedTaskList.Count > 0)
+            {
+                var completedTask = await Task<string>.WhenAny(seedTaskList);
+                Console.WriteLine(completedTask.Result);
+                seedTaskList.Remove(completedTask);
+            }
             return true;
         }
 
-        public async Task<bool> SeedMovie(string movieId)
+        public async Task<string> SeedMovie(string movieId)
         {
-            Console.Write(movieId + ": ");
             if(!_repo.MovieExists(movieId))
             {
                 ApiHelper.MovieObject movieObject = await ApiHelper.PublicAPIProcessor
                     .LoadMovieAsync(movieId);
                 if(movieObject == null)
                 {
-                    Console.Write("Public API returned nothing!\n");
-                    return false;
+                    Console.WriteLine();
+                    return movieId + ": Public API returned nothing!";
                 }
                 MovieDTO newMovieDTO = Mapper.MovieObjectToMovieDTO(movieObject);
                 if(!CreateMovie(newMovieDTO))
                 {
-                    Console.Write("Creation failed!\n");
-                    return false;
+                    return movieId + ": Creation failed!";
                 }
-                Console.Write("Success!\n");
-                return true;
+                return movieId + ": Success!";
             }
-            Console.Write("Movie already exists!\n");
-            return false;
+            return movieId + ": Movie already exists!";
         }
     }
 }
