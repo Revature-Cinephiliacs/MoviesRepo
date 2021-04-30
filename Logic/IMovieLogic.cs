@@ -127,5 +127,12 @@ namespace Logic
         /// <param name="imdbId"></param>
         /// <returns></returns>
         Task<List<MovieDTO>> recommendedMovies(string imdbId);
+
+        /// <summary>
+        /// return a list a movies depending on particular User Id
+        /// </summary>
+        /// <param name="imdbId"></param>
+        /// <returns></returns>
+        Task<List<MovieDTO>> recommendedMoviesByUserId(string userId);
     }
 }

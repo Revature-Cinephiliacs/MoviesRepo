@@ -636,5 +636,35 @@ namespace Logic
             }
             return recommendedsDtos;
         }
+
+        public async Task<List<MovieDTO>> recommendedMoviesByUserId(string userId)
+        {
+            List<MovieDTO> recommendedsDtos = new List<MovieDTO>();
+
+            List<string> titles = new List<string>();
+
+            List<string> movieIds = _repo.GetFollowingMovies(userId);
+
+            foreach (var movieId in movieIds)
+            {
+                foreach (var ss in await MovieProcessor.LoadRecommendedMovies(movieId))
+                {
+                    titles.Add(ss);
+                }
+            }
+            foreach (var str in titles)
+            {
+                var prefix = "/title/";
+                var suffix = "/";
+                string url = str;
+
+                if (url.StartsWith(prefix) && url.EndsWith(suffix) && url.Length >= (prefix.Length + suffix.Length))
+                {
+                    string newString = url.Substring(prefix.Length, url.Length - prefix.Length - suffix.Length);
+                    recommendedsDtos.Add(GetMovie(newString).Result);
+                }
+            }
+            return recommendedsDtos;
+        }
     }
 }
