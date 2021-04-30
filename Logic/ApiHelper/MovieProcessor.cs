@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -42,5 +43,28 @@ namespace Logic.ApiHelper
             }
             return movieObject;
         }
+
+        public static async Task<List<string>> LoadRecommendedMovies(string imdbId)
+        {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri($"https://imdb8.p.rapidapi.com/title/get-more-like-this?tconst={imdbId}&currentCountry=US&purchaseCountry=US"),
+                Headers =
+                {
+                    { "x-rapidapi-key", "e157b8d687msh431e30623e70dd3p174a1cjsn7ea0d090c0f9" },
+                    { "x-rapidapi-host", "imdb8.p.rapidapi.com" },
+                },
+            };
+            using (var response = await client.SendAsync(request))
+            {
+                response.EnsureSuccessStatusCode();
+                var movieRecommended = await response.Content.ReadFromJsonAsync<List<string>>();
+                return movieRecommended;
+            }
+        } 
     }
 }

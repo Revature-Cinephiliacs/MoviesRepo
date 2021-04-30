@@ -317,5 +317,10 @@ namespace CinemaAPI.Controllers
             mo.Response = "Test Str";
             return mo;
         }
+        [HttpGet("recommended/{imdbId}")]
+        public async Task<ActionResult<List<MovieDTO>>> getRecommended(string imdbId)
+        {
+            return await _movieLogic.recommendedMovies(imdbId);
+        }
     }
 }
