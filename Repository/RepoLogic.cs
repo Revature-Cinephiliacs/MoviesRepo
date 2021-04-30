@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Repository.Models;
 
 namespace Repository
@@ -342,7 +343,14 @@ namespace Repository
         /// <returns></returns>
         public List<Movie> GetAllMovies()
         {
-            return _dbContext.Movies.ToList<Movie>();
+            return _dbContext.Movies
+                .Include(m => m.Rating)
+                .Include(m => m.MovieActors)
+                .Include(m => m.MovieDirectors)
+                .Include(m => m.MovieGenres)
+                .Include(m => m.MovieLanguages)
+                .Include(m => m.MovieTags)
+                .ToList();
         }
         
         /// <summary>
@@ -374,7 +382,33 @@ namespace Repository
         /// <returns></returns>
         public Movie GetMovie(string movieId)
         {
-            return _dbContext.Movies.FirstOrDefault(m => m.ImdbId == movieId);
+            return _dbContext.Movies .FirstOrDefault(m => m.ImdbId == movieId);
+        }
+
+        /// <summary>
+        /// Gets the Movie whose movieId matches the provided argument.
+        /// Includes the virtual members of Movie.
+        /// Returns null if no match is found.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <returns></returns>
+        public Movie GetMovieFullInfo(string movieId)
+        {
+            return _dbContext.Movies
+                .Where(m => m.ImdbId == movieId)
+                .AsSplitQuery()
+                .Include(m => m.Rating)
+                .Include(m => m.MovieActors)
+                .ThenInclude(ma => ma.Actor)
+                .Include(m => m.MovieDirectors)
+                .ThenInclude(md => md.Director)
+                .Include(m => m.MovieGenres)
+                .ThenInclude(mg => mg.Genre)
+                .Include(m => m.MovieLanguages)
+                .ThenInclude(ml => ml.Language)
+                .Include(m => m.MovieTags)
+                .ThenInclude(mt => mt.TagNameNavigation)
+                .FirstOrDefault<Movie>();
         }
 
         /// <summary>
@@ -405,7 +439,7 @@ namespace Repository
         /// </summary>
         /// <param name="actorName"></param>
         /// <returns></returns>
-        private Actor GetActor(string actorName)
+        public Actor GetActor(string actorName)
         {
             return _dbContext.Actors.FirstOrDefault(a => a.ActorName == actorName);
         }
@@ -416,7 +450,7 @@ namespace Repository
         /// </summary>
         /// <param name="directorName"></param>
         /// <returns></returns>
-        private Director GetDirector(string directorName)
+        public Director GetDirector(string directorName)
         {
             return _dbContext.Directors.FirstOrDefault(d => d.DirectorName == directorName);
         }
@@ -427,7 +461,7 @@ namespace Repository
         /// </summary>
         /// <param name="genreName"></param>
         /// <returns></returns>
-        private Genre GetGenre(string genreName)
+        public Genre GetGenre(string genreName)
         {
             return _dbContext.Genres.FirstOrDefault(g => g.GenreName == genreName);
         }
@@ -438,7 +472,7 @@ namespace Repository
         /// </summary>
         /// <param name="languageName"></param>
         /// <returns></returns>
-        private Language GetLanguage(string languageName)
+        public Language GetLanguage(string languageName)
         {
             return _dbContext.Languages.FirstOrDefault(l => l.LanguageName == languageName);
         }
