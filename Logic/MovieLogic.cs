@@ -616,25 +616,36 @@ namespace Logic
                 movie.PosterUrl = movieDTO.PosterURL;
             }
         }
+
         public async Task<List<MovieDTO>> recommendedMovies(string imdbId)
         {
-            List<MovieDTO> recommendedsDtos = new List<MovieDTO>();
-
             List<string> titles = await MovieProcessor.LoadRecommendedMovies(imdbId);
+            foreach (var item in titles)
+            {
+                Console.WriteLine(item);
+            }
 
+            var getMovieTasks = new List<Task<MovieDTO>>();
             foreach (var str in titles)
             {
-                var prefix = "/title/";
-                var suffix = "/";
-                string url = str;
-
-                if (url.StartsWith(prefix) && url.EndsWith(suffix) && url.Length >= (prefix.Length + suffix.Length))
+                string movieId = str;
+                if(str.Length > 8)
                 {
-                    string newString = url.Substring(prefix.Length, url.Length - prefix.Length - suffix.Length);
-                    recommendedsDtos.Add(GetMovie(newString).Result);
+                    movieId = str.Substring(7, str.Length - 8);
                 }
+
+                getMovieTasks.Add(GetMovie(movieId));
             }
-            return recommendedsDtos;
+
+            var recommendedDTOs = new List<MovieDTO>();
+            while(getMovieTasks.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(getMovieTasks);
+                recommendedDTOs.Add(completedTask.Result);
+                getMovieTasks.Remove(completedTask);
+            }
+
+            return recommendedDTOs;
         }
 
         public async Task<List<MovieDTO>> recommendedMoviesByUserId(string userId)
