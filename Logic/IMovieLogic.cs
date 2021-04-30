@@ -121,5 +121,11 @@ namespace Logic
         /// </summary>
         /// <returns></returns>
         List<string> GetAllTags();
+        /// <summary>
+        /// return a list a movies depending on particular Movie Id 
+        /// </summary>
+        /// <param name="imdbId"></param>
+        /// <returns></returns>
+        Task<List<MovieDTO>> recommendedMovies(string imdbId);
     }
 }
