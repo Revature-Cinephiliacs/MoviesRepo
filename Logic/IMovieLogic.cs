@@ -121,6 +121,5 @@ namespace Logic
         /// </summary>
         /// <returns></returns>
         List<string> GetAllTags();
-        Task<bool> SeedDbFromCSV(string path);
     }
 }

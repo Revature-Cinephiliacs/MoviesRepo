@@ -23,7 +23,7 @@ namespace Logic.ApiHelper
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"https://movie-database-imdb-alternative.p.rapidapi.com/?i= {imdbId}"),
+                RequestUri = new Uri($"https://movie-database-imdb-alternative.p.rapidapi.com/?i={imdbId}"),
                 Headers =
                 {
                     { "x-rapidapi-key", "e157b8d687msh431e30623e70dd3p174a1cjsn7ea0d090c0f9" },
