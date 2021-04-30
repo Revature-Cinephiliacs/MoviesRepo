@@ -78,12 +78,6 @@ namespace Logic
         /// the Movie object.
         /// </summary>
         /// <param name="movie"></param>
-        /// <param name="rating"></param>
-        /// <param name="actorNames"></param>
-        /// <param name="directorNames"></param>
-        /// <param name="genreNames"></param>
-        /// <param name="languageNames"></param>
-        /// <param name="tagNames"></param>
         /// <returns></returns>
         public static MovieDTO MovieToMovieDTO(Movie movie)
         {
