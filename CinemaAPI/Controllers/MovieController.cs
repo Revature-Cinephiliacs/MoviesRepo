@@ -317,25 +317,22 @@ namespace CinemaAPI.Controllers
             mo.Response = "Test Str";
             return mo;
         }
+        /// <summary>
+        /// retuns recommended movies based on a given movie
+        /// </summary>
+        /// <param name="imdbId"></param>
+        /// <returns></returns>
 
-        ///<summary>
-        ///Returens list of movies based on single movies
-        ///tags. 
-        ///</summary>
-        ///<param name="movieId"></param>
-        ///<retuns></retuns>
-
-        [HttpGet("RecommendationsByMovie/{movieId}")]
-        public ActionResult<List<MovieDTO>> RecommendationsByMovie(string movieId)
+        [HttpGet("recommended/{imdbId}")]
+        public async Task<ActionResult<List<MovieDTO>>> getRecommended(string imdbId)
         {
-            List<MovieDTO> recommendedMovies = new();
-            if (movieId != null)
+            if (await _movieLogic.recommendedMovies(imdbId) == null)
             {
-                recommendedMovies = _movieLogic.RecommendationsByMovie(movieId);
-                return null;
-            }
-            else
                 return StatusCode(404);
+            }
+
+            return StatusCode(200);
+
         }
     }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Logic.ApiHelper;
 using Model;
 using Repository;
 using Repository.Models;
@@ -615,17 +616,25 @@ namespace Logic
                 movie.PosterUrl = movieDTO.PosterURL;
             }
         }
-
-        public List<MovieDTO> RecommendationsByMovie(string movieId)
+        public async Task<List<MovieDTO>> recommendedMovies(string imdbId)
         {
-            var dtoList = new List<MovieDTO>();
-            var nlist = _repo.RecommendationsByMovie(movieId);
-            foreach (var rec in nlist)
+            List<MovieDTO> recommendedsDtos = new List<MovieDTO>();
 
-                dtoList.Add(Mapper.MovieToMovieDTO(rec));
+            List<string> titles = await MovieProcessor.LoadRecommendedMovies(imdbId);
 
-            return dtoList;
+            foreach (var str in titles)
+            {
+                var prefix = "/title/";
+                var suffix = "/";
+                string url = str;
 
+                if (url.StartsWith(prefix) && url.EndsWith(suffix) && url.Length >= (prefix.Length + suffix.Length))
+                {
+                    string newString = url.Substring(prefix.Length, url.Length - prefix.Length - suffix.Length);
+                    recommendedsDtos.Add(GetMovie(newString).Result);
+                }
+            }
+            return recommendedsDtos;
         }
     }
 }
