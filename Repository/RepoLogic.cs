@@ -287,34 +287,13 @@ namespace Repository
         /// <param name="wordIsTag"></param>
         public bool AddWord(Word word)
         {
-            if(!WordExists(word.Word1))
+            if(WordExists(word.Word1))
             {
                 return false;
             }
             _dbContext.Words.Add(word);
             _dbContext.SaveChanges();
             return true;
-        }
-
-        /// <summary>
-        /// Returns the Word specified by the argument if it exists.
-        /// Returns null if the word does not exist.
-        /// </summary>
-        /// <param name="word"></param>
-        /// <returns></returns>
-        public Word GetWord(string word)
-        {
-            return _dbContext.Words.FirstOrDefault(w => w.Word1 == word);
-        }
-
-        /// <summary>
-        /// Returns true if the word exists in the database.
-        /// </summary>
-        /// <param name="word"></param>
-        /// <returns></returns>
-        private bool WordExists(string word)
-        {
-            return (_dbContext.Words.FirstOrDefault(w => w.Word1 == word) != null);
         }
 
         /// <summary>
@@ -527,6 +506,17 @@ namespace Repository
         }
 
         /// <summary>
+        /// Returns the Word specified by the argument if it exists.
+        /// Returns null if the word does not exist.
+        /// </summary>
+        /// <param name="word"></param>
+        /// <returns></returns>
+        public Word GetWord(string word)
+        {
+            return _dbContext.Words.FirstOrDefault(w => w.Word1 == word);
+        }
+
+        /// <summary>
         /// Returns a list containing the name of each Actor associated with
         /// the movieId provided in the argument.
         /// </summary>
@@ -733,6 +723,16 @@ namespace Repository
         public bool MovieExists(string movieId)
         {
             return (_dbContext.Movies.FirstOrDefault(m => m.ImdbId == movieId) != null);
+        }
+
+        /// <summary>
+        /// Returns true if the word exists in the database.
+        /// </summary>
+        /// <param name="word"></param>
+        /// <returns></returns>
+        private bool WordExists(string word)
+        {
+            return (_dbContext.Words.FirstOrDefault(w => w.Word1 == word) != null);
         }
 
         /// <summary>
