@@ -657,14 +657,24 @@ namespace Logic
 
         public async Task<List<MovieDTO>> recommendedMoviesByUserId(string userId)
         {
-            List<string> followedMovieIds = _repo.GetFollowingMovies(userId);
-
             var loadRecommendedTask = new List<Task<List<string>>>();
-            foreach (var followedMovieId in followedMovieIds)
+            List<string> followedMovieIds = _repo.GetFollowingMovies(userId);
+            if (followedMovieIds.Count > 5 )
             {
-                loadRecommendedTask.Add(MovieProcessor.LoadRecommendedMovies(followedMovieId));
+                for (int i = 0; i < 5; i++)
+                {
+                    loadRecommendedTask.Add(MovieProcessor.LoadRecommendedMovies(followedMovieIds[i]));
+                }
+                
             }
 
+            if (followedMovieIds.Count < 5)
+            {
+                foreach (var followedMovieId in followedMovieIds)
+                {
+                    loadRecommendedTask.Add(MovieProcessor.LoadRecommendedMovies(followedMovieId));
+                } 
+            }
             var movieIds = new List<string>();
             while(loadRecommendedTask.Count > 0)
             {

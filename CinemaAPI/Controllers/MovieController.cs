@@ -331,6 +331,12 @@ namespace CinemaAPI.Controllers
         public async Task<ActionResult<List<MovieDTO>>> getRecommendedById(string userId)
         {
             List<MovieDTO> movieDto = await _movieLogic.recommendedMoviesByUserId(userId);
+            if (movieDto == null)
+            {
+                return StatusCode(404);
+            }
+
+            StatusCode(200);
             return movieDto;
         }
     }
