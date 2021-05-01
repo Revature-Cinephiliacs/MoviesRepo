@@ -318,7 +318,7 @@ namespace CinemaAPI.Controllers
             return mo;
         }
         /// <summary>
-        /// retuns recommended movies based on a given movie
+        /// retuns recommended movies basewd
         /// </summary>
         /// <param name="imdbId"></param>
         /// <returns></returns>
@@ -331,19 +331,9 @@ namespace CinemaAPI.Controllers
                 return StatusCode(404);
             }
 
-            return StatusCode(200);
+            StatusCode(200);
+            return await _movieLogic.recommendedMovies(imdbId);
 
-        }
-        /// <summary>
-        /// return a list of movies recommended by the userId
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-        [HttpGet("recommendedByUserId/{userId}")]
-        public async Task<ActionResult<List<MovieDTO>>> getRecommendedById(string userId)
-        {
-            List<MovieDTO> movieDto = await _movieLogic.recommendedMoviesByUserId(userId);
-            return movieDto;
         }
     }
 
