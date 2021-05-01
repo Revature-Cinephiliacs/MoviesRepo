@@ -192,7 +192,7 @@ namespace Seeding
 
         public static async Task AddMovie(MovieDTO movieDTO)
         {
-            await Task.Run(() => {
+            await Task.Run(async () => {
                 using (var context = new Cinephiliacs_MovieContext(dbOptions))
                 {
                     RepoLogic _repo = new RepoLogic(context);
@@ -200,7 +200,7 @@ namespace Seeding
 
                     if(movieDTO != null)
                     {
-                        if(_logic.CreateMovie(movieDTO))
+                        if(await _logic.CreateMovie(movieDTO))
                         {
                             Console.WriteLine(movieDTO.ImdbId + ": Success!");
                         }

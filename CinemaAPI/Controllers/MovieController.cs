@@ -63,13 +63,13 @@ namespace CinemaAPI.Controllers
         /// <param name="movieDTO"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult CreateMovie([FromBody] MovieDTO movieDTO)
+        public async Task<ActionResult> CreateMovie([FromBody] MovieDTO movieDTO)
         {
             if(!ModelState.IsValid)
             {
                 return StatusCode(400);
             }
-            if(_movieLogic.CreateMovie(movieDTO))
+            if(await _movieLogic.CreateMovie(movieDTO))
             {
                 return StatusCode(200);
             }
@@ -87,13 +87,13 @@ namespace CinemaAPI.Controllers
         /// <param name="movieDTO"></param>
         /// <returns></returns>
         [HttpPut("{movieId}")]
-        public ActionResult UpdateMovie(string movieId, [FromBody] MovieDTO movieDTO)
+        public async Task<ActionResult> UpdateMovie(string movieId, [FromBody] MovieDTO movieDTO)
         {
             if(!ModelState.IsValid)
             {
                 return StatusCode(400);
             }
-            if(_movieLogic.UpdateMovie(movieId, movieDTO))
+            if(await _movieLogic.UpdateMovie(movieId, movieDTO))
             {
                 return StatusCode(200);
             }
@@ -316,6 +316,22 @@ namespace CinemaAPI.Controllers
             mo.Website = "Test Str";
             mo.Response = "Test Str";
             return mo;
+        }
+        [HttpGet("recommended/{imdbId}")]
+        public async Task<ActionResult<List<MovieDTO>>> getRecommended(string imdbId)
+        {
+            return await _movieLogic.recommendedMovies(imdbId);
+        }
+        /// <summary>
+        /// return a list of movies recommended by the userId
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpGet("recommendedByUserId/{userId}")]
+        public async Task<ActionResult<List<MovieDTO>>> getRecommendedById(string userId)
+        {
+            List<MovieDTO> movieDto = await _movieLogic.recommendedMoviesByUserId(userId);
+            return movieDto;
         }
     }
 }

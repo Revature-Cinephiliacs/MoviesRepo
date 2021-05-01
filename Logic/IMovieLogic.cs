@@ -37,7 +37,7 @@ namespace Logic
         /// </summary>
         /// <param name="movieDTO"></param>
         /// <returns></returns>
-        bool UpdateMovie(string movieId, MovieDTO movieDTO);
+        Task<bool> UpdateMovie(string movieId, MovieDTO movieDTO);
 
         /// <summary>
         /// Updates the fields of the Movie with a matching movieId to the
@@ -58,7 +58,7 @@ namespace Logic
         /// </summary>
         /// <param name="movieDTO"></param>
         /// <returns></returns>
-        bool CreateMovie(MovieDTO movieDTO);
+        Task<bool> CreateMovie(MovieDTO movieDTO);
 
         /// <summary>
         /// Adds a User's Tag Vote for a Movie to the database.
@@ -121,5 +121,18 @@ namespace Logic
         /// </summary>
         /// <returns></returns>
         List<string> GetAllTags();
+        /// <summary>
+        /// return a list a movies depending on particular Movie Id 
+        /// </summary>
+        /// <param name="imdbId"></param>
+        /// <returns></returns>
+        Task<List<MovieDTO>> recommendedMovies(string imdbId);
+
+        /// <summary>
+        /// return a list a movies depending on particular User Id
+        /// </summary>
+        /// <param name="imdbId"></param>
+        /// <returns></returns>
+        Task<List<MovieDTO>> recommendedMoviesByUserId(string userId);
     }
 }

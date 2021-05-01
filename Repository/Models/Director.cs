@@ -5,9 +5,6 @@ using System.Collections.Generic;
 
 namespace Repository.Models
 {
-    /// <summary>
-    /// Contains all information about a director.
-    /// </summary>
     public partial class Director
     {
         public Director()

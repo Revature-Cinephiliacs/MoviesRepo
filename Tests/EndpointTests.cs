@@ -103,7 +103,7 @@ namespace Tests
         }
         
         [Fact]
-        public void PostMovieTest()
+        public async Task PostMovieTest()
         {
             var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie();
@@ -121,7 +121,7 @@ namespace Tests
                 IMovieLogic movieLogic = new MovieLogic(repoLogic);
                 MovieController movieController = new MovieController(movieLogic);
                 // Test CreateMovie()
-                movieController.CreateMovie(inputMovie);
+                await movieController.CreateMovie(inputMovie);
             }
 
             using(var context = new Cinephiliacs_MovieContext(dbOptions))
@@ -133,7 +133,7 @@ namespace Tests
         }
 
         [Fact]
-        public void PutMovieTest()
+        public async Task PutMovieTest()
         {
             var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie();
@@ -153,7 +153,7 @@ namespace Tests
                 IMovieLogic movieLogic = new MovieLogic(repoLogic);
                 MovieController movieController = new MovieController(movieLogic);
                 // Test UpdateMovie()
-                movieController.UpdateMovie(inputMovie.ImdbId, updatedMovie);
+                await movieController.UpdateMovie(inputMovie.ImdbId, updatedMovie);
             }
 
             using(var context = new Cinephiliacs_MovieContext(dbOptions))

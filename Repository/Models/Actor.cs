@@ -5,9 +5,6 @@ using System.Collections.Generic;
 
 namespace Repository.Models
 {
-    /// <summary>
-    /// Contains all information about an actor.
-    /// </summary>
     public partial class Actor
     {
         public Actor()

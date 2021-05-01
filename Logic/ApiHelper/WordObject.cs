@@ -9,9 +9,9 @@ namespace Logic.ApiHelper
     /// <summary>
     /// A data transfer object for retrieving the definition of a word from a public API.
     /// </summary>
-    public class DefinitionObject
+    public class WordObject
     {
-        public string Definition { get; set; }
-        public string PartOfSpeech { get; set; }
+        public string Word { get; set; }
+        public List<DefinitionObject> Definitions { get; set; }
     }
 }
