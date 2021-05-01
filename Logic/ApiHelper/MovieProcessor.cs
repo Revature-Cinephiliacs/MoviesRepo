@@ -65,6 +65,27 @@ namespace Logic.ApiHelper
                 var movieRecommended = await response.Content.ReadFromJsonAsync<List<string>>();
                 return movieRecommended;
             }
-        } 
+        }
+
+        public static async Task<WordObject> LoadDefinitionAsync(string word)
+        {
+            var client = new HttpClient();
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri($"https://wordsapiv1.p.rapidapi.com/words/{word}/definitions"),
+                Headers =
+                {
+                    { "x-rapidapi-key", "6d0ccdf5b5msh34c1c1dd38ee7f3p126f2cjsn773549c669d8" },
+                    { "x-rapidapi-host", "wordsapiv1.p.rapidapi.com" },
+                },
+            };
+            using (var response = await client.SendAsync(request))
+            {
+                response.EnsureSuccessStatusCode();
+                var wordObject = await response.Content.ReadFromJsonAsync<WordObject>();
+                return wordObject;
+            }
+        }
     }
 }

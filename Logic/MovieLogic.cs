@@ -633,6 +633,28 @@ namespace Logic
             return movieId;
         }
 
+        /// <summary>
+        /// Removes any movie whose movie id exists in the followedMovieIds list
+        /// from the recommendedDTOs list.
+        /// </summary>
+        /// <param name="recommendedDTOs"></param>
+        /// <param name="followedMovieIds"></param>
+        /// <returns></returns>
+        private List<MovieDTO> RemoveFollowedMovies(List<MovieDTO> recommendedDTOs, List<string> followedMovieIds)
+        {
+            for (int i = recommendedDTOs.Count - 1; i >= 0; i--)
+            {
+                foreach (var movieId in followedMovieIds)
+                {
+                    if(recommendedDTOs[i].ImdbId == movieId)
+                    {
+                        recommendedDTOs.RemoveAt(i);
+                    }
+                }
+            }
+            return recommendedDTOs;
+        }
+
         public async Task<List<MovieDTO>> recommendedMovies(string imdbId)
         {
             List<string> recommendedURLs = await MovieProcessor.LoadRecommendedMovies(imdbId);
@@ -690,6 +712,8 @@ namespace Logic
                 recommendedDTOs.Add(completedTask.Result);
                 getMovieTasks.Remove(completedTask);
             }
+
+            RemoveFollowedMovies(recommendedDTOs, followedMovieIds);
 
             return recommendedDTOs;
         }
