@@ -200,19 +200,12 @@ namespace Seeding
 
                     if(movieDTO != null)
                     {
-                        if(!_repo.MovieExists(movieDTO.ImdbId))
+                        if(_logic.CreateMovie(movieDTO))
                         {
-                            if(_logic.CreateMovie(movieDTO))
-                            {
-                                Console.WriteLine(movieDTO.ImdbId + ": Success!");
-                            }
-                            else
-                            { 
-                                Console.WriteLine(movieDTO.ImdbId + ": Creation failed!");
-                            }
+                            Console.WriteLine(movieDTO.ImdbId + ": Success!");
                         }
                         else
-                        {
+                        { 
                             Console.WriteLine(movieDTO.ImdbId + ": Movie already exists!");
                         }
                     }
