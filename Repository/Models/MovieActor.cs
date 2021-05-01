@@ -5,9 +5,6 @@ using System.Collections.Generic;
 
 namespace Repository.Models
 {
-    /// <summary>
-    /// Associates an actor with a movie.
-    /// </summary>
     public partial class MovieActor
     {
         public string ImdbId { get; set; }

@@ -5,10 +5,6 @@ using System.Collections.Generic;
 
 namespace Repository.Models
 {
-    /// <summary>
-    /// Contains all information about a movie's Motion Picture
-    /// Association film rating.
-    /// </summary>
     public partial class Rating
     {
         public Rating()

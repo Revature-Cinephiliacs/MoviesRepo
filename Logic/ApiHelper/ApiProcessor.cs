@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Logic.ApiHelper
 {
-    public class MovieProcessor
+    public class ApiProcessor
     {
         /// <summary>
         /// Retrieves the details for a movie based on an IMDB identification number, imdbId,

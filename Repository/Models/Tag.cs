@@ -5,9 +5,6 @@ using System.Collections.Generic;
 
 namespace Repository.Models
 {
-    /// <summary>
-    /// Contains all information about a movie tag.
-    /// </summary>
     public partial class Tag
     {
         public Tag()

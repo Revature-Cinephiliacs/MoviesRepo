@@ -5,9 +5,6 @@ using System.Collections.Generic;
 
 namespace Repository.Models
 {
-    /// <summary>
-    /// Contains all information about a genre.
-    /// </summary>
     public partial class Genre
     {
         public Genre()
