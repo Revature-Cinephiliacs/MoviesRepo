@@ -617,55 +617,92 @@ namespace Logic
                 movie.PosterUrl = movieDTO.PosterURL;
             }
         }
+
+        /// <summary>
+        /// Extracts the movie id string from a url in the format:
+        /// "/title/{movieid}/"
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        private string ParseMovieIdFromURL(string url)
+        {
+            string movieId = url;
+            if(url.Length > 8)
+            {
+                movieId = url.Substring(7, url.Length - 8);
+            }
+            return movieId;
+        }
+
         public async Task<List<MovieDTO>> recommendedMovies(string imdbId)
         {
-            List<MovieDTO> recommendedsDtos = new List<MovieDTO>();
-
-            List<string> titles = await MovieProcessor.LoadRecommendedMovies(imdbId);
-
-            foreach (var str in titles)
+            List<string> recommendedURLs = await MovieProcessor.LoadRecommendedMovies(imdbId);
+            var getMovieTasks = new List<Task<MovieDTO>>();
+            foreach (var recommendedURL in recommendedURLs)
             {
-                var prefix = "/title/";
-                var suffix = "/";
-                string url = str;
+                var movieId = ParseMovieIdFromURL(recommendedURL);
 
-                if (url.StartsWith(prefix) && url.EndsWith(suffix) && url.Length >= (prefix.Length + suffix.Length))
-                {
-                    string newString = url.Substring(prefix.Length, url.Length - prefix.Length - suffix.Length);
-                    recommendedsDtos.Add(GetMovie(newString).Result);
-                }
+                getMovieTasks.Add(GetMovie(movieId));
             }
-            return recommendedsDtos;
+
+            var recommendedDTOs = new List<MovieDTO>();
+            while(getMovieTasks.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(getMovieTasks);
+                recommendedDTOs.Add(completedTask.Result);
+                getMovieTasks.Remove(completedTask);
+            }
+
+            return recommendedDTOs;
         }
 
         public async Task<List<MovieDTO>> recommendedMoviesByUserId(string userId)
         {
-            List<MovieDTO> recommendedsDtos = new List<MovieDTO>();
+            var loadRecommendedTask = new List<Task<List<string>>>();
+            List<string> followedMovieIds = _repo.GetFollowingMovies(userId);
+            if (followedMovieIds.Count > 5 )
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    loadRecommendedTask.Add(MovieProcessor.LoadRecommendedMovies(followedMovieIds[i]));
+                }
+                
+            }
 
-            List<string> titles = new List<string>();
+            if (followedMovieIds.Count < 5)
+            {
+                foreach (var followedMovieId in followedMovieIds)
+                {
+                    loadRecommendedTask.Add(MovieProcessor.LoadRecommendedMovies(followedMovieId));
+                } 
+            }
+            var movieIds = new List<string>();
+            while(loadRecommendedTask.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(loadRecommendedTask);
+                foreach (var recommendedURL in completedTask.Result)
+                {
+                    var movieId = ParseMovieIdFromURL(recommendedURL);
+                    movieIds.Add(movieId);
+                }
+                loadRecommendedTask.Remove(completedTask);
+            }
 
-            List<string> movieIds = _repo.GetFollowingMovies(userId);
-
+            var getMovieTasks = new List<Task<MovieDTO>>();
             foreach (var movieId in movieIds)
             {
-                foreach (var ss in await MovieProcessor.LoadRecommendedMovies(movieId))
-                {
-                    titles.Add(ss);
-                }
+                getMovieTasks.Add(GetMovie(movieId));
             }
-            foreach (var str in titles)
-            {
-                var prefix = "/title/";
-                var suffix = "/";
-                string url = str;
 
-                if (url.StartsWith(prefix) && url.EndsWith(suffix) && url.Length >= (prefix.Length + suffix.Length))
-                {
-                    string newString = url.Substring(prefix.Length, url.Length - prefix.Length - suffix.Length);
-                    recommendedsDtos.Add(GetMovie(newString).Result);
-                }
+            var recommendedDTOs = new List<MovieDTO>();
+            while(getMovieTasks.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(getMovieTasks);
+                recommendedDTOs.Add(completedTask.Result);
+                getMovieTasks.Remove(completedTask);
             }
-            return recommendedsDtos;
+
+            return recommendedDTOs;
         }
     }
 }

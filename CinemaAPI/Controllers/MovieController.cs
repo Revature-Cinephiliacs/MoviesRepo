@@ -326,17 +326,32 @@ namespace CinemaAPI.Controllers
         [HttpGet("recommended/{imdbId}")]
         public async Task<ActionResult<List<MovieDTO>>> getRecommended(string imdbId)
         {
-            if (await _movieLogic.recommendedMovies(imdbId) == null)
+            List<MovieDTO> movieDto = await _movieLogic.recommendedMovies(imdbId);
+            if (movieDto == null)
             {
                 return StatusCode(404);
             }
 
             StatusCode(200);
-            return await _movieLogic.recommendedMovies(imdbId);
+            return movieDto;
+        }
 
+        /// <summary>
+        /// return a list of movies recommended by the userId
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpGet("recommendedByUserId/{userId}")]
+        public async Task<ActionResult<List<MovieDTO>>> getRecommendedById(string userId)
+        {
+            List<MovieDTO> movieDto = await _movieLogic.recommendedMoviesByUserId(userId);
+            if (movieDto == null)
+            {
+                return StatusCode(404);
+            }
+
+            StatusCode(200);
+            return movieDto;
         }
     }
-
-
 }
-
