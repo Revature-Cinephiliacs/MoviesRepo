@@ -272,6 +272,63 @@ namespace CinemaAPI.Controllers
             return _movieLogic.GetFollowingMovies(userId);
         }
 
+        
+
+        /// <summary>
+        /// Takes a review packet from reviews api,
+        /// and gets a list of users following the movie.
+        /// Returns response code.
+        /// </summary>
+        /// <param name="review"></param>
+        /// <returns></returns>
+        [HttpPost()] //Needs endpoint -Larson
+        [Authorize]
+        public async Task<ActionResult<bool>> RetrieveNewReview([FromBody] ReviewNotification reviewNotification)
+        {
+            ReviewNotification review = new ReviewNotification();
+            review = reviewNotification;
+            review = _movieLogic.GetFollowersForReviewNotification(review);
+            SendReviewNotification(review);
+        }
+
+        /// <summary>
+        /// Takes a forum packet from forum api,
+        /// and gets a list of users following the movie.
+        /// Returns response code.
+        /// </summary>
+        /// <param name="forumNotification"></param>
+        /// <returns></returns>
+        [HttpPost()] //Needs endpoint -Larson
+        [Authorize]
+        public async Task<ActionResult<bool>> RetrieveNewDiscussion([FromBody] ForumNotification forumNotification)
+        {
+            ForumNotification forumNote = new ForumNotification();
+            forumNote = forumNotification;
+            forumNote = _movieLogic.GetFollowersForForumNotification(forumNote);
+            SendForumNotification(forumNote);
+        }
+
+        /// <summary>
+        /// Sends the review notification on to Users, with the list of users who follow the movie the new movie review belongs to.
+        /// </summary>
+        /// <param name="reviewNotification"></param
+        /// <returns></returns>
+        [HttpGet()] //needs endpoint
+        public async Task<ActionResult<ReviewNotification>> SendReviewNotification(ReviewNotification reviewNotification)
+        {
+            return reviewNotification;
+        }
+
+        /// <summary>
+        /// Sends the forum notification on to Users with the list of users who follow the movie the new forum topic belongs to.
+        /// </summary>
+        /// <param name="forumNotification"></param>
+        /// <returns></returns>
+        [HttpGet()] //needs endpoint
+        public async Task<ActionResult<ForumNotification>> SendForumNotification(ForumNotification forumNotification)
+        {
+            return forumNotification;
+        }
         /// <summary>
         /// Example for using authentication
         /// </summary>

@@ -438,6 +438,35 @@ namespace Logic
         }
 
         /// <summary>
+        /// Takes in a review with an empty follower list.
+        /// Gets the follower list from the repo.
+        /// Adds follower list to review.
+        /// </summary>
+        /// <param name="review"></param>
+        /// <returns>ReviewNotification</returns>
+        public ReviewNotification GetFollowersForReviewNotification(ReviewNotification review)
+        {
+            
+            review.Followers = _repo.GetFollowingMoviesByMovieID(review.ImdbId);
+            return review;
+        }
+
+        /// <summary>
+        /// Takes in a discussion notification with it's existing follower list.
+        /// Gets the follower list from the repo for the movie noted in the discussion.
+        /// Adds movie follower list to existing list.
+        /// </summary>
+        /// <param name="forumNote"></param>
+        /// <returns>ForumNotification</returns>
+        public ForumNotification GetFollowersForForumNotification(ForumNotification forumNote)
+        {
+            if(forumNote.ImdbId != null){
+                forumNote.Followers.Add(_repo.GetFollowingMoviesByMovieID(forumNote.ImdbId));
+            }
+            return forumNote;
+        }
+
+        /// <summary>
         /// Removes any movies from the list argument that are not tagged
         /// with all of the provided tag names.
         /// </summary>
