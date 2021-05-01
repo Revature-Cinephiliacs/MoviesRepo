@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Logic.ApiHelper
 {
     /// <summary>
-    /// A data transfer object for retrieving the definition of a word from a public API.
+    /// Contains a single definition and its associated part of speech.
     /// </summary>
     public class DefinitionObject
     {

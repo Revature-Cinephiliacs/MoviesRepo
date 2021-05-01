@@ -380,6 +380,10 @@ namespace Repository.Models
                     .HasMaxLength(50)
                     .HasColumnName("word");
 
+                entity.Property(e => e.BaseWord)
+                    .HasMaxLength(50)
+                    .HasColumnName("baseWord");
+
                 entity.Property(e => e.IsTag).HasColumnName("isTag");
             });
 

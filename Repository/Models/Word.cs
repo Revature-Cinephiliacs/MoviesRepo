@@ -9,5 +9,6 @@ namespace Repository.Models
     {
         public string Word1 { get; set; }
         public bool IsTag { get; set; }
+        public string BaseWord { get; set; }
     }
 }
