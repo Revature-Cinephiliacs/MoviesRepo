@@ -69,6 +69,7 @@ namespace Logic.ApiHelper
 
         public static async Task<WordObject> LoadDefinitionAsync(string word)
         {
+            Console.WriteLine(word);
             var client = new HttpClient();
             var request = new HttpRequestMessage
             {
@@ -82,6 +83,10 @@ namespace Logic.ApiHelper
             };
             using (var response = await client.SendAsync(request))
             {
+                if(response.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    return null;
+                }
                 response.EnsureSuccessStatusCode();
                 var wordObject = await response.Content.ReadFromJsonAsync<WordObject>();
                 return wordObject;

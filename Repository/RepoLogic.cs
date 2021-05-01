@@ -413,6 +413,7 @@ namespace Repository
         {
             return _dbContext.Movies
                 .Where(m => m.ImdbId == movieId)
+                .OrderBy(m => m.ImdbId)
                 .AsSplitQuery()
                 .Include(m => m.Rating)
                 .Include(m => m.MovieActors)
