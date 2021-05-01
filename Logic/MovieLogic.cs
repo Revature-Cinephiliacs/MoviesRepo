@@ -305,6 +305,9 @@ namespace Logic
                     return false;
                 }
                 MovieDTO newMovieDTO = Mapper.MovieObjectToMovieDTO(movieObject);
+// 
+// Add Autotagging
+// 
                 if(!CreateMovie(newMovieDTO))
                 {
                     return false;
