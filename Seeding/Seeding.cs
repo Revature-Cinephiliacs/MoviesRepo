@@ -15,7 +15,7 @@ namespace Seeding
     {
         const int MAX_NUMBER_OF_TASKS = 10;
         const int BATCH_SIZE = 10;
-        const int STARTING_LINE = 1200;
+        const int STARTING_LINE = 2200;
         const int MAX_NUMBER_OF_MOVIES = 200;
         readonly static DbContextOptions<Cinephiliacs_MovieContext> dbOptions = new DbContextOptionsBuilder<Cinephiliacs_MovieContext>()
                 .UseSqlServer("Server=tcp:cinephiliacs.database.windows.net,1433;Initial Catalog=Cinephiliacs_Movie;"
@@ -41,6 +41,8 @@ namespace Seeding
                 {
                     if(movieDTOs.Count >= BATCH_SIZE)
                     {
+                        Console.WriteLine("Batch: " + (STARTING_LINE + 1 + limitCounter - BATCH_SIZE).ToString() + " - "
+                            + (STARTING_LINE + limitCounter).ToString());
                         AddMovies(movieDTOs);
                         movieDTOs.Clear();
                     }
