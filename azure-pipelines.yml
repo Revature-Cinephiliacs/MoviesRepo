@@ -30,6 +30,66 @@ stages:
 - stage: Build
   displayName: Build stage
   jobs:
+  - job: Sonarcloud
+    displayName: SonarCloud
+    pool:
+      vmImage: $(vmImageName)
+    variables:
+      solution: '*.sln'
+      buildPlatform: 'Any CPU'
+      buildConfiguration: 'Release'
+    steps:
+      - task: UseDotNet@2
+        displayName: 'Install .NET Core SDK'
+        inputs:
+          packageType: 'sdk'
+          version: '5.0.x'
+          # performMultiLevelLookup: true
+          # includePreviewVersions: false # Required 'true' to use preview versions
+      - task: UseDotNet@2
+        displayName: 'Install .NET Core Runtime'
+        inputs:
+          packageType: 'runtime'
+          version: '2.x'
+          # performMultiLevelLookup: true
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '11.x'
+      - task: NuGetToolInstaller@1
+      - task: NuGetCommand@2
+        inputs:
+          restoreSolution: '$(solution)'
+
+      - task: SonarCloudPrepare@1
+        inputs:
+          SonarCloud: 'SonarCloudMovie'
+          organization: 'revature-cinephiliacs'
+          scannerMode: 'MSBuild'
+          projectKey: 'Revature-Cinephiliacs_MoviesRepo'
+          projectName: 'MoviesRepo'
+          extraProperties: 
+            sonar.cs.opencover.reportsPaths=$(Agent.TempDirectory)/*/coverage.opencover.xml
+
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: publish
+          publishWebProjects: True
+          arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+          zipAfterPublish: True
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'test'
+          projects: 'Tests/*.csproj'
+          arguments: '--configuration $(buildConfiguration) --collect "xplat code coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura,opencover'
+          testRunTitle: 'Dotnet tests running'
+      - task: PublishCodeCoverageResults@1
+        inputs:
+          codeCoverageTool: 'Cobertura'
+          summaryFileLocation: '$(Agent.TempDirectory)/*/coverage.cobertura.xml'
+      - task: SonarCloudAnalyze@1
+      - task: SonarCloudPublish@1
+        inputs:
+          pollingTimeoutSec: '300'
   - job: Build
     displayName: Build
     pool:
