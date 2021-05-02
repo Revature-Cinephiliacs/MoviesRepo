@@ -6,6 +6,9 @@ using Logic.ApiHelper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Net.Http;
+using Newtonsoft.Json.Linq;
+using System.Net.Http.Headers;
 using Model;
 
 namespace CinemaAPI.Controllers
@@ -348,7 +351,7 @@ namespace CinemaAPI.Controllers
         {
             HttpClient client = new HttpClient();
             string path = "http://20.45.2.119/user/notification/discussion";
-            HttpResponseMessage response = await client.GetAsync(path, forumNotification);
+            HttpResponseMessage response = await client.PostAsJsonAsync(path, forumNotification);
             if(response.IsSuccessStatusCode)
             {   
                 return true;
