@@ -1,8 +1,10 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Logic.ApiHelper;
 using Model;
 using Repository;
 using Repository.Models;
@@ -23,10 +25,10 @@ namespace Logic
         {
             if(_repo.MovieExists(movieId))
             {
-                Movie movie = _repo.GetMovie(movieId);
-                var movieTags = _repo.GetMovieTags(movieId);
+                Movie movie = _repo.GetMovieFullInfo(movieId);
+
                 var tagNames = new List<string>();
-                foreach (var movieTag in movieTags)
+                foreach (var movieTag in movie.MovieTags)
                 {
                     var tag = _repo.GetTag(movieTag.TagName);
                     if(tag != null && tag.IsBanned == false)
@@ -35,9 +37,7 @@ namespace Logic
                     }
                 }
 
-                return Mapper.MovieToMovieDTO(movie, _repo.GetRating(movie.RatingId ?? 0), _repo.GetMovieActorNames(movieId)
-                    , _repo.GetMovieDirectorNames(movieId), _repo.GetMovieGenreNames(movieId)
-                    , _repo.GetMovieLanguageNames(movieId), tagNames);
+                return Mapper.MovieToMovieDTO(movie);
             }
 
             ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor.LoadMovieAsync(movieId);
@@ -59,9 +59,6 @@ namespace Logic
                     case "tag":
                         FilterMoviesByTags(movies, filter.Value);
                     break;
-                    case "rating":
-                        FilterMoviesByRatings(movies, filter.Value);
-                    break;
                     case "actors":
                     case "actor":
                         FilterMoviesByActors(movies, filter.Value);
@@ -70,13 +67,16 @@ namespace Logic
                     case "director":
                         FilterMoviesByDirectors(movies, filter.Value);
                     break;
+                    case "languages":
+                    case "language":
+                        FilterMoviesByLanguages(movies, filter.Value);
+                    break;
                     case "genres":
                     case "genre":
                         FilterMoviesByGenres(movies, filter.Value);
                     break;
-                    case "languages":
-                    case "language":
-                        FilterMoviesByLanguages(movies, filter.Value);
+                    case "rating":
+                        FilterMoviesByRatings(movies, filter.Value);
                     break;
                 }
                 if(movies.Count == 0)
@@ -439,6 +439,35 @@ namespace Logic
         }
 
         /// <summary>
+        /// Takes in a review with an empty follower list.
+        /// Gets the follower list from the repo.
+        /// Adds follower list to review.
+        /// </summary>
+        /// <param name="review"></param>
+        /// <returns>ReviewNotification</returns>
+        public ReviewNotification GetFollowersForReviewNotification(ReviewNotification review)
+        {
+            
+            review.Followers = _repo.GetFollowingMoviesByMovieID(review.Imdbid);
+            return review;
+        }
+
+        /// <summary>
+        /// Takes in a discussion notification with it's existing follower list.
+        /// Gets the follower list from the repo for the movie noted in the discussion.
+        /// Adds movie follower list to existing list.
+        /// </summary>
+        /// <param name="forumNote"></param>
+        /// <returns>ForumNotification</returns>
+        public ForumNotification GetFollowersForForumNotification(ForumNotification forumNote)
+        {
+            if(forumNote.Imdbid != null){
+                forumNote.Followers = _repo.GetFollowingMoviesByMovieID(forumNote.Imdbid);
+            }
+            return forumNote;
+        }
+
+        /// <summary>
         /// Removes any movies from the list argument that are not tagged
         /// with all of the provided tag names.
         /// </summary>
@@ -450,8 +479,7 @@ namespace Logic
             {
                 for (int i = 0; i < movies.Count; i++)
                 {
-                    List<MovieTag> movieTags = _repo.GetMovieTags(movies[i].ImdbId);
-                    if(movieTags.FirstOrDefault(mt => mt.TagName == tagName
+                    if(movies[i].MovieTags.FirstOrDefault(mt => mt.TagName == tagName
                         && mt.VoteSum > 0) == null)
                     {
                         movies.RemoveAt(i);
@@ -493,10 +521,10 @@ namespace Logic
         {
             foreach (var actorName in actorNames)
             {
+                var actorId = _repo.GetActor(actorName).ActorId;
                 for (int i = 0; i < movies.Count; i++)
                 {
-                    List<string> movieActorNames = _repo.GetMovieActorNames(movies[i].ImdbId);
-                    if(!movieActorNames.Contains(actorName))
+                    if(movies[i].MovieActors.FirstOrDefault(ma => ma.ActorId == actorId) == null)
                     {
                         movies.RemoveAt(i);
                         i--;
@@ -515,10 +543,10 @@ namespace Logic
         {
             foreach (var directorName in directorNames)
             {
+                var directorId = _repo.GetDirector(directorName).DirectorId;
                 for (int i = 0; i < movies.Count; i++)
                 {
-                    List<string> movieDirectorNames = _repo.GetMovieDirectorNames(movies[i].ImdbId);
-                    if(!movieDirectorNames.Contains(directorName))
+                    if(movies[i].MovieDirectors.FirstOrDefault(md => md.DirectorId == directorId) == null)
                     {
                         movies.RemoveAt(i);
                         i--;
@@ -537,10 +565,10 @@ namespace Logic
         {
             foreach (var genreName in genreNames)
             {
+                var genreId = _repo.GetGenre(genreName).GenreId;
                 for (int i = 0; i < movies.Count; i++)
                 {
-                    List<string> movieGenreNames = _repo.GetMovieGenreNames(movies[i].ImdbId);
-                    if(!movieGenreNames.Contains(genreName))
+                    if(movies[i].MovieGenres.FirstOrDefault(mg => mg.GenreId == genreId) == null)
                     {
                         movies.RemoveAt(i);
                         i--;
@@ -559,10 +587,10 @@ namespace Logic
         {
             foreach (var languageName in languageNames)
             {
+                var languageId = _repo.GetLanguage(languageName).LanguageId;
                 for (int i = 0; i < movies.Count; i++)
                 {
-                    List<string> movieLanguageNames = _repo.GetMovieLanguageNames(movies[i].ImdbId);
-                    if(!movieLanguageNames.Contains(languageName))
+                    if(movies[i].MovieLanguages.FirstOrDefault(ml => ml.LanguageId == languageId) == null)
                     {
                         movies.RemoveAt(i);
                         i--;
@@ -617,6 +645,93 @@ namespace Logic
             {
                 movie.PosterUrl = movieDTO.PosterURL;
             }
+        }
+
+        /// <summary>
+        /// Extracts the movie id string from a url in the format:
+        /// "/title/{movieid}/"
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        private string ParseMovieIdFromURL(string url)
+        {
+            string movieId = url;
+            if(url.Length > 8)
+            {
+                movieId = url.Substring(7, url.Length - 8);
+            }
+            return movieId;
+        }
+
+        public async Task<List<MovieDTO>> recommendedMovies(string imdbId)
+        {
+            List<string> recommendedURLs = await MovieProcessor.LoadRecommendedMovies(imdbId);
+            var getMovieTasks = new List<Task<MovieDTO>>();
+            foreach (var recommendedURL in recommendedURLs)
+            {
+                var movieId = ParseMovieIdFromURL(recommendedURL);
+
+                getMovieTasks.Add(GetMovie(movieId));
+            }
+
+            var recommendedDTOs = new List<MovieDTO>();
+            while(getMovieTasks.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(getMovieTasks);
+                recommendedDTOs.Add(completedTask.Result);
+                getMovieTasks.Remove(completedTask);
+            }
+
+            return recommendedDTOs;
+        }
+
+        public async Task<List<MovieDTO>> recommendedMoviesByUserId(string userId)
+        {
+            var loadRecommendedTask = new List<Task<List<string>>>();
+            List<string> followedMovieIds = _repo.GetFollowingMovies(userId);
+            if (followedMovieIds.Count > 5 )
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    loadRecommendedTask.Add(MovieProcessor.LoadRecommendedMovies(followedMovieIds[i]));
+                }
+                
+            }
+
+            if (followedMovieIds.Count < 5)
+            {
+                foreach (var followedMovieId in followedMovieIds)
+                {
+                    loadRecommendedTask.Add(MovieProcessor.LoadRecommendedMovies(followedMovieId));
+                } 
+            }
+            var movieIds = new List<string>();
+            while(loadRecommendedTask.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(loadRecommendedTask);
+                foreach (var recommendedURL in completedTask.Result)
+                {
+                    var movieId = ParseMovieIdFromURL(recommendedURL);
+                    movieIds.Add(movieId);
+                }
+                loadRecommendedTask.Remove(completedTask);
+            }
+
+            var getMovieTasks = new List<Task<MovieDTO>>();
+            foreach (var movieId in movieIds)
+            {
+                getMovieTasks.Add(GetMovie(movieId));
+            }
+
+            var recommendedDTOs = new List<MovieDTO>();
+            while(getMovieTasks.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(getMovieTasks);
+                recommendedDTOs.Add(completedTask.Result);
+                getMovieTasks.Remove(completedTask);
+            }
+
+            return recommendedDTOs;
         }
     }
 }
