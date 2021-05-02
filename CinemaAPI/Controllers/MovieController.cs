@@ -324,10 +324,19 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="reviewNotification"></param
         /// <returns></returns>
-        [HttpPost("User/notification/review")] //needs endpoint
-        public async Task<ActionResult<ReviewNotification>> SendReviewNotification(ReviewNotification reviewNotification)
+        public async Task<bool> SendReviewNotification(ReviewNotification reviewNotification)
         {
-            return reviewNotification;
+            HttpClient client = new HttpClient();
+            string path = "http://20.45.2.119/user/notification/review";
+            HttpResponseMessage response = await client.PostAsJsonAsync(path, reviewNotification);
+            if(response.IsSuccessStatusCode)
+            {   
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -335,10 +344,20 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="forumNotification"></param>
         /// <returns></returns>
-        [HttpPost("User/notification/discussion")] //needs endpoint
-        public async Task<ActionResult<ForumNotification>> SendForumNotification(ForumNotification forumNotification)
+        public async Task<bool> SendForumNotification(ForumNotification forumNotification)
         {
-            return forumNotification;
+            HttpClient client = new HttpClient();
+            string path = "http://20.45.2.119/user/notification/discussion";
+            HttpResponseMessage response = await client.GetAsync(path, forumNotification);
+            if(response.IsSuccessStatusCode)
+            {   
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+            
         }
         /// <summary>
         /// Example for using authentication
