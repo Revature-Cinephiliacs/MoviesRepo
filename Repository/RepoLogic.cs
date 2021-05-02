@@ -609,6 +609,23 @@ namespace Repository
         }
 
         /// <summary>
+        /// Takes a movie id and returns a list of every user who follows
+        /// the movie. Used in conjunction with notifications.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <returns></returns>
+        public List<string> GetFollowingMoviesByMovieID(string movieId)
+        {
+            var followingMovies = _dbContext.FollowingMovies.Where(fm => fm.ImdbId == movieId);
+            var followerList = new List<string>();
+            foreach (var followingMovie in followingMovies)
+            {
+                followerList.Add(followingMovie.UserId);
+            }
+            return followerList;
+        }
+
+        /// <summary>
         /// Removes all actors from the Movie assocaited with the
         /// provided movie Id.
         /// </summary>

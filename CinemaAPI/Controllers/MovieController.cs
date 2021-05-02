@@ -272,6 +272,93 @@ namespace CinemaAPI.Controllers
             return _movieLogic.GetFollowingMovies(userId);
         }
 
+        
+
+        /// <summary>
+        /// Takes a review packet from reviews api,
+        /// and gets a list of users following the movie.
+        /// Returns response code.
+        /// </summary>
+        /// <param name="review"></param>
+        /// <returns></returns>
+        [HttpPost("review/notification")] //Needs endpoint -Larson
+        [Authorize]
+        public async Task<ActionResult<bool>> RetrieveNewReview([FromBody] ReviewNotification reviewNotification)
+        {
+            ReviewNotification review = new ReviewNotification();
+            review = reviewNotification;
+            review = _movieLogic.GetFollowersForReviewNotification(review);
+            if(review.Followers != null){
+                SendReviewNotification(review);
+                return StatusCode(200);
+            }else{
+                return StatusCode(404);
+            }
+            
+        }
+
+        /// <summary>
+        /// Takes a forum packet from forum api,
+        /// and gets a list of users following the movie.
+        /// Returns response code.
+        /// </summary>
+        /// <param name="forumNotification"></param>
+        /// <returns></returns>
+        [HttpPost("discussion/notification")] //Needs endpoint -Larson
+        [Authorize]
+        public async Task<ActionResult<bool>> RetrieveNewDiscussion([FromBody] ForumNotification forumNotification)
+        {
+            ForumNotification forumNote = new ForumNotification();
+            forumNote = forumNotification;
+            forumNote = _movieLogic.GetFollowersForForumNotification(forumNote);
+            if(forumNote.Followers != null){
+                SendForumNotification(forumNote);
+                return StatusCode(200);
+            }else{
+                return StatusCode(404);
+            }
+        }
+
+        /// <summary>
+        /// Sends the review notification on to Users, with the list of users who follow the movie the new movie review belongs to.
+        /// </summary>
+        /// <param name="reviewNotification"></param
+        /// <returns></returns>
+        public async Task<bool> SendReviewNotification(ReviewNotification reviewNotification)
+        {
+            HttpClient client = new HttpClient();
+            string path = "http://20.45.2.119/user/notification/review";
+            HttpResponseMessage response = await client.PostAsJsonAsync(path, reviewNotification);
+            if(response.IsSuccessStatusCode)
+            {   
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Sends the forum notification on to Users with the list of users who follow the movie the new forum topic belongs to.
+        /// </summary>
+        /// <param name="forumNotification"></param>
+        /// <returns></returns>
+        public async Task<bool> SendForumNotification(ForumNotification forumNotification)
+        {
+            HttpClient client = new HttpClient();
+            string path = "http://20.45.2.119/user/notification/discussion";
+            HttpResponseMessage response = await client.GetAsync(path, forumNotification);
+            if(response.IsSuccessStatusCode)
+            {   
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+            
+        }
         /// <summary>
         /// Example for using authentication
         /// </summary>
