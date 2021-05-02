@@ -19,12 +19,18 @@ namespace Seeding
         const int MAX_WORD_API_TASKS = 5;
         const int MAX_DB_TASKS = 15;
         const int BATCH_SIZE = 50;
-        const int STARTING_LINE = 4600;
-        const int MAX_NUMBER_OF_MOVIES = 100;
+
+        // Path to the file with all the idbdIds
+        const string FILE_PATH = "imdbIDs.txt";
+
+        // Determines which line of the file is the starting point
+        const int STARTING_LINE = 0;
+
+        // Sets the number of movies to add to the database. If this is greater than the
+        // remaining number of lines in the file, all the remianing movies will be added.
+        const int MAX_NUMBER_OF_MOVIES = 1000;
         readonly static DbContextOptions<Cinephiliacs_MovieContext> dbOptions = new DbContextOptionsBuilder<Cinephiliacs_MovieContext>()
-                .UseSqlServer("Server=tcp:cinephiliacs.database.windows.net,1433;Initial Catalog=Cinephiliacs_Movie;"
-                + "Persist Security Info=False;User ID=kugelsicher;Password=F36UWevqvcDxEmt;MultipleActiveResultSets="
-                + "False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;").Options;
+                .UseSqlServer("Server=tcp:mark-moore-03012021batch-p3-sqlserver.database.windows.net,1433;Initial Catalog=Movie;Persist Security Info=False;User ID=markmoorerev;Password=03012021batch!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;").Options;
         
         private static List<string> ReadMovieIdsFromFile(string path)
         {
@@ -46,10 +52,9 @@ namespace Seeding
             return movieIdList;
         }
 
-        public async static Task<bool> SeedDbFromCSV(string path)
+        public async static Task<bool> SeedDbFromCSV()
         {
-
-            var movieIdList = ReadMovieIdsFromFile(path);
+            var movieIdList = ReadMovieIdsFromFile(FILE_PATH);
 
             int limitCounter = 0;
             var getMovieTasks = new List<Task<MovieDTO>>();

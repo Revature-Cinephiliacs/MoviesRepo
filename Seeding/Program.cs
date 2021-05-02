@@ -7,8 +7,7 @@ namespace Seeding
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Input file path:");
-            await Seeding.SeedDbFromCSV(Console.ReadLine());
+            await Seeding.SeedDbFromCSV();
         }
     }
 }
