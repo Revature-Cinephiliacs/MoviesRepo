@@ -33,6 +33,23 @@ namespace CinemaAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    builder =>
+                    {
+                        builder.WithOrigins(
+                            "http://20.94.137.143/", //Frontend
+                            "http://20.189.29.112/", //Admintools
+                            "http://20.45.2.119/", //User
+                            "http://localhost:4200/" // for testing
+                            )
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    }
+                );
+            });
+
             var myConnectionString = Configuration.GetConnectionString("Cinephiliacs_Movie");
             services.AddDbContext<Cinephiliacs_MovieContext>(options =>
             {
@@ -77,9 +94,9 @@ namespace CinemaAPI
         {
             //if (env.IsDevelopment())
             //{
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CinemaAPI v1"));
+            app.UseDeveloperExceptionPage();
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CinemaAPI v1"));
             //}
 
             app.UseHttpsRedirection();
