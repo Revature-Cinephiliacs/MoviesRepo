@@ -10,6 +10,7 @@ using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using Model;
+using System.Net.Http.Json;
 
 namespace CinemaAPI.Controllers
 {
@@ -292,7 +293,7 @@ namespace CinemaAPI.Controllers
             review = reviewNotification;
             review = _movieLogic.GetFollowersForReviewNotification(review);
             if(review.Followers != null){
-                SendReviewNotification(review);
+                await SendReviewNotification(review);
                 return StatusCode(200);
             }else{
                 return StatusCode(404);
@@ -315,7 +316,7 @@ namespace CinemaAPI.Controllers
             forumNote = forumNotification;
             forumNote = _movieLogic.GetFollowersForForumNotification(forumNote);
             if(forumNote.Followers != null){
-                SendForumNotification(forumNote);
+                await SendForumNotification(forumNote);
                 return StatusCode(200);
             }else{
                 return StatusCode(404);
