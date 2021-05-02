@@ -69,7 +69,6 @@ namespace Logic.ApiHelper
 
         public static async Task<WordObject> LoadDefinitionAsync(string word)
         {
-            Console.WriteLine(word);
             var client = new HttpClient();
             var request = new HttpRequestMessage
             {

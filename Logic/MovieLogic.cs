@@ -241,8 +241,9 @@ namespace Logic
         /// <summary>
         /// Splits a single string into a list of individual words.
         /// Removes all characters that are not letters, including
-        /// whitespace. Returns an empty list if the input string
-        /// is shorter than 11 characters.
+        /// whitespace. Makes all characters lowercase. Returns an
+        /// empty list if the input string is shorter than 11 
+        /// characters.
         /// </summary>
         /// <param name="plot"></param>
         /// <returns></returns>
