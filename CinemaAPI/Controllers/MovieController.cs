@@ -281,14 +281,20 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="review"></param>
         /// <returns></returns>
-        [HttpPost()] //Needs endpoint -Larson
+        [HttpPost("review/notification")] //Needs endpoint -Larson
         [Authorize]
         public async Task<ActionResult<bool>> RetrieveNewReview([FromBody] ReviewNotification reviewNotification)
         {
             ReviewNotification review = new ReviewNotification();
             review = reviewNotification;
             review = _movieLogic.GetFollowersForReviewNotification(review);
-            SendReviewNotification(review);
+            if(review.Followers != null){
+                SendReviewNotification(review);
+                return StatusCode(200);
+            }else{
+                return StatusCode(404);
+            }
+            
         }
 
         /// <summary>
@@ -298,14 +304,19 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="forumNotification"></param>
         /// <returns></returns>
-        [HttpPost()] //Needs endpoint -Larson
+        [HttpPost("discussion/notification")] //Needs endpoint -Larson
         [Authorize]
         public async Task<ActionResult<bool>> RetrieveNewDiscussion([FromBody] ForumNotification forumNotification)
         {
             ForumNotification forumNote = new ForumNotification();
             forumNote = forumNotification;
             forumNote = _movieLogic.GetFollowersForForumNotification(forumNote);
-            SendForumNotification(forumNote);
+            if(forumNote.Followers != null){
+                SendForumNotification(forumNote);
+                return StatusCode(200);
+            }else{
+                return StatusCode(404);
+            }
         }
 
         /// <summary>
@@ -313,7 +324,7 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="reviewNotification"></param
         /// <returns></returns>
-        [HttpGet()] //needs endpoint
+        [HttpPost("User/notification/review")] //needs endpoint
         public async Task<ActionResult<ReviewNotification>> SendReviewNotification(ReviewNotification reviewNotification)
         {
             return reviewNotification;
@@ -324,7 +335,7 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="forumNotification"></param>
         /// <returns></returns>
-        [HttpGet()] //needs endpoint
+        [HttpPost("User/notification/discussion")] //needs endpoint
         public async Task<ActionResult<ForumNotification>> SendForumNotification(ForumNotification forumNotification)
         {
             return forumNotification;

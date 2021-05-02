@@ -134,5 +134,23 @@ namespace Logic
         /// <param name="imdbId"></param>
         /// <returns></returns>
         Task<List<MovieDTO>> recommendedMoviesByUserId(string userId);
+
+        /// <summary>
+        /// Takes in a review with an empty follower list.
+        /// Gets the follower list from the repo.
+        /// Adds follower list to review.
+        /// </summary>
+        /// <param name="review"></param>
+        /// <returns>ReviewNotification</returns>
+        ReviewNotification GetFollowersForReviewNotification(ReviewNotification review);
+
+        /// <summary>
+        /// Takes in a discussion notification with it's existing follower list.
+        /// Gets the follower list from the repo for the movie noted in the discussion.
+        /// Adds movie follower list to existing list.
+        /// </summary>
+        /// <param name="forumNote"></param>
+        /// <returns>ForumNotification</returns>
+        ForumNotification GetFollowersForForumNotification(ForumNotification forumNote);
     }
 }

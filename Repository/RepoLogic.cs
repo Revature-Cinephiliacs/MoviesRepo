@@ -616,7 +616,7 @@ namespace Repository
         /// <returns></returns>
         public List<string> GetFollowingMoviesByMovieID(string movieId)
         {
-            var followingMovies = _dbContext.FollowingMovies.Where(fm => fm.ImdbId == movieId).Select(UserId);
+            var followingMovies = _dbContext.FollowingMovies.Where(fm => fm.ImdbId == movieId);
             var followerList = new List<string>();
             foreach (var followingMovie in followingMovies)
             {

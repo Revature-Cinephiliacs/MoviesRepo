@@ -447,7 +447,7 @@ namespace Logic
         public ReviewNotification GetFollowersForReviewNotification(ReviewNotification review)
         {
             
-            review.Followers = _repo.GetFollowingMoviesByMovieID(review.ImdbId);
+            review.Followers = _repo.GetFollowingMoviesByMovieID(review.Imdbid);
             return review;
         }
 
@@ -460,8 +460,8 @@ namespace Logic
         /// <returns>ForumNotification</returns>
         public ForumNotification GetFollowersForForumNotification(ForumNotification forumNote)
         {
-            if(forumNote.ImdbId != null){
-                forumNote.Followers.Add(_repo.GetFollowingMoviesByMovieID(forumNote.ImdbId));
+            if(forumNote.Imdbid != null){
+                forumNote.Followers = _repo.GetFollowingMoviesByMovieID(forumNote.Imdbid);
             }
             return forumNote;
         }
