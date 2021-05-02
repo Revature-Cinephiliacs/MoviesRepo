@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -559,6 +560,35 @@ namespace Logic
         }
 
         /// <summary>
+        /// Takes in a review with an empty follower list.
+        /// Gets the follower list from the repo.
+        /// Adds follower list to review.
+        /// </summary>
+        /// <param name="review"></param>
+        /// <returns>ReviewNotification</returns>
+        public ReviewNotification GetFollowersForReviewNotification(ReviewNotification review)
+        {
+            
+            review.Followers = _repo.GetFollowingMoviesByMovieID(review.Imdbid);
+            return review;
+        }
+
+        /// <summary>
+        /// Takes in a discussion notification with it's existing follower list.
+        /// Gets the follower list from the repo for the movie noted in the discussion.
+        /// Adds movie follower list to existing list.
+        /// </summary>
+        /// <param name="forumNote"></param>
+        /// <returns>ForumNotification</returns>
+        public ForumNotification GetFollowersForForumNotification(ForumNotification forumNote)
+        {
+            if(forumNote.Imdbid != null){
+                forumNote.Followers = _repo.GetFollowingMoviesByMovieID(forumNote.Imdbid);
+            }
+            return forumNote;
+        }
+
+        /// <summary>
         /// Removes any movies from the list argument that are not tagged
         /// with all of the provided tag names.
         /// </summary>
@@ -800,14 +830,23 @@ namespace Logic
 
         public async Task<List<MovieDTO>> recommendedMoviesByUserId(string userId)
         {
-            List<string> followedMovieIds = _repo.GetFollowingMovies(userId);
-
             var loadRecommendedTask = new List<Task<List<string>>>();
-            foreach (var followedMovieId in followedMovieIds)
+            List<string> followedMovieIds = _repo.GetFollowingMovies(userId);
+            if (followedMovieIds.Count > 5 )
             {
-                loadRecommendedTask.Add(ApiProcessor.LoadRecommendedMovies(followedMovieId));
+                for (int i = 0; i < 5; i++)
+                {
+                    loadRecommendedTask.Add(ApiProcessor.LoadRecommendedMovies(followedMovieIds[i]));
+                }
             }
 
+            if (followedMovieIds.Count < 5)
+            {
+                foreach (var followedMovieId in followedMovieIds)
+                {
+                    loadRecommendedTask.Add(ApiProcessor.LoadRecommendedMovies(followedMovieId));
+                } 
+            }
             var movieIds = new List<string>();
             while(loadRecommendedTask.Count > 0)
             {
