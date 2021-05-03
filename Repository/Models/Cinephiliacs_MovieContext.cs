@@ -34,6 +34,7 @@ namespace Repository.Models
         public virtual DbSet<MovieTagUser> MovieTagUsers { get; set; }
         public virtual DbSet<Rating> Ratings { get; set; }
         public virtual DbSet<Tag> Tags { get; set; }
+        public virtual DbSet<Word> Words { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         { }
@@ -138,9 +139,6 @@ namespace Repository.Models
                     .HasName("pk_imdbId");
 
                 entity.ToTable("Movie");
-
-                entity.HasIndex(e => e.Title, "uk_movieTitle")
-                    .IsUnique();
 
                 entity.Property(e => e.ImdbId)
                     .HasMaxLength(255)
@@ -374,6 +372,22 @@ namespace Repository.Models
                     .HasColumnName("tagName");
 
                 entity.Property(e => e.IsBanned).HasColumnName("isBanned");
+            });
+
+            modelBuilder.Entity<Word>(entity =>
+            {
+                entity.HasKey(e => e.Word1)
+                    .HasName("pk_word");
+
+                entity.Property(e => e.Word1)
+                    .HasMaxLength(50)
+                    .HasColumnName("word");
+
+                entity.Property(e => e.BaseWord)
+                    .HasMaxLength(50)
+                    .HasColumnName("baseWord");
+
+                entity.Property(e => e.IsTag).HasColumnName("isTag");
             });
 
             OnModelCreatingPartial(modelBuilder);

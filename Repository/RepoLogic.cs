@@ -280,6 +280,23 @@ namespace Repository
         }
 
         /// <summary>
+        /// Adds the word specified in the argument and whether
+        /// it is considered a tag to the database.
+        /// </summary>
+        /// <param name="word"></param>
+        /// <param name="wordIsTag"></param>
+        public bool AddWord(Word word)
+        {
+            if(WordExists(word.Word1))
+            {
+                return false;
+            }
+            _dbContext.Words.Add(word);
+            _dbContext.SaveChanges();
+            return true;
+        }
+
+        /// <summary>
         /// Updates an existing Movie in the database.
         /// </summary>
         /// <param name="movie"></param>
@@ -396,6 +413,7 @@ namespace Repository
         {
             return _dbContext.Movies
                 .Where(m => m.ImdbId == movieId)
+                .OrderBy(m => m.ImdbId)
                 .AsSplitQuery()
                 .Include(m => m.Rating)
                 .Include(m => m.MovieActors)
@@ -486,6 +504,17 @@ namespace Repository
         public Tag GetTag(string tagName)
         {
             return _dbContext.Tags.FirstOrDefault(t => t.TagName == tagName);
+        }
+
+        /// <summary>
+        /// Returns the Word specified by the argument if it exists.
+        /// Returns null if the word does not exist.
+        /// </summary>
+        /// <param name="word"></param>
+        /// <returns></returns>
+        public Word GetWord(string word)
+        {
+            return _dbContext.Words.FirstOrDefault(w => w.Word1 == word);
         }
 
         /// <summary>
@@ -712,6 +741,16 @@ namespace Repository
         public bool MovieExists(string movieId)
         {
             return (_dbContext.Movies.FirstOrDefault(m => m.ImdbId == movieId) != null);
+        }
+
+        /// <summary>
+        /// Returns true if the word exists in the database.
+        /// </summary>
+        /// <param name="word"></param>
+        /// <returns></returns>
+        private bool WordExists(string word)
+        {
+            return (_dbContext.Words.FirstOrDefault(w => w.Word1 == word) != null);
         }
 
         /// <summary>

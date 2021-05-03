@@ -40,7 +40,7 @@ namespace Logic
                 return Mapper.MovieToMovieDTO(movie);
             }
 
-            ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor.LoadMovieAsync(movieId);
+            ApiHelper.MovieObject movieObject = await ApiHelper.ApiProcessor.LoadMovieAsync(movieId);
             if(movieObject == null || movieObject.imdbID != movieId)
             {
                 return null;
@@ -97,14 +97,14 @@ namespace Logic
         {
             if(!_repo.MovieExists(taggingDTO.MovieId))
             {
-                ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor
+                ApiHelper.MovieObject movieObject = await ApiHelper.ApiProcessor
                     .LoadMovieAsync(taggingDTO.MovieId);
                 if(movieObject == null)
                 {
                     return false;
                 }
                 MovieDTO movieDTO = Mapper.MovieObjectToMovieDTO(movieObject);
-                if(!CreateMovie(movieDTO))
+                if(!(await CreateMovie(movieDTO)))
                 {
                     return false;
                 }
@@ -140,7 +140,7 @@ namespace Logic
             return true;
         }
 
-        public bool UpdateMovie(string movieId, MovieDTO movieDTO)
+        public async Task<bool> UpdateMovie(string movieId, MovieDTO movieDTO)
         {
             if(movieDTO.ImdbId != null && movieDTO.ImdbId != movieId)
             {
@@ -149,7 +149,7 @@ namespace Logic
 
             if(!_repo.MovieExists(movieId))
             {
-                return CreateMovie(movieDTO);
+                return await CreateMovie(movieDTO);
             }
             
             Movie movie = _repo.GetMovie(movieId);
@@ -238,7 +238,101 @@ namespace Logic
             return true;
         }
 
-        public bool CreateMovie(MovieDTO movieDTO)
+        public async Task<List<MovieDTO>> recommendedMovies(string imdbId)
+        {
+            List<string> recommendedURLs = await ApiProcessor.LoadRecommendedMovies(imdbId);
+            var getMovieTasks = new List<Task<MovieDTO>>();
+            foreach (var recommendedURL in recommendedURLs)
+            {
+                var movieId = ParseMovieIdFromURL(recommendedURL);
+
+                getMovieTasks.Add(GetMovie(movieId));
+            }
+
+            var recommendedDTOs = new List<MovieDTO>();
+            while(getMovieTasks.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(getMovieTasks);
+                recommendedDTOs.Add(completedTask.Result);
+                getMovieTasks.Remove(completedTask);
+            }
+
+            return recommendedDTOs;
+        }
+
+        public async Task<List<MovieDTO>> recommendedMoviesByUserId(string userId)
+        {
+            var loadRecommendedTask = new List<Task<List<string>>>();
+            List<string> followedMovieIds = _repo.GetFollowingMovies(userId);
+            if (followedMovieIds.Count > 5 )
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    loadRecommendedTask.Add(ApiProcessor.LoadRecommendedMovies(followedMovieIds[i]));
+                }
+            }
+
+            if (followedMovieIds.Count < 5)
+            {
+                foreach (var followedMovieId in followedMovieIds)
+                {
+                    loadRecommendedTask.Add(ApiProcessor.LoadRecommendedMovies(followedMovieId));
+                } 
+            }
+            var movieIds = new List<string>();
+            while(loadRecommendedTask.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(loadRecommendedTask);
+                foreach (var recommendedURL in completedTask.Result)
+                {
+                    var movieId = ParseMovieIdFromURL(recommendedURL);
+                    movieIds.Add(movieId);
+                }
+                loadRecommendedTask.Remove(completedTask);
+            }
+
+            var getMovieTasks = new List<Task<MovieDTO>>();
+            foreach (var movieId in movieIds)
+            {
+                getMovieTasks.Add(GetMovie(movieId));
+            }
+
+            var recommendedDTOs = new List<MovieDTO>();
+            while(getMovieTasks.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(getMovieTasks);
+                recommendedDTOs.Add(completedTask.Result);
+                getMovieTasks.Remove(completedTask);
+            }
+
+            RemoveFollowedMovies(recommendedDTOs, followedMovieIds);
+
+            return recommendedDTOs;
+        }
+
+        /// <summary>
+        /// Splits a single string into a list of individual words.
+        /// Removes all characters that are not letters, including
+        /// whitespace. Returns an empty list if the input string
+        /// is shorter than 11 characters.
+        /// </summary>
+        /// <param name="plot"></param>
+        /// <returns></returns>
+        private List<string> SplitPlotIntoWords(string plot)
+        {
+            var plotWords = new List<string>();
+            if(plot != null && plot.Length > 10)
+            {
+                var lettersOnlyPlot = new string((from c in plot
+                  where char.IsWhiteSpace(c) || char.IsLetter(c)
+                  select c ).ToArray());
+                lettersOnlyPlot = lettersOnlyPlot.ToLowerInvariant();
+                plotWords = lettersOnlyPlot.Split(' ').ToList<string>();
+            }
+            return plotWords;
+        }
+
+        public async Task<bool> CreateMovie(MovieDTO movieDTO)
         {
             if(movieDTO.ImdbId == null || _repo.MovieExists(movieDTO.ImdbId))
             {
@@ -251,7 +345,47 @@ namespace Logic
             AppendMoviesOptionalProperties(movie, movieDTO);
 
             _repo.AddMovie(movie);
-            
+
+            var plotWords = SplitPlotIntoWords(movieDTO.Plot);
+            foreach (var plotWord in plotWords)
+            {
+                Word dbWord = _repo.GetWord(plotWord);
+                if(dbWord == null)
+                {
+                    var wordObject = await ApiHelper.ApiProcessor.LoadDefinitionAsync(plotWord);
+
+                    bool wordIsTag = ProcessWordObject(plotWord, wordObject);
+
+                    if(wordIsTag)
+                    {
+                        var movieTagUser = new MovieTagUser();
+                        movieTagUser.ImdbId = movieDTO.ImdbId;
+                        movieTagUser.UserId = "~AutoGenerated";
+                        movieTagUser.TagName = wordObject.Word;
+                        movieTagUser.IsUpvote = true;
+                        if(!_repo.MovieTagUserExists(movieTagUser))
+                        {
+                            _repo.AddMovieTagUser(movieTagUser);
+                        }
+                    }
+                }
+                else
+                {
+                    if(dbWord.IsTag)
+                    {
+                        var movieTagUser = new MovieTagUser();
+                        movieTagUser.ImdbId = movieDTO.ImdbId;
+                        movieTagUser.UserId = "~AutoGenerated";
+                        movieTagUser.TagName = dbWord.BaseWord;
+                        movieTagUser.IsUpvote = true;
+                        if(!_repo.MovieTagUserExists(movieTagUser))
+                        {
+                            _repo.AddMovieTagUser(movieTagUser);
+                        }
+                    }
+                }
+            }
+
             if(movieDTO.MovieActors != null)
             {
                 foreach (var movieActorName in movieDTO.MovieActors)
@@ -295,18 +429,77 @@ namespace Logic
             return true;
         }
 
+        /// <summary>
+        /// Returns true if the wordObject meets the criteria to be a tag.
+        /// </summary>
+        /// <param name="wordObject"></param>
+        /// <returns></returns>
+        private bool WordQualifiesAsTag(WordObject wordObject)
+        {
+            const double NOUN_RATIO_THRESHOLD = 0.45;
+            const int MINIMUM_LENGTH = 3;
+
+            if(wordObject.Word.Length < MINIMUM_LENGTH)
+            {
+                return false;
+            }
+
+            int nounCount = 0;
+            foreach (var definition in wordObject.Definitions)
+            {
+                if(definition.PartOfSpeech == "noun")
+                {
+                    nounCount++;
+                }
+            }
+            return ((double)nounCount / wordObject.Definitions.Count) > NOUN_RATIO_THRESHOLD;
+        }
+
+        /// <summary>
+        /// Processes the word object, adding new words to the database
+        /// with the appropriate properties.
+        /// Returns true if the wordObject meets the criteria to be a tag.
+        /// </summary>
+        /// <param name="wordObject"></param>
+        /// <returns></returns>
+        private bool ProcessWordObject(string originalWord, WordObject wordObject)
+        {
+            if(wordObject == null)
+            {
+                return false;
+            }
+
+            bool wordIsTag = WordQualifiesAsTag(wordObject);
+
+            var newWord = new Word();
+            newWord.IsTag = wordIsTag;
+            newWord.Word1 = originalWord;
+            newWord.BaseWord = wordObject.Word;
+            _repo.AddWord(newWord);
+
+            if(wordObject.Word != originalWord)
+            {
+                var baseWord = new Word();
+                baseWord.IsTag = wordIsTag;
+                baseWord.Word1 = wordObject.Word;
+                baseWord.BaseWord = wordObject.Word;
+                _repo.AddWord(baseWord);
+            }
+            return wordIsTag;
+        }
+
         public async Task<bool> AppendMovie(string movieId, MovieDTO movieDTO)
         {
             if(!_repo.MovieExists(movieId))
             {
-                ApiHelper.MovieObject movieObject = await ApiHelper.MovieProcessor
+                ApiHelper.MovieObject movieObject = await ApiHelper.ApiProcessor
                     .LoadMovieAsync(movieId);
                 if(movieObject == null)
                 {
                     return false;
                 }
                 MovieDTO newMovieDTO = Mapper.MovieObjectToMovieDTO(movieObject);
-                if(!CreateMovie(newMovieDTO))
+                if(!(await CreateMovie(newMovieDTO)))
                 {
                     return false;
                 }
@@ -663,74 +856,25 @@ namespace Logic
             return movieId;
         }
 
-        public async Task<List<MovieDTO>> recommendedMovies(string imdbId)
+        /// <summary>
+        /// Removes any movie whose movie id exists in the followedMovieIds list
+        /// from the recommendedDTOs list.
+        /// </summary>
+        /// <param name="recommendedDTOs"></param>
+        /// <param name="followedMovieIds"></param>
+        /// <returns></returns>
+        private List<MovieDTO> RemoveFollowedMovies(List<MovieDTO> recommendedDTOs, List<string> followedMovieIds)
         {
-            List<string> recommendedURLs = await MovieProcessor.LoadRecommendedMovies(imdbId);
-            var getMovieTasks = new List<Task<MovieDTO>>();
-            foreach (var recommendedURL in recommendedURLs)
+            for (int i = recommendedDTOs.Count - 1; i >= 0; i--)
             {
-                var movieId = ParseMovieIdFromURL(recommendedURL);
-
-                getMovieTasks.Add(GetMovie(movieId));
-            }
-
-            var recommendedDTOs = new List<MovieDTO>();
-            while(getMovieTasks.Count > 0)
-            {
-                var completedTask = await Task.WhenAny(getMovieTasks);
-                recommendedDTOs.Add(completedTask.Result);
-                getMovieTasks.Remove(completedTask);
-            }
-
-            return recommendedDTOs;
-        }
-
-        public async Task<List<MovieDTO>> recommendedMoviesByUserId(string userId)
-        {
-            var loadRecommendedTask = new List<Task<List<string>>>();
-            List<string> followedMovieIds = _repo.GetFollowingMovies(userId);
-            if (followedMovieIds.Count > 5 )
-            {
-                for (int i = 0; i < 5; i++)
+                foreach (var movieId in followedMovieIds)
                 {
-                    loadRecommendedTask.Add(MovieProcessor.LoadRecommendedMovies(followedMovieIds[i]));
+                    if(recommendedDTOs[i].ImdbId == movieId)
+                    {
+                        recommendedDTOs.RemoveAt(i);
+                    }
                 }
-                
             }
-
-            if (followedMovieIds.Count < 5)
-            {
-                foreach (var followedMovieId in followedMovieIds)
-                {
-                    loadRecommendedTask.Add(MovieProcessor.LoadRecommendedMovies(followedMovieId));
-                } 
-            }
-            var movieIds = new List<string>();
-            while(loadRecommendedTask.Count > 0)
-            {
-                var completedTask = await Task.WhenAny(loadRecommendedTask);
-                foreach (var recommendedURL in completedTask.Result)
-                {
-                    var movieId = ParseMovieIdFromURL(recommendedURL);
-                    movieIds.Add(movieId);
-                }
-                loadRecommendedTask.Remove(completedTask);
-            }
-
-            var getMovieTasks = new List<Task<MovieDTO>>();
-            foreach (var movieId in movieIds)
-            {
-                getMovieTasks.Add(GetMovie(movieId));
-            }
-
-            var recommendedDTOs = new List<MovieDTO>();
-            while(getMovieTasks.Count > 0)
-            {
-                var completedTask = await Task.WhenAny(getMovieTasks);
-                recommendedDTOs.Add(completedTask.Result);
-                getMovieTasks.Remove(completedTask);
-            }
-
             return recommendedDTOs;
         }
     }
