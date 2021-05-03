@@ -293,7 +293,7 @@ namespace CinemaAPI.Controllers
             review = reviewNotification;
             review = _movieLogic.GetFollowersForReviewNotification(review);
             if(review.Followers != null){
-                await SendReviewNotification(review);
+                await Logic.ApiHelper.ApiProcessor.SendReviewNotification(review);
                 return StatusCode(200);
             }else{
                 return StatusCode(404);
@@ -316,98 +316,13 @@ namespace CinemaAPI.Controllers
             forumNote = forumNotification;
             forumNote = _movieLogic.GetFollowersForForumNotification(forumNote);
             if(forumNote.Followers != null){
-                await SendForumNotification(forumNote);
+                await Logic.ApiHelper.ApiProcessor.SendForumNotification(forumNote);
                 return StatusCode(200);
             }else{
                 return StatusCode(404);
             }
         }
 
-        /// <summary>
-        /// Sends the review notification on to Users, with the list of users who follow the movie the new movie review belongs to.
-        /// </summary>
-        /// <param name="reviewNotification"></param
-        /// <returns></returns>
-        public async Task<bool> SendReviewNotification(ReviewNotification reviewNotification)
-        {
-            HttpClient client = new HttpClient();
-            string path = "http://20.45.2.119/user/notification/review";
-            HttpResponseMessage response = await client.PostAsJsonAsync(path, reviewNotification);
-            if(response.IsSuccessStatusCode)
-            {   
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Sends the forum notification on to Users with the list of users who follow the movie the new forum topic belongs to.
-        /// </summary>
-        /// <param name="forumNotification"></param>
-        /// <returns></returns>
-        public async Task<bool> SendForumNotification(ForumNotification forumNotification)
-        {
-            HttpClient client = new HttpClient();
-            string path = "http://20.45.2.119/user/notification/discussion";
-            HttpResponseMessage response = await client.PostAsJsonAsync(path, forumNotification);
-            if(response.IsSuccessStatusCode)
-            {   
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-            
-        }
-        /// <summary>
-        /// Example for using authentication
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("authexample")]
-        [Authorize]
-        public ActionResult<string> GetExample()
-        {
-            return "Success";
-        }
-
-        /// <summary>
-        /// Temporary endpoint for testing the Kubernetes deployment.
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("test")]
-        public MovieObject GetTestObject()
-        {
-            MovieObject mo = new MovieObject();
-            mo.Title = "Test Str";
-            mo.Year = "Test Str";
-            mo.Rated = "Test Str";
-            mo.Released = "Test Str";
-            mo.RunTime = "Test Str";
-            mo.Genre = "Test Str";
-            mo.Director = "Test Str";
-            mo.Writer = "Test Str";
-            mo.Actors = "Test Str";
-            mo.Plot = "Test Str";
-            mo.Language = "Test Str";
-            mo.Country = "Test Str";
-            mo.Awards = "Test Str";
-            mo.Poster = "Test Str";
-            mo.Ratings = null;
-            mo.Metascore = "Test Str";
-            mo.imdbVotes = "Test Str";
-            mo.imdbID = "Test Str";
-            mo.Type = "Test Str";
-            mo.DVD = "Test Str";
-            mo.BoxOffice = "Test Str";
-            mo.Production = "Test Str";
-            mo.Website = "Test Str";
-            mo.Response = "Test Str";
-            return mo;
-        }
         /// <summary>
         /// retuns recommended movies basewd
         /// </summary>

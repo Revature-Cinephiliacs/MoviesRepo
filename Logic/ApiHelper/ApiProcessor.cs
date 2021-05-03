@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Model;
 
 namespace Logic.ApiHelper
 {
@@ -69,7 +70,6 @@ namespace Logic.ApiHelper
 
         public static async Task<WordObject> LoadDefinitionAsync(string word)
         {
-            Console.WriteLine(word);
             var client = new HttpClient();
             var request = new HttpRequestMessage
             {
@@ -90,6 +90,47 @@ namespace Logic.ApiHelper
                 response.EnsureSuccessStatusCode();
                 var wordObject = await response.Content.ReadFromJsonAsync<WordObject>();
                 return wordObject;
+            }
+        }
+
+        /// <summary>
+        /// Sends the forum notification on to Users with the list of users who follow the movie the new forum topic belongs to.
+        /// </summary>
+        /// <param name="forumNotification"></param>
+        /// <returns></returns>
+        public static async Task<bool> SendForumNotification(ForumNotification forumNotification)
+        {
+            HttpClient client = new HttpClient();
+            string path = "http://20.45.2.119/user/notification/discussion";
+            HttpResponseMessage response = await client.PostAsJsonAsync(path, forumNotification);
+            if(response.IsSuccessStatusCode)
+            {   
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+            
+        }
+
+        /// <summary>
+        /// Sends the review notification on to Users, with the list of users who follow the movie the new movie review belongs to.
+        /// </summary>
+        /// <param name="reviewNotification"></param
+        /// <returns></returns>
+        public static async Task<bool> SendReviewNotification(ReviewNotification reviewNotification)
+        {
+            HttpClient client = new HttpClient();
+            string path = "http://20.45.2.119/user/notification/review";
+            HttpResponseMessage response = await client.PostAsJsonAsync(path, reviewNotification);
+            if(response.IsSuccessStatusCode)
+            {   
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
     }
