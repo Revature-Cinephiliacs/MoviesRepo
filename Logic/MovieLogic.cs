@@ -27,14 +27,18 @@ namespace Logic
             {
                 Movie movie = _repo.GetMovieFullInfo(movieId);
 
-                var tagNames = new List<string>();
+                var tagNamesToRemove = new List<string>();
                 foreach (var movieTag in movie.MovieTags)
                 {
                     var tag = _repo.GetTag(movieTag.TagName);
-                    if(tag != null && !tag.IsBanned)
+                    if(tag == null || tag.IsBanned)
                     {
-                        tagNames.Add(tag.TagName);
+                        tagNamesToRemove.Add(tag.TagName);
                     }
+                }
+                foreach (var tagNameToRemove in tagNamesToRemove)
+                {
+                    movie.MovieTags.Remove(movie.MovieTags.First(mt => mt.TagName == tagNameToRemove));
                 }
 
                 return Mapper.MovieToMovieDTO(movie);
@@ -50,71 +54,38 @@ namespace Logic
 
         public List<string> SearchMovies(Dictionary<string, string[]> filters)
         {
+            var cumulativeResult = new List<string>();
+            var currentResult = new List<string>();
             string ratingName = null;
-            var filterResults = new List<List<string>>();
+
             foreach (var filter in filters)
             {
-                switch (filter.Key.ToLower())
+                var filterType = filter.Key.ToLower();
+                if(filterType == "rating")
                 {
-                    case "any":
-                        filterResults.Add(FilterMoviesByAny(filter.Value));
-                    break;
-                    case "tags":
-                    case "tag":
-                        filterResults.Add(FilterMoviesByTags(filter.Value));
-                    break;
-                    case "actors":
-                    case "actor":
-                        filterResults.Add(FilterMoviesByActors(filter.Value));
-                    break;
-                    case "directors":
-                    case "director":
-                        filterResults.Add(FilterMoviesByDirectors(filter.Value));
-                    break;
-                    case "languages":
-                    case "language":
-                        filterResults.Add(FilterMoviesByLanguages(filter.Value));
-                    break;
-                    case "genres":
-                    case "genre":
-                        filterResults.Add(FilterMoviesByGenres(filter.Value));
-                    break;
-                    case "rating":
-                        if(String.IsNullOrWhiteSpace(filter.Value[0]))
-                        {
-                            return new List<string>();
-                        }
-                        ratingName = filter.Value[0];
-                    break;
+                    if(String.IsNullOrWhiteSpace(filter.Value[0]))
+                    {
+                        return new List<string>();
+                    }
+                    // Save this information so the filtering by rating can be processed last.
+                    ratingName = filter.Value[0];
                 }
-                if(filterResults.Count > 1)
+                else
                 {
-                    if(filterResults[0].Count == 0)
+                    currentResult = GetMoviesFiltered(filterType, filter.Value);
+
+                    cumulativeResult = GetIntersection(cumulativeResult, currentResult);
+
+                    if(cumulativeResult.Count == 0)
                     {
-                        return new List<string>();
+                        return cumulativeResult;
                     }
-                    for (int outer = filterResults.Count - 1; outer > 0; outer--)
-                    {
-                        for (int inner = filterResults[0].Count - 1; inner >= 0; inner--)
-                        {
-                            if(!filterResults[outer].Contains(filterResults[0][inner]))
-                            {
-                                filterResults[0].RemoveAt(inner);
-                            }
-                        }
-                    }
-                    if(filterResults[0].Count == 0)
-                    {
-                        return new List<string>();
-                    }
-                    filterResults.RemoveAt(1);
                 }
             }
 
-            // Filter by rating
             if(ratingName != null)
             {
-                if(filterResults.Count == 0)
+                if(cumulativeResult.Count == 0)
                 {
                     var movies = _repo.GetAllMovies();
                     if(movies == null)
@@ -124,18 +95,13 @@ namespace Logic
                     var movieIds = new List<string>();
                     foreach (var movie in movies)
                     {
-                        movieIds.Add(movie.ImdbId);
+                        cumulativeResult.Add(movie.ImdbId);
                     }
-                    filterResults.Add(movieIds);
                 }
-                FilterMoviesByRating(filterResults[0], ratingName);
-                if(filterResults[0].Count == 0)
-                {
-                    return new List<string>();
-                }
+                FilterMoviesByRating(cumulativeResult, ratingName);
             }
 
-            return filterResults[0];
+            return cumulativeResult;
         }
 
         public async Task<bool> TagMovie(TaggingDTO taggingDTO)
@@ -154,8 +120,6 @@ namespace Logic
                     return false;
                 }
             }
-
-// Call the User microservice to make sure the user exists
 
             MovieTagUser movieTagUser = new MovieTagUser();
             movieTagUser.ImdbId = taggingDTO.MovieId;
@@ -355,28 +319,6 @@ namespace Logic
             return recommendedDTOs;
         }
 
-        /// <summary>
-        /// Splits a single string into a list of individual words.
-        /// Removes all characters that are not letters, including
-        /// whitespace. Returns an empty list if the input string
-        /// is shorter than 11 characters.
-        /// </summary>
-        /// <param name="plot"></param>
-        /// <returns></returns>
-        private List<string> SplitPlotIntoWords(string plot)
-        {
-            var plotWords = new List<string>();
-            if(plot != null && plot.Length > 10)
-            {
-                var lettersOnlyPlot = new string((from c in plot
-                  where char.IsWhiteSpace(c) || char.IsLetter(c)
-                  select c ).ToArray());
-                lettersOnlyPlot = lettersOnlyPlot.ToLowerInvariant();
-                plotWords = lettersOnlyPlot.Split(' ').ToList<string>();
-            }
-            return plotWords;
-        }
-
         public async Task<bool> CreateMovie(MovieDTO movieDTO)
         {
             if(movieDTO.ImdbId == null || _repo.MovieExists(movieDTO.ImdbId))
@@ -392,44 +334,7 @@ namespace Logic
             _repo.AddMovie(movie);
 
             var plotWords = SplitPlotIntoWords(movieDTO.Plot);
-            foreach (var plotWord in plotWords)
-            {
-                Word dbWord = _repo.GetWord(plotWord);
-                if(dbWord == null)
-                {
-                    var wordObject = await ApiHelper.ApiProcessor.LoadDefinitionAsync(plotWord);
-
-                    bool wordIsTag = ProcessWordObject(plotWord, wordObject);
-
-                    if(wordIsTag)
-                    {
-                        var movieTagUser = new MovieTagUser();
-                        movieTagUser.ImdbId = movieDTO.ImdbId;
-                        movieTagUser.UserId = "~AutoGenerated";
-                        movieTagUser.TagName = wordObject.Word;
-                        movieTagUser.IsUpvote = true;
-                        if(!_repo.MovieTagUserExists(movieTagUser))
-                        {
-                            _repo.AddMovieTagUser(movieTagUser);
-                        }
-                    }
-                }
-                else
-                {
-                    if(dbWord.IsTag)
-                    {
-                        var movieTagUser = new MovieTagUser();
-                        movieTagUser.ImdbId = movieDTO.ImdbId;
-                        movieTagUser.UserId = "~AutoGenerated";
-                        movieTagUser.TagName = dbWord.BaseWord;
-                        movieTagUser.IsUpvote = true;
-                        if(!_repo.MovieTagUserExists(movieTagUser))
-                        {
-                            _repo.AddMovieTagUser(movieTagUser);
-                        }
-                    }
-                }
-            }
+            await AutoTagMovie(plotWords, movieDTO.ImdbId);
 
             if(movieDTO.MovieActors != null)
             {
@@ -472,65 +377,6 @@ namespace Logic
                 }
             }
             return true;
-        }
-
-        /// <summary>
-        /// Returns true if the wordObject meets the criteria to be a tag.
-        /// </summary>
-        /// <param name="wordObject"></param>
-        /// <returns></returns>
-        private bool WordQualifiesAsTag(WordObject wordObject)
-        {
-            const double NOUN_RATIO_THRESHOLD = 0.45;
-            const int MINIMUM_LENGTH = 3;
-
-            if(wordObject.Word.Length < MINIMUM_LENGTH)
-            {
-                return false;
-            }
-
-            int nounCount = 0;
-            foreach (var definition in wordObject.Definitions)
-            {
-                if(definition.PartOfSpeech == "noun")
-                {
-                    nounCount++;
-                }
-            }
-            return ((double)nounCount / wordObject.Definitions.Count) > NOUN_RATIO_THRESHOLD;
-        }
-
-        /// <summary>
-        /// Processes the word object, adding new words to the database
-        /// with the appropriate properties.
-        /// Returns true if the wordObject meets the criteria to be a tag.
-        /// </summary>
-        /// <param name="wordObject"></param>
-        /// <returns></returns>
-        private bool ProcessWordObject(string originalWord, WordObject wordObject)
-        {
-            if(wordObject == null)
-            {
-                return false;
-            }
-
-            bool wordIsTag = WordQualifiesAsTag(wordObject);
-
-            var newWord = new Word();
-            newWord.IsTag = wordIsTag;
-            newWord.Word1 = originalWord;
-            newWord.BaseWord = wordObject.Word;
-            _repo.AddWord(newWord);
-
-            if(wordObject.Word != originalWord)
-            {
-                var baseWord = new Word();
-                baseWord.IsTag = wordIsTag;
-                baseWord.Word1 = wordObject.Word;
-                baseWord.BaseWord = wordObject.Word;
-                _repo.AddWord(baseWord);
-            }
-            return wordIsTag;
         }
 
         public async Task<bool> AppendMovie(string movieId, MovieDTO movieDTO)
@@ -633,8 +479,6 @@ namespace Logic
                 return false;
             }
 
-// Call the User microservice to make sure the user exists
-
             _repo.AddFollowingMovie(movieId, userId);
             return true;
         }
@@ -645,8 +489,6 @@ namespace Logic
             {
                 return false;
             }
-
-// Call the User microservice to make sure the user exists
 
             _repo.DeleteFollowingMovie(movieId, userId);
             return true;
@@ -674,6 +516,167 @@ namespace Logic
                 }
             }
             return tagNames;
+        }
+
+        /// <summary>
+        /// Splits a single string into a list of individual words.
+        /// Removes all characters that are not letters, including
+        /// whitespace. Returns an empty list if the input string
+        /// is shorter than 11 characters.
+        /// </summary>
+        /// <param name="plot"></param>
+        /// <returns></returns>
+        private List<string> SplitPlotIntoWords(string plot)
+        {
+            var plotWords = new List<string>();
+            if(plot != null && plot.Length > 10)
+            {
+                var lettersOnlyPlot = new string((from c in plot
+                  where char.IsWhiteSpace(c) || char.IsLetter(c)
+                  select c ).ToArray());
+                lettersOnlyPlot = lettersOnlyPlot.ToLowerInvariant();
+                plotWords = lettersOnlyPlot.Split(' ').ToList<string>();
+            }
+            return plotWords;
+        }
+
+        /// <summary>
+        /// Returns all list of every movieId whose movie has all of the properties
+        /// (of type filterType) present in filterList
+        /// </summary>
+        /// <param name="filterType"></param>
+        /// <param name="filterList"></param>
+        /// <returns></returns>
+        private List<string> GetMoviesFiltered(string filterType, string[] filterList)
+        {
+            switch (filterType)
+            {
+                case "any":
+                    return FilterMoviesByAny(filterList);
+                case "tags":
+                case "tag":
+                    return FilterMoviesByTags(filterList);
+                case "actors":
+                case "actor":
+                    return FilterMoviesByActors(filterList);
+                case "directors":
+                case "director":
+                    return FilterMoviesByDirectors(filterList);
+                case "languages":
+                case "language":
+                    return FilterMoviesByLanguages(filterList);
+                case "genres":
+                case "genre":
+                    return FilterMoviesByGenres(filterList);
+                default:
+                    return new List<string>();
+            }
+        }
+
+        /// <summary>
+        /// Adds tags to the movie specified in the argument based on the
+        /// provided list of words and their definitions.
+        /// </summary>
+        /// <param name="words"></param>
+        private async Task AutoTagMovie(List<string> words, string movieId)
+        {
+            foreach (var word in words)
+            {
+                Word dbWord = _repo.GetWord(word);
+                if(dbWord == null)
+                {
+                    var wordObject = await ApiHelper.ApiProcessor.LoadDefinitionAsync(word);
+
+                    bool wordIsTag = ProcessWordObject(word, wordObject);
+
+                    if(wordIsTag)
+                    {
+                        var movieTagUser = new MovieTagUser();
+                        movieTagUser.ImdbId = movieId;
+                        movieTagUser.UserId = "~AutoGenerated";
+                        movieTagUser.TagName = wordObject.Word;
+                        movieTagUser.IsUpvote = true;
+                        if(!_repo.MovieTagUserExists(movieTagUser))
+                        {
+                            _repo.AddMovieTagUser(movieTagUser);
+                        }
+                    }
+                }
+                else
+                {
+                    if(dbWord.IsTag)
+                    {
+                        var movieTagUser = new MovieTagUser();
+                        movieTagUser.ImdbId = movieId;
+                        movieTagUser.UserId = "~AutoGenerated";
+                        movieTagUser.TagName = dbWord.BaseWord;
+                        movieTagUser.IsUpvote = true;
+                        if(!_repo.MovieTagUserExists(movieTagUser))
+                        {
+                            _repo.AddMovieTagUser(movieTagUser);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the wordObject meets the criteria to be a tag.
+        /// </summary>
+        /// <param name="wordObject"></param>
+        /// <returns></returns>
+        private bool WordQualifiesAsTag(WordObject wordObject)
+        {
+            const double NOUN_RATIO_THRESHOLD = 0.45;
+            const int MINIMUM_LENGTH = 3;
+
+            if(wordObject.Word.Length < MINIMUM_LENGTH)
+            {
+                return false;
+            }
+
+            int nounCount = 0;
+            foreach (var definition in wordObject.Definitions)
+            {
+                if(definition.PartOfSpeech == "noun")
+                {
+                    nounCount++;
+                }
+            }
+            return ((double)nounCount / wordObject.Definitions.Count) > NOUN_RATIO_THRESHOLD;
+        }
+
+        /// <summary>
+        /// Processes the word object, adding new words to the database
+        /// with the appropriate properties.
+        /// Returns true if the wordObject meets the criteria to be a tag.
+        /// </summary>
+        /// <param name="wordObject"></param>
+        /// <returns></returns>
+        private bool ProcessWordObject(string originalWord, WordObject wordObject)
+        {
+            if(wordObject == null)
+            {
+                return false;
+            }
+
+            bool wordIsTag = WordQualifiesAsTag(wordObject);
+
+            var newWord = new Word();
+            newWord.IsTag = wordIsTag;
+            newWord.Word1 = originalWord;
+            newWord.BaseWord = wordObject.Word;
+            _repo.AddWord(newWord);
+
+            if(wordObject.Word != originalWord)
+            {
+                var baseWord = new Word();
+                baseWord.IsTag = wordIsTag;
+                baseWord.Word1 = wordObject.Word;
+                baseWord.BaseWord = wordObject.Word;
+                _repo.AddWord(baseWord);
+            }
+            return wordIsTag;
         }
 
         /// <summary>
@@ -741,6 +744,12 @@ namespace Logic
             return movieIds;
         }
 
+        /// <summary>
+        /// Returns a list containing all of the strings that were present in
+        /// each of the lists in the argument.
+        /// </summary>
+        /// <param name="listofLists"></param>
+        /// <returns></returns>
         private List<string> GetIntersection(List<List<string>> listofLists)
         {
             var movieIds = new List<string>();
@@ -762,6 +771,36 @@ namespace Logic
             }
 
             return movieIds;
+        }
+
+        /// <summary>
+        /// Returns a list containing all of the strings that were present in
+        /// both of the lists in the arguments.
+        /// </summary>
+        /// <param name="listOne"></param>
+        /// <param name="listTwo"></param>
+        /// <returns></returns>
+        private List<string> GetIntersection(List<string> listOne, List<string> listTwo)
+        {
+            var movieIds = new List<string>();
+            if(listOne.Count == 0)
+            {
+                return listTwo;
+            }
+            if(listTwo.Count == 0)
+            {
+                return listOne;
+            }
+            
+            for (int i = listOne.Count - 1; i >= 0; i--)
+            {
+                if(!listTwo.Contains(listOne[i]))
+                {
+                    listOne.RemoveAt(i);
+                }
+            }
+
+            return listOne;
         }
 
         /// <summary>

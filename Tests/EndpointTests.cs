@@ -321,6 +321,37 @@ namespace Tests
         }
 
         [Fact]
+        public void SearchAnyTest()
+        {
+            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
+            MovieDTO inputMovie = TestingHelper.GetRandomMovie(1, 1, 1, 1, 1);
+            List<string> searchResults;
+
+            var filters = new Dictionary<string, string[]>();
+            filters.Add("Any", new string[] {inputMovie.MovieDirectors[0]});
+
+            // Seed the test database
+            using(var context = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
+
+                TestingHelper.AddMovieDTOToDatabase(context, inputMovie);
+            }
+
+            using(var context = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                RepoLogic repoLogic = new RepoLogic(context);
+                IMovieLogic movieLogic = new MovieLogic(repoLogic);
+                MovieController movieController = new MovieController(movieLogic);
+                // Test SearchMovies()
+                searchResults = movieController.SearchMovies(filters).Value;
+            }
+
+            Assert.Equal(inputMovie.ImdbId, searchResults[0]);
+        }
+
+        [Fact]
         public void SearchRatingTest()
         {
             var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
@@ -513,6 +544,71 @@ namespace Tests
             }
 
             Assert.False(tag.IsBanned);
+        }
+
+        [Fact]
+        public void GetTagsTest()
+        {
+            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
+            MovieDTO inputMovie = TestingHelper.GetRandomMovie(0, 0, 0, 0, 3);
+            List<string> results;
+
+            // Seed the test database
+            using(var context = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
+
+                TestingHelper.AddMovieDTOToDatabase(context, inputMovie);
+            }
+
+            using(var context = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                RepoLogic repoLogic = new RepoLogic(context);
+                IMovieLogic movieLogic = new MovieLogic(repoLogic);
+                MovieController movieController = new MovieController(movieLogic);
+
+                // Test GetAllTags()
+                results = movieController.GetAllTags().Value;
+            }
+
+            Assert.Contains(inputMovie.MovieTags[0], results);
+            Assert.Contains(inputMovie.MovieTags[1], results);
+            Assert.Contains(inputMovie.MovieTags[2], results);
+        }
+
+        [Fact]
+        public void FollowMovieTest()
+        {
+            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
+            MovieDTO inputMovie = TestingHelper.GetRandomMovie();
+            string userId = Guid.NewGuid().ToString();
+            var followedMovies = new List<string>();
+
+            // Seed the test database
+            using(var context = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
+
+                TestingHelper.AddMovieDTOToDatabase(context, inputMovie);
+
+                RepoLogic repoLogic = new RepoLogic(context);
+                IMovieLogic movieLogic = new MovieLogic(repoLogic);
+                // Test FollowMovie()
+                movieLogic.FollowMovie(inputMovie.ImdbId, userId);
+            }
+
+            using(var context = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                RepoLogic repoLogic = new RepoLogic(context);
+                IMovieLogic movieLogic = new MovieLogic(repoLogic);
+                MovieController movieController = new MovieController(movieLogic);
+                // Test FollowMovie()
+                followedMovies = movieController.GetFollowingMovies(userId).Value;
+            }
+
+            Assert.Contains(inputMovie.ImdbId, followedMovies);
         }
     }
 }
