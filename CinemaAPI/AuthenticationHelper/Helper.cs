@@ -38,6 +38,5 @@ namespace CinemaAPI.Helpers
             Console.WriteLine(response.Content);
             return response;
         }
-
     }
 }

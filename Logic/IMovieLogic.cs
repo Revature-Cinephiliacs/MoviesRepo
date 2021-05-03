@@ -16,7 +16,7 @@ namespace Logic
         /// </summary>
         /// <param name="movieid"></param>
         /// <returns></returns>
-        Task<MovieDTO> GetMovie(string movieid);
+        Task<MovieDTO> GetMovie(string movieId);
 
         /// <summary>
         /// Returns a movieId for each movie that matches all of the filters
@@ -80,7 +80,7 @@ namespace Logic
         /// <param name="tagname"></param>
         /// <param name="IsBan"></param>
         /// <returns></returns>
-        bool SetTagBanStatus(string tagname, bool isBan);
+        bool SetTagBanStatus(string tagName, bool isBan);
 
         /// <summary>
         /// Deletes the Movie from the database. Also deletes all associated
