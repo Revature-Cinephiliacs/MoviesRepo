@@ -65,7 +65,6 @@ List of current features
 | (Admin) Unban a tag                              | DELETE | movie/tag/ban/{tagname}         |              |          |                                                                                                                                                  |
 | Adds the movie to the user's following list      | PUT    | movie/follow/{movieid}/{userid} |              |          |                                                                                                                                                  |
 | Removes the movie from the user's following list | DELETE | movie/follow/{movieid}/{userid} |              |          |                                                                                                                                                  |
-<<<<<<< HEAD
 | Gets all movies that the user is following       | GET    | movie/follow/{userid}           |              |          | Returns a list containing the movieid of each movie.                                                                                             |
 | A Test method for deployment                     | GET    | movie/test                      |              |          |                                                                                                                                                  |
 ### Object usage within an endpoint is denoted by placing the object name with parenthesis: (Object)
