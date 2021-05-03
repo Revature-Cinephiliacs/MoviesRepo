@@ -61,7 +61,7 @@ namespace Logic.ApiHelper
                 RequestUri = new Uri($"https://imdb8.p.rapidapi.com/title/get-more-like-this?tconst={imdbId}&currentCountry=US&purchaseCountry=US"),
                 Headers =
                 {
-                    { "x-rapidapi-key", "e157b8d687msh431e30623e70dd3p174a1cjsn7ea0d090c0f9" },
+                    { "x-rapidapi-key", "6d0ccdf5b5msh34c1c1dd38ee7f3p126f2cjsn773549c669d8" },
                     { "x-rapidapi-host", "imdb8.p.rapidapi.com" },
                 },
             };
