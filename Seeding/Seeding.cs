@@ -30,8 +30,7 @@ namespace Seeding
         // remaining number of lines in the file, all the remianing movies will be added.
         const int MAX_NUMBER_OF_MOVIES = 10000;
         readonly static DbContextOptions<Cinephiliacs_MovieContext> dbOptions = new DbContextOptionsBuilder<Cinephiliacs_MovieContext>()
-            //.UseSqlServer(@"Server=tcp:mark-moore-03012021batch-p3-sqlserver.database.windows.net,1433;Initial Catalog=Movie;Persist Security Info=False;User ID=markmoorerev;Password=03012021batch!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;").Options;
-            .UseSqlServer(@"Server=tcp:cinephiliacs.database.windows.net,1433;Initial Catalog=Cinephiliacs_Movie;Persist Security Info=False;User ID=kugelsicher;Password=F36UWevqvcDxEmt;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;").Options;
+            .UseSqlServer(@"Server=tcp:mark-moore-03012021batch-p3-sqlserver.database.windows.net,1433;Initial Catalog=Movie;Persist Security Info=False;User ID=markmoorerev;Password=03012021batch!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;").Options;
         private static List<string> ReadMovieIdsFromFile(string path)
         {
             var movieIdList = new List<string>();
