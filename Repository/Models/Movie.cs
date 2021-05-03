@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 namespace Repository.Models
 {
+    /// <summary>
+    /// Contains all of the information associated with a movie.
+    /// </summary>
     public partial class Movie
     {
         public Movie()

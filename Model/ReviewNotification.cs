@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 namespace Model
 {
+    /// <summary>
+    /// Facillitates passing of notifications.
+    /// </summary>
+    /// <value></value>
     public class ReviewNotification
     {
-        /// <summary>
-        /// Facillitates passing of notifications.
-        /// </summary>
-        /// <value></value>
         public string Imdbid { get; set; }
         public string Usernameid { get; set; }
         public Guid Reviewid { get; set; }

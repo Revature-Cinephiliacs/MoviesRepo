@@ -45,6 +45,11 @@ namespace Logic.ApiHelper
             return movieObject;
         }
 
+        /// <summary>
+        /// Retrieves the a list of movie recommendations based on an imdbId.
+        /// </summary>
+        /// <param name="imdbId"></param>
+        /// <returns></returns>
         public static async Task<List<string>> LoadRecommendedMovies(string imdbId)
         {
             var client = new HttpClient();
@@ -68,6 +73,11 @@ namespace Logic.ApiHelper
             }
         }
 
+        /// <summary>
+        /// Retrieves a word's definition(s) and the part-of-speech associated with each.
+        /// </summary>
+        /// <param name="word"></param>
+        /// <returns></returns>
         public static async Task<WordObject> LoadDefinitionAsync(string word)
         {
             var client = new HttpClient();

@@ -238,6 +238,78 @@ namespace Logic
             return true;
         }
 
+        public async Task<List<MovieDTO>> recommendedMovies(string imdbId)
+        {
+            List<string> recommendedURLs = await ApiProcessor.LoadRecommendedMovies(imdbId);
+            var getMovieTasks = new List<Task<MovieDTO>>();
+            foreach (var recommendedURL in recommendedURLs)
+            {
+                var movieId = ParseMovieIdFromURL(recommendedURL);
+
+                getMovieTasks.Add(GetMovie(movieId));
+            }
+
+            var recommendedDTOs = new List<MovieDTO>();
+            while(getMovieTasks.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(getMovieTasks);
+                recommendedDTOs.Add(completedTask.Result);
+                getMovieTasks.Remove(completedTask);
+            }
+
+            return recommendedDTOs;
+        }
+
+        public async Task<List<MovieDTO>> recommendedMoviesByUserId(string userId)
+        {
+            var loadRecommendedTask = new List<Task<List<string>>>();
+            List<string> followedMovieIds = _repo.GetFollowingMovies(userId);
+            if (followedMovieIds.Count > 5 )
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    loadRecommendedTask.Add(ApiProcessor.LoadRecommendedMovies(followedMovieIds[i]));
+                }
+            }
+
+            if (followedMovieIds.Count < 5)
+            {
+                foreach (var followedMovieId in followedMovieIds)
+                {
+                    loadRecommendedTask.Add(ApiProcessor.LoadRecommendedMovies(followedMovieId));
+                } 
+            }
+            var movieIds = new List<string>();
+            while(loadRecommendedTask.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(loadRecommendedTask);
+                foreach (var recommendedURL in completedTask.Result)
+                {
+                    var movieId = ParseMovieIdFromURL(recommendedURL);
+                    movieIds.Add(movieId);
+                }
+                loadRecommendedTask.Remove(completedTask);
+            }
+
+            var getMovieTasks = new List<Task<MovieDTO>>();
+            foreach (var movieId in movieIds)
+            {
+                getMovieTasks.Add(GetMovie(movieId));
+            }
+
+            var recommendedDTOs = new List<MovieDTO>();
+            while(getMovieTasks.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(getMovieTasks);
+                recommendedDTOs.Add(completedTask.Result);
+                getMovieTasks.Remove(completedTask);
+            }
+
+            RemoveFollowedMovies(recommendedDTOs, followedMovieIds);
+
+            return recommendedDTOs;
+        }
+
         /// <summary>
         /// Splits a single string into a list of individual words.
         /// Removes all characters that are not letters, including
@@ -803,78 +875,6 @@ namespace Logic
                     }
                 }
             }
-            return recommendedDTOs;
-        }
-
-        public async Task<List<MovieDTO>> recommendedMovies(string imdbId)
-        {
-            List<string> recommendedURLs = await ApiProcessor.LoadRecommendedMovies(imdbId);
-            var getMovieTasks = new List<Task<MovieDTO>>();
-            foreach (var recommendedURL in recommendedURLs)
-            {
-                var movieId = ParseMovieIdFromURL(recommendedURL);
-
-                getMovieTasks.Add(GetMovie(movieId));
-            }
-
-            var recommendedDTOs = new List<MovieDTO>();
-            while(getMovieTasks.Count > 0)
-            {
-                var completedTask = await Task.WhenAny(getMovieTasks);
-                recommendedDTOs.Add(completedTask.Result);
-                getMovieTasks.Remove(completedTask);
-            }
-
-            return recommendedDTOs;
-        }
-
-        public async Task<List<MovieDTO>> recommendedMoviesByUserId(string userId)
-        {
-            var loadRecommendedTask = new List<Task<List<string>>>();
-            List<string> followedMovieIds = _repo.GetFollowingMovies(userId);
-            if (followedMovieIds.Count > 5 )
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    loadRecommendedTask.Add(ApiProcessor.LoadRecommendedMovies(followedMovieIds[i]));
-                }
-            }
-
-            if (followedMovieIds.Count < 5)
-            {
-                foreach (var followedMovieId in followedMovieIds)
-                {
-                    loadRecommendedTask.Add(ApiProcessor.LoadRecommendedMovies(followedMovieId));
-                } 
-            }
-            var movieIds = new List<string>();
-            while(loadRecommendedTask.Count > 0)
-            {
-                var completedTask = await Task.WhenAny(loadRecommendedTask);
-                foreach (var recommendedURL in completedTask.Result)
-                {
-                    var movieId = ParseMovieIdFromURL(recommendedURL);
-                    movieIds.Add(movieId);
-                }
-                loadRecommendedTask.Remove(completedTask);
-            }
-
-            var getMovieTasks = new List<Task<MovieDTO>>();
-            foreach (var movieId in movieIds)
-            {
-                getMovieTasks.Add(GetMovie(movieId));
-            }
-
-            var recommendedDTOs = new List<MovieDTO>();
-            while(getMovieTasks.Count > 0)
-            {
-                var completedTask = await Task.WhenAny(getMovieTasks);
-                recommendedDTOs.Add(completedTask.Result);
-                getMovieTasks.Remove(completedTask);
-            }
-
-            RemoveFollowedMovies(recommendedDTOs, followedMovieIds);
-
             return recommendedDTOs;
         }
     }
