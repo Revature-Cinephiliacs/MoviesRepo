@@ -286,7 +286,6 @@ namespace CinemaAPI.Controllers
         /// <param name="review"></param>
         /// <returns></returns>
         [HttpPost("review/notification")] //Needs endpoint -Larson
-        [Authorize]
         public async Task<ActionResult<bool>> RetrieveNewReview([FromBody] ReviewNotification reviewNotification)
         {
             var review = _movieLogic.GetFollowersForReviewNotification(reviewNotification);
@@ -307,7 +306,6 @@ namespace CinemaAPI.Controllers
         /// <param name="forumNotification"></param>
         /// <returns></returns>
         [HttpPost("discussion/notification")] //Needs endpoint -Larson
-        [Authorize]
         public async Task<ActionResult<bool>> RetrieveNewDiscussion([FromBody] ForumNotification forumNotification)
         {
             var forumNote = _movieLogic.GetFollowersForForumNotification(forumNotification);
