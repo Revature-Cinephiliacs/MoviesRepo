@@ -80,14 +80,11 @@ namespace Logic
                         filterResults.Add(FilterMoviesByGenres(filter.Value));
                     break;
                     case "rating":
-                        if(filter.Value.Length == 1 && !String.IsNullOrWhiteSpace(filter.Value[0]))
-                        {
-                            ratingName = filter.Value[0];
-                        }
-                        else
+                        if(String.IsNullOrWhiteSpace(filter.Value[0]))
                         {
                             return new List<string>();
                         }
+                        ratingName = filter.Value[0];
                     break;
                 }
                 if(filterResults.Count > 1)
@@ -117,6 +114,20 @@ namespace Logic
             // Filter by rating
             if(ratingName != null)
             {
+                if(filterResults.Count == 0)
+                {
+                    var movies = _repo.GetAllMovies();
+                    if(movies == null)
+                    {
+                        return new List<string>();
+                    }
+                    var movieIds = new List<string>();
+                    foreach (var movie in movies)
+                    {
+                        movieIds.Add(movie.ImdbId);
+                    }
+                    filterResults.Add(movieIds);
+                }
                 FilterMoviesByRating(filterResults[0], ratingName);
                 if(filterResults[0].Count == 0)
                 {
