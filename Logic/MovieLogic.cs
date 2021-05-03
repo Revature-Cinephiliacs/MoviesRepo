@@ -249,12 +249,14 @@ namespace Logic
 
         public async Task<List<MovieDTO>> recommendedMovies(string imdbId)
         {
-            List<string> recommendedURLs = await ApiProcessor.LoadRecommendedMovies(imdbId);
-            var getMovieTasks = new List<Task<MovieDTO>>();
-            foreach (var recommendedURL in recommendedURLs)
-            {
-                var movieId = ParseMovieIdFromURL(recommendedURL);
 
+            List<string> recommendedURLs = await ApiProcessor.LoadRecommendedMovies(imdbId);
+
+            var getMovieTasks = new List<Task<MovieDTO>>();
+
+            for (int i = 0; i < recommendedURLs.Count; i++)
+            {
+                var movieId = ParseMovieIdFromURL(recommendedURLs[i]);
                 getMovieTasks.Add(GetMovie(movieId));
             }
 
@@ -265,7 +267,6 @@ namespace Logic
                 recommendedDTOs.Add(completedTask.Result);
                 getMovieTasks.Remove(completedTask);
             }
-
             return recommendedDTOs;
         }
 
@@ -301,11 +302,14 @@ namespace Logic
             }
 
             var getMovieTasks = new List<Task<MovieDTO>>();
+
+            Random _random = new Random();
             for (int i = 0; i < movieIds.Count; i++)
             {
-                getMovieTasks.Add(GetMovie(movieIds[i]));
+                int rand = _random.Next(0, movieIds.Count);
+                getMovieTasks.Add(GetMovie(movieIds[rand]));
+                
             }
-
             var recommendedDTOs = new List<MovieDTO>();
             while(getMovieTasks.Count > 0)
             {
