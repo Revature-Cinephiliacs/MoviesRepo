@@ -5,11 +5,9 @@ using Logic;
 using Logic.ApiHelper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.Net.Http;
-using Newtonsoft.Json.Linq;
-using System.Net.Http.Headers;
 using Model;
+using RestSharp;
+using Newtonsoft.Json;
 using System.Net.Http.Json;
 
 namespace CinemaAPI.Controllers
@@ -67,6 +65,7 @@ namespace CinemaAPI.Controllers
         /// <param name="movieDTO"></param>
         /// <returns></returns>
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult> CreateMovie([FromBody] MovieDTO movieDTO)
         {
             if(!ModelState.IsValid)
@@ -91,6 +90,7 @@ namespace CinemaAPI.Controllers
         /// <param name="movieDTO"></param>
         /// <returns></returns>
         [HttpPut("{movieId}")]
+        [Authorize]
         public async Task<ActionResult> UpdateMovie(string movieId, [FromBody] MovieDTO movieDTO)
         {
             if(!ModelState.IsValid)
@@ -118,6 +118,7 @@ namespace CinemaAPI.Controllers
         /// <param name="movieDTO"></param>
         /// <returns></returns>
         [HttpPatch("{movieId}")]
+        [Authorize]
         public async Task<ActionResult> AppendMovie(string movieId, [FromBody] MovieDTO movieDTO)
         {
             if(!ModelState.IsValid)
@@ -140,6 +141,7 @@ namespace CinemaAPI.Controllers
         /// <param name="movieId"></param>
         /// <returns></returns>
         [HttpDelete("{movieId}")]
+        [Authorize("manage:awebsite")]
         public ActionResult DeleteMovie(string movieId)
         {
             if(_movieLogic.DeleteMovie(movieId))
@@ -160,6 +162,7 @@ namespace CinemaAPI.Controllers
         /// <param name="taggingDTO"></param>
         /// <returns></returns>
         [HttpPost("tags")]
+        [Authorize]
         public async Task<ActionResult> TagMovie([FromBody] TaggingDTO taggingDTO)
         {
             if(await _movieLogic.TagMovie(taggingDTO))
@@ -190,6 +193,7 @@ namespace CinemaAPI.Controllers
         /// <param name="tagName"></param>
         /// <returns></returns>
         [HttpPut("tag/ban/{tagName}")]
+        [Authorize("manage:awebsite")]
         public ActionResult BanTag(string tagName)
         {
             if(_movieLogic.SetTagBanStatus(tagName, true))
@@ -209,6 +213,7 @@ namespace CinemaAPI.Controllers
         /// <param name="tagName"></param>
         /// <returns></returns>
         [HttpDelete("tag/ban/{tagName}")]
+        [Authorize("manage:awebsite")]
         public ActionResult UnbanTag(string tagName)
         {
             if(_movieLogic.SetTagBanStatus(tagName, false))
@@ -227,9 +232,12 @@ namespace CinemaAPI.Controllers
         /// <param name="movieId"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        [HttpPut("follow/{movieId}/{userId}")]
-        public ActionResult FollowMovie(string movieId, string userId)
+        [HttpPut("follow/{movieId}")]
+        [Authorize]
+        public async Task<ActionResult> FollowMovie(string movieId)
         {
+            var response = await Helpers.Helper.Sendrequest("/userdata", Method.GET, Helpers.Helper.GetTokenFromRequest(this.Request));
+            var userId = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)["sub"];
             if(_movieLogic.FollowMovie(movieId, userId))
             {
                 return StatusCode(200);
@@ -246,9 +254,12 @@ namespace CinemaAPI.Controllers
         /// <param name="movieId"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        [HttpDelete("follow/{movieId}/{userId}")]
-        public ActionResult UnfollowMovie(string movieId, string userId)
+        [HttpDelete("follow/{movieId}")]
+        [Authorize]
+        public async Task<ActionResult> UnfollowMovie(string movieId)
         {
+            var response = await Helpers.Helper.Sendrequest("/userdata", Method.GET, Helpers.Helper.GetTokenFromRequest(this.Request));
+            var userId = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)["sub"];
             if(_movieLogic.UnfollowMovie(movieId, userId))
             {
                 return StatusCode(200);
@@ -265,6 +276,7 @@ namespace CinemaAPI.Controllers
         /// <param name="userId"></param>
         /// <returns></returns>
         [HttpGet("follow/{userId}")]
+        [Authorize]
         public ActionResult<List<string>> GetFollowingMovies(string userId)
         {
             return _movieLogic.GetFollowingMovies(userId);
@@ -337,9 +349,12 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        [HttpGet("recommendedByUserId/{userId}")]
-        public async Task<ActionResult<List<MovieDTO>>> getRecommendedById(string userId)
+        [HttpGet("recommendedByUserId")]
+        [Authorize]
+        public async Task<ActionResult<List<MovieDTO>>> getRecommendedById()
         {
+            var response = await Helpers.Helper.Sendrequest("/userdata", Method.GET, Helpers.Helper.GetTokenFromRequest(this.Request));
+            var userId = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)["sub"];
             List<MovieDTO> movieDto = await _movieLogic.recommendedMoviesByUserId(userId);
             if (movieDto == null)
             {

@@ -31,7 +31,7 @@ namespace Logic
                 foreach (var movieTag in movie.MovieTags)
                 {
                     var tag = _repo.GetTag(movieTag.TagName);
-                    if(tag != null && tag.IsBanned == false)
+                    if(tag != null && !tag.IsBanned)
                     {
                         tagNames.Add(tag.TagName);
                     }
@@ -662,7 +662,7 @@ namespace Logic
             var tags = _repo.GetAllTags();
             if(tags == null)
             {
-                return null;
+                return new List<string>();
             }
 
             var tagNames = new List<string>();
@@ -685,7 +685,6 @@ namespace Logic
         /// <returns>ReviewNotification</returns>
         public ReviewNotification GetFollowersForReviewNotification(ReviewNotification review)
         {
-            
             review.Followers = _repo.GetFollowingMoviesByMovieID(review.Imdbid);
             return review;
         }

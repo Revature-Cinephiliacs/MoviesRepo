@@ -133,7 +133,7 @@ namespace Tests
                 context1.SaveChanges();
             }
 
-            List<Movie> result = new List<Movie>();
+            List<Movie> result;
             using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
             {
                 context2.Database.EnsureCreated();
@@ -355,7 +355,7 @@ namespace Tests
 
             }
 
-            List<Movie> movies = new List<Movie>();
+            List<Movie> movies;
             using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
             {
                 context2.Database.EnsureCreated();
