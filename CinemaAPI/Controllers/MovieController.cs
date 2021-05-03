@@ -180,13 +180,7 @@ namespace CinemaAPI.Controllers
         [HttpGet("tags")]
         public ActionResult<List<string>> GetAllTags()
         {
-            List<string> tagNames = _movieLogic.GetAllTags();
-            if(tagNames == null)
-            {
-                return StatusCode(400);
-            }
-            StatusCode(200);
-            return tagNames;
+            return _movieLogic.GetAllTags();
         }
 
         /// <summary>
@@ -289,9 +283,7 @@ namespace CinemaAPI.Controllers
         [Authorize]
         public async Task<ActionResult<bool>> RetrieveNewReview([FromBody] ReviewNotification reviewNotification)
         {
-            ReviewNotification review = new ReviewNotification();
-            review = reviewNotification;
-            review = _movieLogic.GetFollowersForReviewNotification(review);
+            var review = _movieLogic.GetFollowersForReviewNotification(reviewNotification);
             if(review.Followers != null){
                 await Logic.ApiHelper.ApiProcessor.SendReviewNotification(review);
                 return StatusCode(200);
@@ -312,9 +304,7 @@ namespace CinemaAPI.Controllers
         [Authorize]
         public async Task<ActionResult<bool>> RetrieveNewDiscussion([FromBody] ForumNotification forumNotification)
         {
-            ForumNotification forumNote = new ForumNotification();
-            forumNote = forumNotification;
-            forumNote = _movieLogic.GetFollowersForForumNotification(forumNote);
+            var forumNote = _movieLogic.GetFollowersForForumNotification(forumNotification);
             if(forumNote.Followers != null){
                 await Logic.ApiHelper.ApiProcessor.SendForumNotification(forumNote);
                 return StatusCode(200);
