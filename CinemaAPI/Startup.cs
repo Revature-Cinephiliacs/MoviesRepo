@@ -41,6 +41,8 @@ namespace CinemaAPI
                             "http://20.94.137.143", //Frontend
                             "http://20.189.29.112", //Admintools
                             "http://20.45.2.119", //User
+                            "http://20.45.6.142", //Forum
+                            "http://20.189.30.176", //Review
                             "http://localhost:4200" // for testing
                             )
                             .AllowAnyHeader()
