@@ -43,7 +43,9 @@ namespace CinemaAPI
                             "http://20.45.2.119", //User
                             "http://20.45.6.142", //Forum
                             "http://20.189.30.176", //Review
-                            "http://localhost:4200" // for testing
+                            "http://localhost:4200", // for testing
+                            "https://cinephiliacsapp.azurewebsites.net",
+                            "https://cinephiliacs.org"
                             )
                             .AllowAnyHeader()
                             .AllowAnyMethod();
