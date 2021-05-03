@@ -24,14 +24,14 @@ namespace Seeding
         const string FILE_PATH = "USAOnly.txt";
 
         // Determines which line of the file is the starting point
-        const int STARTING_LINE = 0;
+        const int STARTING_LINE = 1;
 
         // Sets the number of movies to add to the database. If this is greater than the
         // remaining number of lines in the file, all the remianing movies will be added.
-        const int MAX_NUMBER_OF_MOVIES = 1000;
+        const int MAX_NUMBER_OF_MOVIES = 10000;
         readonly static DbContextOptions<Cinephiliacs_MovieContext> dbOptions = new DbContextOptionsBuilder<Cinephiliacs_MovieContext>()
-                .UseSqlServer("Server=tcp:mark-moore-03012021batch-p3-sqlserver.database.windows.net,1433;Initial Catalog=Movie;Persist Security Info=False;User ID=markmoorerev;Password=03012021batch!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;").Options;
-        
+            //.UseSqlServer(@"Server=tcp:mark-moore-03012021batch-p3-sqlserver.database.windows.net,1433;Initial Catalog=Movie;Persist Security Info=False;User ID=markmoorerev;Password=03012021batch!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;").Options;
+            .UseSqlServer(@"Server=tcp:cinephiliacs.database.windows.net,1433;Initial Catalog=Cinephiliacs_Movie;Persist Security Info=False;User ID=kugelsicher;Password=F36UWevqvcDxEmt;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;").Options;
         private static List<string> ReadMovieIdsFromFile(string path)
         {
             var movieIdList = new List<string>();
@@ -52,68 +52,20 @@ namespace Seeding
             return movieIdList;
         }
 
-        public static async Task FilterFile(string newFilePath)
+        public async static Task<bool> SeedDbFromCSV(string startingLine)
         {
-            var movieIdList = ReadMovieIdsFromFile(FILE_PATH);
-
-            StreamWriter writer = new StreamWriter(newFilePath);
-
-            var getMovieTasks = new List<Task<MovieDTO>>();
-            var movieDTOs = new List<MovieDTO>();
-
-            foreach (var movieId in movieIdList)
-            {
-                getMovieTasks.Add(GetMovie(movieId));
-
-                while(getMovieTasks.Count >= MAX_MOVIE_API_TASKS)
-                {
-                    var completedTask = await Task<MovieDTO>.WhenAny(getMovieTasks);
-                    if(completedTask.Result != null)
-                    {
-                        var movieDTO = completedTask.Result;
-                        if(movieDTO.ReleaseCountry != null
-                            && movieDTO.RuntimeMinutes != null
-                            && movieDTO.ReleaseCountry == "USA"
-                            && movieDTO.RuntimeMinutes > 44)
-                        {
-                            writer.WriteLine(movieDTO.ImdbId);
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Public Movie API Returned Null!");
-                    }
-                    getMovieTasks.Remove(completedTask);
-                }
+            int starting_index = 0;
+            try{
+                starting_index = int.Parse(startingLine) - 1;
             }
-            // Await remaining GetMovie tasks
-            Console.WriteLine("Awaiting Final GetMovie Tasks!");
-            while(getMovieTasks.Count > 0)
+            catch{
+                starting_index = 0;
+            }
+            if(starting_index < 0 || starting_index > 100000)
             {
-                var completedTask = await Task<MovieDTO>.WhenAny(getMovieTasks);
-                if(completedTask.Result != null)
-                {
-                    var movieDTO = completedTask.Result;
-                    if(movieDTO.ReleaseCountry != null
-                        && movieDTO.RuntimeMinutes != null
-                        && movieDTO.ReleaseCountry == "USA"
-                        && movieDTO.RuntimeMinutes > 44)
-                    {
-                        writer.WriteLine(movieDTO.ImdbId);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Public Movie API Returned Null!");
-                }
-                getMovieTasks.Remove(completedTask);
+                starting_index = 0;
             }
 
-            writer.Close();
-        }
-
-        public async static Task<bool> SeedDbFromCSV()
-        {
             var movieIdList = ReadMovieIdsFromFile(FILE_PATH);
 
             int limitCounter = 0;
@@ -121,12 +73,12 @@ namespace Seeding
             var movieDTOs = new List<MovieDTO>();
             var addMovieBatchTasks = new List<Task<bool>>();
             
-            for (int index = STARTING_LINE; index < movieIdList.Count
-                && limitCounter <= MAX_NUMBER_OF_MOVIES; index++)
+            for (int index = starting_index; index < movieIdList.Count
+                && limitCounter < MAX_NUMBER_OF_MOVIES; index++)
             {
                 getMovieTasks.Add(GetMovie(movieIdList[index]));
-
                 limitCounter++;
+
                 while(getMovieTasks.Count >= MAX_MOVIE_API_TASKS)
                 {
                     var completedTask = await Task<MovieDTO>.WhenAny(getMovieTasks);
@@ -158,7 +110,8 @@ namespace Seeding
                         Console.WriteLine(completedTask.Result.ToString());
                         addMovieBatchTasks.Remove(completedTask);
                     }
-                    Console.WriteLine("Starting Batch with " + movieDTObatch.Count.ToString() + " Movies to Add!");
+                    Console.WriteLine("Starting Batch of " + movieDTObatch.Count.ToString() + " Movies, from Lines "
+                        + (index - BATCH_SIZE - 2).ToString() + " - " + (index - 3).ToString() + ".");
                     addMovieBatchTasks.Add(AddMovies(movieDTObatch));
                 }
             }
@@ -177,8 +130,6 @@ namespace Seeding
                 }
                 getMovieTasks.Remove(completedTask);
             }
-            // Start final batches of AddMovies Tasks
-            Console.WriteLine("Starting Final AddMovies Tasks!");
             while(movieDTOs.Count > 0)
             {
                 // Move a batch of MovieDTO object to a new list which will be
@@ -206,8 +157,6 @@ namespace Seeding
                 addMovieBatchTasks.Add(AddMovies(movieDTObatch));
             }
             
-            // Await the final AddMovies Task!
-            Console.WriteLine("Await the final AddMovies Task!");
             while (addMovieBatchTasks.Count > 0)
             {
                 var completedTask = await Task<List<MovieDTO>>.WhenAny(addMovieBatchTasks);

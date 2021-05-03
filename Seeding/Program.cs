@@ -7,7 +7,8 @@ namespace Seeding
     {
         static async Task Main(string[] args)
         {
-            await Seeding.SeedDbFromCSV();
+            Console.WriteLine("Enter the file line number to start at (Default 1): ");
+            await Seeding.SeedDbFromCSV(Console.ReadLine());
         }
     }
 }
