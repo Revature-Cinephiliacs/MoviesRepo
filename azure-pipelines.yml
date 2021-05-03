@@ -62,7 +62,7 @@ stages:
 
       - task: SonarCloudPrepare@1
         inputs:
-          SonarCloud: 'SonarCloudMovie'
+          SonarCloud: 'MovieRepo'
           organization: 'revature-cinephiliacs'
           scannerMode: 'MSBuild'
           projectKey: 'Revature-Cinephiliacs_MoviesRepo'
