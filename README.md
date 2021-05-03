@@ -68,6 +68,7 @@ List of current features
 | Gets all movies that the user is following           | GET    | movie/follow/{userid}              |              |           | Returns a list containing the movieid of each movie.                                                                                             |
 | Returns similar movies                               | GET    | movie/recommended/{movieid}        |              | (Movie)[] | Returns an array of movie objects                                                                                                                |
 | Returns movies similar to the user's followed movies | GET    | movie/recommendedByUserId/{userid} |              | (Movie)[] | Returns an array of movie objects                                                                                                                |
+
 ### Object usage within an endpoint is denoted by placing the object name with parenthesis: (Object)
 
 ## Contributors
