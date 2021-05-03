@@ -275,11 +275,9 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        [HttpGet("follow")]
-        public async Task<ActionResult<List<string>>> GetFollowingMovies()
+        [HttpGet("follow/{userId}")]
+        public ActionResult<List<string>> GetFollowingMovies(string userId)
         {
-            var response = await Helpers.Helper.Sendrequest("/userdata", Method.GET, Helpers.Helper.GetTokenFromRequest(this.Request));
-            var userId = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)["sub"];
             return _movieLogic.GetFollowingMovies(userId);
         }
 
