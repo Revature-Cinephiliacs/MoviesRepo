@@ -736,18 +736,25 @@ namespace Logic
                 filterResults.Add(resultsCollection);
             }
 
+            var movieIds = GetIntersection(filterResults);
+
+            return movieIds;
+        }
+
+        private List<string> GetIntersection(List<List<string>> listofLists)
+        {
             var movieIds = new List<string>();
-            if(filterResults.Count == 0)
+            if(listofLists.Count == 0)
             {
                 return new List<string>();
             }
             
-            movieIds = filterResults[0];
-            for (int outer = filterResults.Count - 1; outer > 0; outer--)
+            movieIds = listofLists[0];
+            for (int outer = listofLists.Count - 1; outer > 0; outer--)
             {
                 for (int inner = movieIds.Count - 1; inner >= 0; inner--)
                 {
-                    if(!filterResults[outer].Contains(movieIds[inner]))
+                    if(!listofLists[outer].Contains(movieIds[inner]))
                     {
                         movieIds.RemoveAt(inner);
                     }
@@ -787,23 +794,7 @@ namespace Logic
                 filterResults.Add(filterResult);
             }
 
-            var movieIds = new List<string>();
-            if(filterResults.Count == 0)
-            {
-                return new List<string>();
-            }
-
-            movieIds = filterResults[0];
-            for (int outer = filterResults.Count - 1; outer > 0; outer--)
-            {
-                for (int inner = movieIds.Count - 1; inner >= 0; inner--)
-                {
-                    if(!filterResults[outer].Contains(movieIds[inner]))
-                    {
-                        movieIds.RemoveAt(inner);
-                    }
-                }
-            }
+            var movieIds = GetIntersection(filterResults);
 
             return movieIds;
         }
@@ -851,23 +842,7 @@ namespace Logic
                 }
             }
 
-            var movieIds = new List<string>();
-            if(filterResults.Count == 0)
-            {
-                return new List<string>();
-            }
-            
-            movieIds = filterResults[0];
-            for (int outer = filterResults.Count - 1; outer > 0; outer--)
-            {
-                for (int inner = movieIds.Count - 1; inner >= 0; inner--)
-                {
-                    if(!filterResults[outer].Contains(movieIds[inner]))
-                    {
-                        movieIds.RemoveAt(inner);
-                    }
-                }
-            }
+            var movieIds = GetIntersection(filterResults);
 
             return movieIds;
         }
@@ -896,23 +871,7 @@ namespace Logic
                 }
             }
 
-            var movieIds = new List<string>();
-            if(filterResults.Count == 0)
-            {
-                return new List<string>();
-            }
-            
-            movieIds = filterResults[0];
-            for (int outer = filterResults.Count - 1; outer > 0; outer--)
-            {
-                for (int inner = movieIds.Count - 1; inner >= 0; inner--)
-                {
-                    if(!filterResults[outer].Contains(movieIds[inner]))
-                    {
-                        movieIds.RemoveAt(inner);
-                    }
-                }
-            }
+            var movieIds = GetIntersection(filterResults);
 
             return movieIds;
         }
@@ -941,23 +900,7 @@ namespace Logic
                 }
             }
 
-            var movieIds = new List<string>();
-            if(filterResults.Count == 0)
-            {
-                return new List<string>();
-            }
-            
-            movieIds = filterResults[0];
-            for (int outer = filterResults.Count - 1; outer > 0; outer--)
-            {
-                for (int inner = movieIds.Count - 1; inner >= 0; inner--)
-                {
-                    if(!filterResults[outer].Contains(movieIds[inner]))
-                    {
-                        movieIds.RemoveAt(inner);
-                    }
-                }
-            }
+            var movieIds = GetIntersection(filterResults);
 
             return movieIds;
         }
@@ -986,23 +929,7 @@ namespace Logic
                 }
             }
 
-            var movieIds = new List<string>();
-            if(filterResults.Count == 0)
-            {
-                return new List<string>();
-            }
-            
-            movieIds = filterResults[0];
-            for (int outer = filterResults.Count - 1; outer > 0; outer--)
-            {
-                for (int inner = movieIds.Count - 1; inner >= 0; inner--)
-                {
-                    if(!filterResults[outer].Contains(movieIds[inner]))
-                    {
-                        movieIds.RemoveAt(inner);
-                    }
-                }
-            }
+            var movieIds = GetIntersection(filterResults);
 
             return movieIds;
         }
