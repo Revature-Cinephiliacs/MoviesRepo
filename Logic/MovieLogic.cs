@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -50,47 +50,78 @@ namespace Logic
 
         public List<string> SearchMovies(Dictionary<string, string[]> filters)
         {
-            List<Movie> movies = _repo.GetAllMovies();
+            string ratingName = null;
+            var filterResults = new List<List<string>>();
             foreach (var filter in filters)
             {
                 switch (filter.Key.ToLower())
                 {
                     case "tags":
                     case "tag":
-                        FilterMoviesByTags(movies, filter.Value);
+                        filterResults.Add(FilterMoviesByTags(filter.Value));
                     break;
                     case "actors":
                     case "actor":
-                        FilterMoviesByActors(movies, filter.Value);
+                        filterResults.Add(FilterMoviesByActors(filter.Value));
                     break;
                     case "directors":
                     case "director":
-                        FilterMoviesByDirectors(movies, filter.Value);
+                        filterResults.Add(FilterMoviesByDirectors(filter.Value));
                     break;
                     case "languages":
                     case "language":
-                        FilterMoviesByLanguages(movies, filter.Value);
+                        filterResults.Add(FilterMoviesByLanguages(filter.Value));
                     break;
                     case "genres":
                     case "genre":
-                        FilterMoviesByGenres(movies, filter.Value);
+                        filterResults.Add(FilterMoviesByGenres(filter.Value));
                     break;
                     case "rating":
-                        FilterMoviesByRatings(movies, filter.Value);
+                        if(filter.Value.Length == 1 && !String.IsNullOrWhiteSpace(filter.Value[0]))
+                        {
+                            ratingName = filter.Value[0];
+                        }
+                        else
+                        {
+                            return new List<string>();
+                        }
                     break;
                 }
-                if(movies.Count == 0)
+                if(filterResults.Count > 1)
+                {
+                    if(filterResults[0].Count == 0)
+                    {
+                        return new List<string>();
+                    }
+                    for (int outer = filterResults.Count - 1; outer > 0; outer--)
+                    {
+                        for (int inner = filterResults[0].Count - 1; inner >= 0; inner--)
+                        {
+                            if(!filterResults[outer].Contains(filterResults[0][inner]))
+                            {
+                                filterResults[0].RemoveAt(inner);
+                            }
+                        }
+                    }
+                    if(filterResults[0].Count == 0)
+                    {
+                        return new List<string>();
+                    }
+                    filterResults.RemoveAt(1);
+                }
+            }
+
+            // Filter by rating
+            if(ratingName != null)
+            {
+                FilterMoviesByRating(filterResults[0], ratingName);
+                if(filterResults[0].Count == 0)
                 {
                     return new List<string>();
                 }
             }
 
-            List<string> movieIds = new List<string>();
-            foreach (var movie in movies)
-            {
-                movieIds.Add(movie.ImdbId);
-            }
-            return movieIds;
+            return filterResults[0];
         }
 
         public async Task<bool> TagMovie(TaggingDTO taggingDTO)
@@ -666,20 +697,49 @@ namespace Logic
         /// </summary>
         /// <param name="movies"></param>
         /// <param name="tagName"></param>
-        private void FilterMoviesByTags(List<Movie> movies, string[] tagNames)
+        private List<string> FilterMoviesByTags(string[] tagNames)
         {
+            var filterResults = new List<List<string>>();
             foreach (var tagName in tagNames)
             {
-                for (int i = 0; i < movies.Count; i++)
+                string baseTagName;
+                var word = _repo.GetWord(tagName);
+                if(String.IsNullOrEmpty(word.BaseWord))
                 {
-                    if(movies[i].MovieTags.FirstOrDefault(mt => mt.TagName == tagName
-                        && mt.VoteSum > 0) == null)
+                    baseTagName = tagName;
+                }
+                else
+                {
+                    baseTagName = word.BaseWord;
+                }
+                var movieTags = _repo.GetMovieTagsByName(baseTagName);
+                var filterResult = new List<string>();
+                foreach (var movieTag in movieTags)
+                {
+                    filterResult.Add(movieTag.ImdbId);
+                }
+                filterResults.Add(filterResult);
+            }
+
+            var movieIds = new List<string>();
+            if(filterResults.Count == 0)
+            {
+                return new List<string>();
+            }
+
+            movieIds = filterResults[0];
+            for (int outer = filterResults.Count - 1; outer > 0; outer--)
+            {
+                for (int inner = movieIds.Count - 1; inner >= 0; inner--)
+                {
+                    if(!filterResults[outer].Contains(movieIds[inner]))
                     {
-                        movies.RemoveAt(i);
-                        i--;
+                        movieIds.RemoveAt(inner);
                     }
                 }
             }
+
+            return movieIds;
         }
 
         /// <summary>
@@ -688,18 +748,15 @@ namespace Logic
         /// </summary>
         /// <param name="movies"></param>
         /// <param name="ratingName"></param>
-        private void FilterMoviesByRatings(List<Movie> movies, string[] ratingNames)
+        private void FilterMoviesByRating(List<string> movieIds, string ratingName)
         {
-            foreach (var ratingName in ratingNames)
+            var rating = _repo.GetRating(ratingName);
+            for (int i = movieIds.Count - 1; i >= 0; i--)
             {
-                for (int i = 0; i < movies.Count; i++)
+                var movie = _repo.GetMovie(movieIds[i]);
+                if(movie == null || movie.RatingId != rating.RatingId)
                 {
-                    var ratingId = _repo.GetRating(ratingName).RatingId;
-                    if(movies[i].RatingId != ratingId)
-                    {
-                        movies.RemoveAt(i);
-                        i--;
-                    }
+                    movieIds.RemoveAt(i);
                 }
             }
         }
@@ -710,20 +767,40 @@ namespace Logic
         /// </summary>
         /// <param name="movies"></param>
         /// <param name="actorName"></param>
-        private void FilterMoviesByActors(List<Movie> movies, string[] actorNames)
+        private List<string> FilterMoviesByActors(string[] actorNames)
         {
+            var filterResults = new List<List<string>>();
             foreach (var actorName in actorNames)
             {
-                var actorId = _repo.GetActor(actorName).ActorId;
-                for (int i = 0; i < movies.Count; i++)
+                var actor = _repo.GetActor(actorName);
+                var movieActors = _repo.GetMovieActorsById(actor.ActorId);
+                var filterResult = new List<string>();
+                foreach (var movieActor in movieActors)
                 {
-                    if(movies[i].MovieActors.FirstOrDefault(ma => ma.ActorId == actorId) == null)
+                    filterResult.Add(movieActor.ImdbId);
+                }
+                filterResults.Add(filterResult);
+            }
+
+            var movieIds = new List<string>();
+            if(filterResults.Count == 0)
+            {
+                return new List<string>();
+            }
+            
+            movieIds = filterResults[0];
+            for (int outer = filterResults.Count - 1; outer > 0; outer--)
+            {
+                for (int inner = movieIds.Count - 1; inner >= 0; inner--)
+                {
+                    if(!filterResults[outer].Contains(movieIds[inner]))
                     {
-                        movies.RemoveAt(i);
-                        i--;
+                        movieIds.RemoveAt(inner);
                     }
                 }
             }
+
+            return movieIds;
         }
 
         /// <summary>
@@ -732,20 +809,40 @@ namespace Logic
         /// </summary>
         /// <param name="movies"></param>
         /// <param name="directorName"></param>
-        private void FilterMoviesByDirectors(List<Movie> movies, string[] directorNames)
+        private List<string> FilterMoviesByDirectors(string[] directorNames)
         {
+            var filterResults = new List<List<string>>();
             foreach (var directorName in directorNames)
             {
-                var directorId = _repo.GetDirector(directorName).DirectorId;
-                for (int i = 0; i < movies.Count; i++)
+                var director = _repo.GetDirector(directorName);
+                var movieDirectors = _repo.GetMovieDirectorsById(director.DirectorId);
+                var filterResult = new List<string>();
+                foreach (var movieDirector in movieDirectors)
                 {
-                    if(movies[i].MovieDirectors.FirstOrDefault(md => md.DirectorId == directorId) == null)
+                    filterResult.Add(movieDirector.ImdbId);
+                }
+                filterResults.Add(filterResult);
+            }
+
+            var movieIds = new List<string>();
+            if(filterResults.Count == 0)
+            {
+                return new List<string>();
+            }
+            
+            movieIds = filterResults[0];
+            for (int outer = filterResults.Count - 1; outer > 0; outer--)
+            {
+                for (int inner = movieIds.Count - 1; inner >= 0; inner--)
+                {
+                    if(!filterResults[outer].Contains(movieIds[inner]))
                     {
-                        movies.RemoveAt(i);
-                        i--;
+                        movieIds.RemoveAt(inner);
                     }
                 }
             }
+
+            return movieIds;
         }
 
         /// <summary>
@@ -754,20 +851,40 @@ namespace Logic
         /// </summary>
         /// <param name="movies"></param>
         /// <param name="genreName"></param>
-        private void FilterMoviesByGenres(List<Movie> movies, string[] genreNames)
+        private List<string> FilterMoviesByGenres(string[] genreNames)
         {
+            var filterResults = new List<List<string>>();
             foreach (var genreName in genreNames)
             {
-                var genreId = _repo.GetGenre(genreName).GenreId;
-                for (int i = 0; i < movies.Count; i++)
+                var genre = _repo.GetGenre(genreName);
+                var movieGenres = _repo.GetMovieGenresById(genre.GenreId);
+                var filterResult = new List<string>();
+                foreach (var movieGenre in movieGenres)
                 {
-                    if(movies[i].MovieGenres.FirstOrDefault(mg => mg.GenreId == genreId) == null)
+                    filterResult.Add(movieGenre.ImdbId);
+                }
+                filterResults.Add(filterResult);
+            }
+
+            var movieIds = new List<string>();
+            if(filterResults.Count == 0)
+            {
+                return new List<string>();
+            }
+            
+            movieIds = filterResults[0];
+            for (int outer = filterResults.Count - 1; outer > 0; outer--)
+            {
+                for (int inner = movieIds.Count - 1; inner >= 0; inner--)
+                {
+                    if(!filterResults[outer].Contains(movieIds[inner]))
                     {
-                        movies.RemoveAt(i);
-                        i--;
+                        movieIds.RemoveAt(inner);
                     }
                 }
             }
+
+            return movieIds;
         }
 
         /// <summary>
@@ -776,20 +893,40 @@ namespace Logic
         /// </summary>
         /// <param name="movies"></param>
         /// <param name="languageName"></param>
-        private void FilterMoviesByLanguages(List<Movie> movies, string[] languageNames)
+        private List<string> FilterMoviesByLanguages(string[] languageNames)
         {
+            var filterResults = new List<List<string>>();
             foreach (var languageName in languageNames)
             {
-                var languageId = _repo.GetLanguage(languageName).LanguageId;
-                for (int i = 0; i < movies.Count; i++)
+                var language = _repo.GetLanguage(languageName);
+                var movieLanguages = _repo.GetMovieLanguagesById(language.LanguageId);
+                var filterResult = new List<string>();
+                foreach (var movieLanguage in movieLanguages)
                 {
-                    if(movies[i].MovieLanguages.FirstOrDefault(ml => ml.LanguageId == languageId) == null)
+                    filterResult.Add(movieLanguage.ImdbId);
+                }
+                filterResults.Add(filterResult);
+            }
+
+            var movieIds = new List<string>();
+            if(filterResults.Count == 0)
+            {
+                return new List<string>();
+            }
+            
+            movieIds = filterResults[0];
+            for (int outer = filterResults.Count - 1; outer > 0; outer--)
+            {
+                for (int inner = movieIds.Count - 1; inner >= 0; inner--)
+                {
+                    if(!filterResults[outer].Contains(movieIds[inner]))
                     {
-                        movies.RemoveAt(i);
-                        i--;
+                        movieIds.RemoveAt(inner);
                     }
                 }
             }
+
+            return movieIds;
         }
 
         /// <summary>

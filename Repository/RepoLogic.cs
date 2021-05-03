@@ -655,6 +655,16 @@ namespace Repository
         }
 
         /// <summary>
+        /// Returns all MovieTags with a TagName that matches the argument.
+        /// </summary>
+        /// <param name="baseTagName"></param>
+        /// <returns></returns>
+        public List<MovieTag> GetMovieTagsByName(string baseTagName)
+        {
+            return _dbContext.MovieTags.Where(mt => mt.TagName == baseTagName).ToList();
+        }
+
+        /// <summary>
         /// Removes all actors from the Movie assocaited with the
         /// provided movie Id.
         /// </summary>
@@ -713,6 +723,46 @@ namespace Repository
             _dbContext.MovieLanguages.RemoveRange(_dbContext.MovieLanguages.Where(ml => ml.ImdbId == movieId));
             _dbContext.Movies.RemoveRange(_dbContext.Movies.Where(m => m.ImdbId == movieId));
             _dbContext.SaveChanges();
+        }
+
+        /// <summary>
+        /// Returns all MovieActors with the actorId specified in the argument
+        /// </summary>
+        /// <param name="actorId"></param>
+        /// <returns></returns>
+        public List<MovieActor> GetMovieActorsById(Guid actorId)
+        {
+            return _dbContext.MovieActors.Where(ma => ma.ActorId == actorId).ToList();
+        }
+
+        /// <summary>
+        /// Returns all MovieDirectors with the actorId specified in the argument
+        /// </summary>
+        /// <param name="directorId"></param>
+        /// <returns></returns>
+        public List<MovieDirector> GetMovieDirectorsById(Guid directorId)
+        {
+            return _dbContext.MovieDirectors.Where(md => md.DirectorId == directorId).ToList();
+        }
+
+        /// <summary>
+        /// Returns all MovieGenres with the actorId specified in the argument
+        /// </summary>
+        /// <param name="genreId"></param>
+        /// <returns></returns>
+        public List<MovieGenre> GetMovieGenresById(Guid genreId)
+        {
+            return _dbContext.MovieGenres.Where(mg => mg.GenreId == genreId).ToList();
+        }
+
+        /// <summary>
+        /// Returns all MovieLanguages with the actorId specified in the argument
+        /// </summary>
+        /// <param name="languageId"></param>
+        /// <returns></returns>
+        public List<MovieLanguage> GetMovieLanguagesById(Guid languageId)
+        {
+            return _dbContext.MovieLanguages.Where(ml => ml.LanguageId == languageId).ToList();
         }
 
         /// <summary>
