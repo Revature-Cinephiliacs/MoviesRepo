@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Logic;
+using Model;
 using Microsoft.EntityFrameworkCore;
 using Repository;
 using Repository.Models;
@@ -859,6 +860,36 @@ namespace Tests
                 
             }
             Assert.False(result1);
+        }
+
+        [Fact]
+        public void TestGetFollowersForReviewNotification()
+        {
+            Cinephiliacs_MovieContext movieContext= new Cinephiliacs_MovieContext(dbOptions);
+            RepoLogic repoLogic = new RepoLogic(movieContext);
+            MovieLogic movieLogic = new MovieLogic(repoLogic);
+            repoLogic.AddFollowingMovie("Avengers", "Avengee");
+            ReviewNotification reviewNotification = new ReviewNotification();
+            reviewNotification.Imdbid = "Avengers";
+            ReviewNotification testNote = movieLogic.GetFollowersForReviewNotification(reviewNotification);
+            var expected = 1;
+            var actual = testNote.Followers.Count();
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void TestGetFollowersForForumNotification()
+        {
+            Cinephiliacs_MovieContext movieContext= new Cinephiliacs_MovieContext(dbOptions);
+            RepoLogic repoLogic = new RepoLogic(movieContext);
+            MovieLogic movieLogic = new MovieLogic(repoLogic);
+            repoLogic.AddFollowingMovie("Avengers", "Avengee");
+            ForumNotification forumNotification = new ForumNotification();
+            forumNotification.Imdbid = "Avengers";
+            ForumNotification testNote = movieLogic.GetFollowersForForumNotification(forumNotification);
+            var expected = 1;
+            var actual = testNote.Followers.Count();
+            Assert.Equal(expected, actual);
         }
     }
 }
