@@ -276,7 +276,6 @@ namespace CinemaAPI.Controllers
         /// <param name="userId"></param>
         /// <returns></returns>
         [HttpGet("follow")]
-        [Authorize]
         public async Task<ActionResult<List<string>>> GetFollowingMovies()
         {
             var response = await Helpers.Helper.Sendrequest("/userdata", Method.GET, Helpers.Helper.GetTokenFromRequest(this.Request));
