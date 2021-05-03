@@ -301,9 +301,9 @@ namespace Logic
             }
 
             var getMovieTasks = new List<Task<MovieDTO>>();
-            foreach (var movieId in movieIds)
+            for (int i = 0; i < movieIds.Count; i++)
             {
-                getMovieTasks.Add(GetMovie(movieId));
+                getMovieTasks.Add(GetMovie(movieIds[i]));
             }
 
             var recommendedDTOs = new List<MovieDTO>();
@@ -313,8 +313,6 @@ namespace Logic
                 recommendedDTOs.Add(completedTask.Result);
                 getMovieTasks.Remove(completedTask);
             }
-
-            RemoveFollowedMovies(recommendedDTOs, followedMovieIds);
 
             return recommendedDTOs;
         }
@@ -1035,28 +1033,6 @@ namespace Logic
                 movieId = url.Substring(7, url.Length - 8);
             }
             return movieId;
-        }
-
-        /// <summary>
-        /// Removes any movie whose movie id exists in the followedMovieIds list
-        /// from the recommendedDTOs list.
-        /// </summary>
-        /// <param name="recommendedDTOs"></param>
-        /// <param name="followedMovieIds"></param>
-        /// <returns></returns>
-        private List<MovieDTO> RemoveFollowedMovies(List<MovieDTO> recommendedDTOs, List<string> followedMovieIds)
-        {
-            for (int i = recommendedDTOs.Count - 1; i >= 0; i--)
-            {
-                foreach (var movieId in followedMovieIds)
-                {
-                    if(recommendedDTOs[i].ImdbId == movieId)
-                    {
-                        recommendedDTOs.RemoveAt(i);
-                    }
-                }
-            }
-            return recommendedDTOs;
         }
     }
 }
