@@ -56,6 +56,9 @@ namespace Logic
             {
                 switch (filter.Key.ToLower())
                 {
+                    case "any":
+                        filterResults.Add(FilterMoviesByAny(filter.Value));
+                    break;
                     case "tags":
                     case "tag":
                         filterResults.Add(FilterMoviesByTags(filter.Value));
@@ -692,6 +695,59 @@ namespace Logic
         }
 
         /// <summary>
+        /// Removes any movies from the list argument that do not have a property
+        /// (Actor, Director, Genre, Language, Tag) that matches each of the
+        /// provided names.
+        /// </summary>
+        /// <param name="anyNames"></param>
+        /// <returns></returns>
+        private List<string> FilterMoviesByAny(string[] anyNames)
+        {
+            var filterResults = new List<List<string>>();
+            foreach (var name in anyNames)
+            {
+                var resultsCollection = new List<string>();
+
+                var tagResults = FilterMoviesByTags(new string[] {name});
+                resultsCollection.AddRange(tagResults);
+
+                var actorResults = FilterMoviesByActors(new string[] {name});
+                resultsCollection.AddRange(actorResults);
+
+                var directorResults = FilterMoviesByDirectors(new string[] {name});
+                resultsCollection.AddRange(directorResults);
+
+                var genreResults = FilterMoviesByGenres(new string[] {name});
+                resultsCollection.AddRange(genreResults);
+
+                var languageResults = FilterMoviesByLanguages(new string[] {name});
+                resultsCollection.AddRange(languageResults);
+
+                filterResults.Add(resultsCollection);
+            }
+
+            var movieIds = new List<string>();
+            if(filterResults.Count == 0)
+            {
+                return new List<string>();
+            }
+            
+            movieIds = filterResults[0];
+            for (int outer = filterResults.Count - 1; outer > 0; outer--)
+            {
+                for (int inner = movieIds.Count - 1; inner >= 0; inner--)
+                {
+                    if(!filterResults[outer].Contains(movieIds[inner]))
+                    {
+                        movieIds.RemoveAt(inner);
+                    }
+                }
+            }
+
+            return movieIds;
+        }
+
+        /// <summary>
         /// Removes any movies from the list argument that are not tagged
         /// with all of the provided tag names.
         /// </summary>
@@ -704,7 +760,7 @@ namespace Logic
             {
                 string baseTagName;
                 var word = _repo.GetWord(tagName);
-                if(String.IsNullOrEmpty(word.BaseWord))
+                if(word == null || String.IsNullOrEmpty(word.BaseWord))
                 {
                     baseTagName = tagName;
                 }
@@ -773,13 +829,16 @@ namespace Logic
             foreach (var actorName in actorNames)
             {
                 var actor = _repo.GetActor(actorName);
-                var movieActors = _repo.GetMovieActorsById(actor.ActorId);
-                var filterResult = new List<string>();
-                foreach (var movieActor in movieActors)
+                if(actor != null)
                 {
-                    filterResult.Add(movieActor.ImdbId);
+                    var movieActors = _repo.GetMovieActorsById(actor.ActorId);
+                    var filterResult = new List<string>();
+                    foreach (var movieActor in movieActors)
+                    {
+                        filterResult.Add(movieActor.ImdbId);
+                    }
+                    filterResults.Add(filterResult);
                 }
-                filterResults.Add(filterResult);
             }
 
             var movieIds = new List<string>();
@@ -815,13 +874,16 @@ namespace Logic
             foreach (var directorName in directorNames)
             {
                 var director = _repo.GetDirector(directorName);
-                var movieDirectors = _repo.GetMovieDirectorsById(director.DirectorId);
-                var filterResult = new List<string>();
-                foreach (var movieDirector in movieDirectors)
+                if(director != null)
                 {
-                    filterResult.Add(movieDirector.ImdbId);
+                    var movieDirectors = _repo.GetMovieDirectorsById(director.DirectorId);
+                    var filterResult = new List<string>();
+                    foreach (var movieDirector in movieDirectors)
+                    {
+                        filterResult.Add(movieDirector.ImdbId);
+                    }
+                    filterResults.Add(filterResult);
                 }
-                filterResults.Add(filterResult);
             }
 
             var movieIds = new List<string>();
@@ -857,13 +919,16 @@ namespace Logic
             foreach (var genreName in genreNames)
             {
                 var genre = _repo.GetGenre(genreName);
-                var movieGenres = _repo.GetMovieGenresById(genre.GenreId);
-                var filterResult = new List<string>();
-                foreach (var movieGenre in movieGenres)
+                if(genre != null)
                 {
-                    filterResult.Add(movieGenre.ImdbId);
+                    var movieGenres = _repo.GetMovieGenresById(genre.GenreId);
+                    var filterResult = new List<string>();
+                    foreach (var movieGenre in movieGenres)
+                    {
+                        filterResult.Add(movieGenre.ImdbId);
+                    }
+                    filterResults.Add(filterResult);
                 }
-                filterResults.Add(filterResult);
             }
 
             var movieIds = new List<string>();
@@ -899,13 +964,16 @@ namespace Logic
             foreach (var languageName in languageNames)
             {
                 var language = _repo.GetLanguage(languageName);
-                var movieLanguages = _repo.GetMovieLanguagesById(language.LanguageId);
-                var filterResult = new List<string>();
-                foreach (var movieLanguage in movieLanguages)
+                if(language != null)
                 {
-                    filterResult.Add(movieLanguage.ImdbId);
+                    var movieLanguages = _repo.GetMovieLanguagesById(language.LanguageId);
+                    var filterResult = new List<string>();
+                    foreach (var movieLanguage in movieLanguages)
+                    {
+                        filterResult.Add(movieLanguage.ImdbId);
+                    }
+                    filterResults.Add(filterResult);
                 }
-                filterResults.Add(filterResult);
             }
 
             var movieIds = new List<string>();
