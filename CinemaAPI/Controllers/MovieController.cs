@@ -50,13 +50,11 @@ namespace CinemaAPI.Controllers
         [HttpPost("search")]
         public ActionResult<List<string>> SearchMovies([FromBody] Dictionary<string, string[]> filters)
         {
-            var movies = _movieLogic.SearchMovies(filters);
-            if (movies == null)
+            if(!ModelState.IsValid)
             {
-                return StatusCode(404);
+                return StatusCode(400);
             }
-            StatusCode(200);
-            return movies;
+            return _movieLogic.SearchMovies(filters);
         }
 
         /// <summary>
@@ -176,8 +174,7 @@ namespace CinemaAPI.Controllers
         }
 
         /// <summary>
-        /// Returns all currently existing tag names, excluding banned
-        /// tags.
+        /// Returns all currently existing tag names, excluding banned tags.
         /// </summary>
         /// <returns></returns>
         [HttpGet("tags")]
@@ -289,7 +286,6 @@ namespace CinemaAPI.Controllers
         /// <param name="review"></param>
         /// <returns></returns>
         [HttpPost("review/notification")] //Needs endpoint -Larson
-        [Authorize]
         public async Task<ActionResult<bool>> RetrieveNewReview([FromBody] ReviewNotification reviewNotification)
         {
             var review = _movieLogic.GetFollowersForReviewNotification(reviewNotification);
@@ -310,7 +306,6 @@ namespace CinemaAPI.Controllers
         /// <param name="forumNotification"></param>
         /// <returns></returns>
         [HttpPost("discussion/notification")] //Needs endpoint -Larson
-        [Authorize]
         public async Task<ActionResult<bool>> RetrieveNewDiscussion([FromBody] ForumNotification forumNotification)
         {
             var forumNote = _movieLogic.GetFollowersForForumNotification(forumNotification);
