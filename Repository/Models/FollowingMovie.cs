@@ -6,14 +6,13 @@ using System.Collections.Generic;
 namespace Repository.Models
 {
     /// <summary>
-    /// Associates an actor with a movie.
+    /// Relates a movie to a user who is following that movie.
     /// </summary>
-    public partial class MovieActor
+    public partial class FollowingMovie
     {
+        public string UserId { get; set; }
         public string ImdbId { get; set; }
-        public Guid ActorId { get; set; }
 
-        public virtual Actor Actor { get; set; }
         public virtual Movie Imdb { get; set; }
     }
 }
