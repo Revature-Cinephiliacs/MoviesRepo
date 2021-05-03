@@ -21,7 +21,7 @@ namespace Seeding
         const int BATCH_SIZE = 50;
 
         // Path to the file with all the idbdIds
-        const string FILE_PATH = "imdbIDs.txt";
+        const string FILE_PATH = "USAOnly.txt";
 
         // Determines which line of the file is the starting point
         const int STARTING_LINE = 0;
@@ -50,6 +50,66 @@ namespace Seeding
                 reader.Close();
             }
             return movieIdList;
+        }
+
+        public static async Task FilterFile(string newFilePath)
+        {
+            var movieIdList = ReadMovieIdsFromFile(FILE_PATH);
+
+            StreamWriter writer = new StreamWriter(newFilePath);
+
+            var getMovieTasks = new List<Task<MovieDTO>>();
+            var movieDTOs = new List<MovieDTO>();
+
+            foreach (var movieId in movieIdList)
+            {
+                getMovieTasks.Add(GetMovie(movieId));
+
+                while(getMovieTasks.Count >= MAX_MOVIE_API_TASKS)
+                {
+                    var completedTask = await Task<MovieDTO>.WhenAny(getMovieTasks);
+                    if(completedTask.Result != null)
+                    {
+                        var movieDTO = completedTask.Result;
+                        if(movieDTO.ReleaseCountry != null
+                            && movieDTO.RuntimeMinutes != null
+                            && movieDTO.ReleaseCountry == "USA"
+                            && movieDTO.RuntimeMinutes > 44)
+                        {
+                            writer.WriteLine(movieDTO.ImdbId);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Public Movie API Returned Null!");
+                    }
+                    getMovieTasks.Remove(completedTask);
+                }
+            }
+            // Await remaining GetMovie tasks
+            Console.WriteLine("Awaiting Final GetMovie Tasks!");
+            while(getMovieTasks.Count > 0)
+            {
+                var completedTask = await Task<MovieDTO>.WhenAny(getMovieTasks);
+                if(completedTask.Result != null)
+                {
+                    var movieDTO = completedTask.Result;
+                    if(movieDTO.ReleaseCountry != null
+                        && movieDTO.RuntimeMinutes != null
+                        && movieDTO.ReleaseCountry == "USA"
+                        && movieDTO.RuntimeMinutes > 44)
+                    {
+                        writer.WriteLine(movieDTO.ImdbId);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Public Movie API Returned Null!");
+                }
+                getMovieTasks.Remove(completedTask);
+            }
+
+            writer.Close();
         }
 
         public async static Task<bool> SeedDbFromCSV()
