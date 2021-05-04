@@ -42,7 +42,7 @@ namespace Tests
 
             Assert.Equal(inputMovie, outputMovie);
         }
-        
+
         [Fact]
         public async Task PatchNewMovieTest()
         {
