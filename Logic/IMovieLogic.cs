@@ -126,14 +126,14 @@ namespace Logic
         /// </summary>
         /// <param name="imdbId"></param>
         /// <returns></returns>
-        Task<List<MovieDTO>> recommendedMovies(string imdbId);
+        Task<List<MovieDTO>> RecommendedMovies(string imdbId);
 
         /// <summary>
         /// return a list a movies depending on particular User Id
         /// </summary>
         /// <param name="imdbId"></param>
         /// <returns></returns>
-        Task<List<MovieDTO>> recommendedMoviesByUserId(string userId);
+        Task<List<MovieDTO>> RecommendedMoviesByUserId(string userId);
 
         /// <summary>
         /// Takes in a review with an empty follower list.

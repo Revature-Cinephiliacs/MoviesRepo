@@ -247,7 +247,7 @@ namespace Logic
             return true;
         }
 
-        public async Task<List<MovieDTO>> recommendedMovies(string imdbId)
+        public async Task<List<MovieDTO>> RecommendedMovies(string imdbId)
         {
 
             List<string> recommendedURLs = await ApiProcessor.LoadRecommendedMovies(imdbId);
@@ -270,7 +270,7 @@ namespace Logic
             return recommendedDTOs;
         }
 
-        public async Task<List<MovieDTO>> recommendedMoviesByUserId(string userId)
+        public async Task<List<MovieDTO>> RecommendedMoviesByUserId(string userId)
         {
             var loadRecommendedTask = new List<Task<List<string>>>();
             List<string> followedMovieIds = _repo.GetFollowingMovies(userId);
