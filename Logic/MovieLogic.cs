@@ -33,7 +33,7 @@ namespace Logic
                     var tag = _repo.GetTag(movieTag.TagName);
                     if(tag == null || tag.IsBanned)
                     {
-                        tagNamesToRemove.Add(tag.TagName);
+                        tagNamesToRemove.Add(movieTag.TagName);
                     }
                 }
                 foreach (var tagNameToRemove in tagNamesToRemove)
