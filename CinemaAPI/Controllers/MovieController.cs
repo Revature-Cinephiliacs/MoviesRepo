@@ -139,7 +139,7 @@ namespace CinemaAPI.Controllers
         /// <param name="movieId"></param>
         /// <returns></returns>
         [HttpDelete("{movieId}")]
-        [Authorize("manage:awebsite")]
+        //[Authorize("manage:awebsite")]
         public ActionResult DeleteMovie(string movieId)
         {
             if(_movieLogic.DeleteMovie(movieId))
@@ -148,7 +148,7 @@ namespace CinemaAPI.Controllers
             }
             else
             {
-                return StatusCode(400);
+                return StatusCode(404);
             }
         }
 
