@@ -32,25 +32,26 @@ namespace CinemaAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(
                     builder =>
                     {
                         builder.WithOrigins(
-                            "http://20.94.137.143/", //Frontend
-                            "http://20.189.29.112/", //Admintools
-                            "http://20.45.2.119/", //User
-                            "http://20.45.6.142/", //Forum
-                            "http://localhost:4200/" // for testing
+                            "http://20.189.29.112", //Admintools
+                            "http://20.45.2.119", //User
+                            "http://20.45.6.142", //Forum
+                            "http://20.189.30.176", //Review
+                            "http://localhost:4200", // for testing
+                            "https://cinephiliacsapp.azurewebsites.net", // for frontend
+                            "https://cinephiliacs.org" // for frontend
                             )
                             .AllowAnyHeader()
                             .AllowAnyMethod();
                     }
                 );
             });
-
+            services.AddControllers();
             var myConnectionString = Configuration.GetConnectionString("Cinephiliacs_Movie");
             services.AddDbContext<Cinephiliacs_MovieContext>(options =>
             {
@@ -93,16 +94,18 @@ namespace CinemaAPI
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //if (env.IsDevelopment())
-            //{
-            app.UseDeveloperExceptionPage();
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CinemaAPI v1"));
-            //}
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CinemaAPI v1"));
+            }
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthentication();
 

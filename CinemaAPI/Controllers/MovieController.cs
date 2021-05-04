@@ -5,11 +5,10 @@ using Logic;
 using Logic.ApiHelper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.Net.Http;
-using Newtonsoft.Json.Linq;
-using System.Net.Http.Headers;
 using Model;
+using RestSharp;
+using Newtonsoft.Json;
+using System.Net.Http.Json;
 
 namespace CinemaAPI.Controllers
 {
@@ -51,13 +50,11 @@ namespace CinemaAPI.Controllers
         [HttpPost("search")]
         public ActionResult<List<string>> SearchMovies([FromBody] Dictionary<string, string[]> filters)
         {
-            var movies = _movieLogic.SearchMovies(filters);
-            if (movies == null)
+            if(!ModelState.IsValid)
             {
-                return StatusCode(404);
+                return StatusCode(400);
             }
-            StatusCode(200);
-            return movies;
+            return _movieLogic.SearchMovies(filters);
         }
 
         /// <summary>
@@ -66,13 +63,14 @@ namespace CinemaAPI.Controllers
         /// <param name="movieDTO"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult CreateMovie([FromBody] MovieDTO movieDTO)
+        [Authorize]
+        public async Task<ActionResult> CreateMovie([FromBody] MovieDTO movieDTO)
         {
             if(!ModelState.IsValid)
             {
                 return StatusCode(400);
             }
-            if(_movieLogic.CreateMovie(movieDTO))
+            if(await _movieLogic.CreateMovie(movieDTO))
             {
                 return StatusCode(200);
             }
@@ -90,13 +88,14 @@ namespace CinemaAPI.Controllers
         /// <param name="movieDTO"></param>
         /// <returns></returns>
         [HttpPut("{movieId}")]
-        public ActionResult UpdateMovie(string movieId, [FromBody] MovieDTO movieDTO)
+        [Authorize]
+        public async Task<ActionResult> UpdateMovie(string movieId, [FromBody] MovieDTO movieDTO)
         {
             if(!ModelState.IsValid)
             {
                 return StatusCode(400);
             }
-            if(_movieLogic.UpdateMovie(movieId, movieDTO))
+            if(await _movieLogic.UpdateMovie(movieId, movieDTO))
             {
                 return StatusCode(200);
             }
@@ -117,6 +116,7 @@ namespace CinemaAPI.Controllers
         /// <param name="movieDTO"></param>
         /// <returns></returns>
         [HttpPatch("{movieId}")]
+        [Authorize]
         public async Task<ActionResult> AppendMovie(string movieId, [FromBody] MovieDTO movieDTO)
         {
             if(!ModelState.IsValid)
@@ -139,6 +139,7 @@ namespace CinemaAPI.Controllers
         /// <param name="movieId"></param>
         /// <returns></returns>
         [HttpDelete("{movieId}")]
+        [Authorize("manage:awebsite")]
         public ActionResult DeleteMovie(string movieId)
         {
             if(_movieLogic.DeleteMovie(movieId))
@@ -159,6 +160,7 @@ namespace CinemaAPI.Controllers
         /// <param name="taggingDTO"></param>
         /// <returns></returns>
         [HttpPost("tags")]
+        [Authorize]
         public async Task<ActionResult> TagMovie([FromBody] TaggingDTO taggingDTO)
         {
             if(await _movieLogic.TagMovie(taggingDTO))
@@ -172,20 +174,13 @@ namespace CinemaAPI.Controllers
         }
 
         /// <summary>
-        /// Returns all currently existing tag names, excluding banned
-        /// tags.
+        /// Returns all currently existing tag names, excluding banned tags.
         /// </summary>
         /// <returns></returns>
         [HttpGet("tags")]
         public ActionResult<List<string>> GetAllTags()
         {
-            List<string> tagNames = _movieLogic.GetAllTags();
-            if(tagNames == null)
-            {
-                return StatusCode(400);
-            }
-            StatusCode(200);
-            return tagNames;
+            return _movieLogic.GetAllTags();
         }
 
         /// <summary>
@@ -195,6 +190,7 @@ namespace CinemaAPI.Controllers
         /// <param name="tagName"></param>
         /// <returns></returns>
         [HttpPut("tag/ban/{tagName}")]
+        [Authorize("manage:awebsite")]
         public ActionResult BanTag(string tagName)
         {
             if(_movieLogic.SetTagBanStatus(tagName, true))
@@ -214,6 +210,7 @@ namespace CinemaAPI.Controllers
         /// <param name="tagName"></param>
         /// <returns></returns>
         [HttpDelete("tag/ban/{tagName}")]
+        [Authorize("manage:awebsite")]
         public ActionResult UnbanTag(string tagName)
         {
             if(_movieLogic.SetTagBanStatus(tagName, false))
@@ -232,9 +229,12 @@ namespace CinemaAPI.Controllers
         /// <param name="movieId"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        [HttpPut("follow/{movieId}/{userId}")]
-        public ActionResult FollowMovie(string movieId, string userId)
+        [HttpPut("follow/{movieId}")]
+        [Authorize]
+        public async Task<ActionResult> FollowMovie(string movieId)
         {
+            var response = await Helpers.Helper.Sendrequest("/userdata", Method.GET, Helpers.Helper.GetTokenFromRequest(this.Request));
+            var userId = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)["sub"];
             if(_movieLogic.FollowMovie(movieId, userId))
             {
                 return StatusCode(200);
@@ -251,9 +251,12 @@ namespace CinemaAPI.Controllers
         /// <param name="movieId"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        [HttpDelete("follow/{movieId}/{userId}")]
-        public ActionResult UnfollowMovie(string movieId, string userId)
+        [HttpDelete("follow/{movieId}")]
+        [Authorize]
+        public async Task<ActionResult> UnfollowMovie(string movieId)
         {
+            var response = await Helpers.Helper.Sendrequest("/userdata", Method.GET, Helpers.Helper.GetTokenFromRequest(this.Request));
+            var userId = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)["sub"];
             if(_movieLogic.UnfollowMovie(movieId, userId))
             {
                 return StatusCode(200);
@@ -275,8 +278,6 @@ namespace CinemaAPI.Controllers
             return _movieLogic.GetFollowingMovies(userId);
         }
 
-        
-
         /// <summary>
         /// Takes a review packet from reviews api,
         /// and gets a list of users following the movie.
@@ -285,14 +286,11 @@ namespace CinemaAPI.Controllers
         /// <param name="review"></param>
         /// <returns></returns>
         [HttpPost("review/notification")] //Needs endpoint -Larson
-        [Authorize]
         public async Task<ActionResult<bool>> RetrieveNewReview([FromBody] ReviewNotification reviewNotification)
         {
-            ReviewNotification review = new ReviewNotification();
-            review = reviewNotification;
-            review = _movieLogic.GetFollowersForReviewNotification(review);
+            var review = _movieLogic.GetFollowersForReviewNotification(reviewNotification);
             if(review.Followers != null){
-                SendReviewNotification(review);
+                await Logic.ApiHelper.ApiProcessor.SendReviewNotification(review);
                 return StatusCode(200);
             }else{
                 return StatusCode(404);
@@ -308,14 +306,11 @@ namespace CinemaAPI.Controllers
         /// <param name="forumNotification"></param>
         /// <returns></returns>
         [HttpPost("discussion/notification")] //Needs endpoint -Larson
-        [Authorize]
         public async Task<ActionResult<bool>> RetrieveNewDiscussion([FromBody] ForumNotification forumNotification)
         {
-            ForumNotification forumNote = new ForumNotification();
-            forumNote = forumNotification;
-            forumNote = _movieLogic.GetFollowersForForumNotification(forumNote);
+            var forumNote = _movieLogic.GetFollowersForForumNotification(forumNotification);
             if(forumNote.Followers != null){
-                SendForumNotification(forumNote);
+                await Logic.ApiHelper.ApiProcessor.SendForumNotification(forumNote);
                 return StatusCode(200);
             }else{
                 return StatusCode(404);
@@ -323,100 +318,15 @@ namespace CinemaAPI.Controllers
         }
 
         /// <summary>
-        /// Sends the review notification on to Users, with the list of users who follow the movie the new movie review belongs to.
-        /// </summary>
-        /// <param name="reviewNotification"></param
-        /// <returns></returns>
-        public async Task<bool> SendReviewNotification(ReviewNotification reviewNotification)
-        {
-            HttpClient client = new HttpClient();
-            string path = "http://20.45.2.119/user/notification/review";
-            HttpResponseMessage response = await client.PostAsJsonAsync(path, reviewNotification);
-            if(response.IsSuccessStatusCode)
-            {   
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Sends the forum notification on to Users with the list of users who follow the movie the new forum topic belongs to.
-        /// </summary>
-        /// <param name="forumNotification"></param>
-        /// <returns></returns>
-        public async Task<bool> SendForumNotification(ForumNotification forumNotification)
-        {
-            HttpClient client = new HttpClient();
-            string path = "http://20.45.2.119/user/notification/discussion";
-            HttpResponseMessage response = await client.PostAsJsonAsync(path, forumNotification);
-            if(response.IsSuccessStatusCode)
-            {   
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-            
-        }
-        /// <summary>
-        /// Example for using authentication
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("authexample")]
-        [Authorize]
-        public ActionResult<string> GetExample()
-        {
-            return "Success";
-        }
-
-        /// <summary>
-        /// Temporary endpoint for testing the Kubernetes deployment.
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("test")]
-        public MovieObject GetTestObject()
-        {
-            MovieObject mo = new MovieObject();
-            mo.Title = "Test Str";
-            mo.Year = "Test Str";
-            mo.Rated = "Test Str";
-            mo.Released = "Test Str";
-            mo.RunTime = "Test Str";
-            mo.Genre = "Test Str";
-            mo.Director = "Test Str";
-            mo.Writer = "Test Str";
-            mo.Actors = "Test Str";
-            mo.Plot = "Test Str";
-            mo.Language = "Test Str";
-            mo.Country = "Test Str";
-            mo.Awards = "Test Str";
-            mo.Poster = "Test Str";
-            mo.Ratings = null;
-            mo.Metascore = "Test Str";
-            mo.imdbVotes = "Test Str";
-            mo.imdbID = "Test Str";
-            mo.Type = "Test Str";
-            mo.DVD = "Test Str";
-            mo.BoxOffice = "Test Str";
-            mo.Production = "Test Str";
-            mo.Website = "Test Str";
-            mo.Response = "Test Str";
-            return mo;
-        }
-        /// <summary>
         /// retuns recommended movies basewd
         /// </summary>
         /// <param name="imdbId"></param>
         /// <returns></returns>
 
         [HttpGet("recommended/{imdbId}")]
-        public async Task<ActionResult<List<MovieDTO>>> getRecommended(string imdbId)
+        public async Task<ActionResult<List<MovieDTO>>> GetRecommended(string imdbId)
         {
-            List<MovieDTO> movieDto = await _movieLogic.recommendedMovies(imdbId);
+            List<MovieDTO> movieDto = await _movieLogic.RecommendedMovies(imdbId);
             if (movieDto == null)
             {
                 return StatusCode(404);
@@ -431,10 +341,13 @@ namespace CinemaAPI.Controllers
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        [HttpGet("recommendedByUserId/{userId}")]
-        public async Task<ActionResult<List<MovieDTO>>> getRecommendedById(string userId)
+        [HttpGet("recommendedByUserId")]
+        [Authorize]
+        public async Task<ActionResult<List<MovieDTO>>> GetRecommendedById()
         {
-            List<MovieDTO> movieDto = await _movieLogic.recommendedMoviesByUserId(userId);
+            var response = await Helpers.Helper.Sendrequest("/userdata", Method.GET, Helpers.Helper.GetTokenFromRequest(this.Request));
+            var userId = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)["sub"];
+            var movieDto = await _movieLogic.RecommendedMoviesByUserId(userId);
             if (movieDto == null)
             {
                 return StatusCode(404);

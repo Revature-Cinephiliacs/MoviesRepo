@@ -91,6 +91,11 @@ namespace Tests
             return movieDTO;
         }
 
+        /// <summary>
+        /// Returns a random DateTime value between the current date
+        /// and 10000 days prior.
+        /// </summary>
+        /// <returns></returns>
         private static DateTime GetRandomDateTime()
         {
             DateTime dateTime = DateTime.Now;
@@ -98,11 +103,20 @@ namespace Tests
             return dateTime.AddDays(-1*randomGen.Next(10000));
         }
 
+        /// <summary>
+        /// Returns a unique movie Id.
+        /// </summary>
+        /// <returns></returns>
         private static string GetNextMovieId()
         {
             return Guid.NewGuid().ToString().Substring(0, 10) + (nextMovieIdNumber++).ToString();
         }
 
+        /// <summary>
+        /// Returns a TaggingDTO object populated with random values.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <returns></returns>
         public static TaggingDTO GetRandomTaggingDTO(string movieId)
         {
             TaggingDTO taggingDTO = new TaggingDTO();
@@ -224,6 +238,12 @@ namespace Tests
             }
         }
 
+        /// <summary>
+        /// Adds the Tag defined by the arguments to the database using the provided context.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="inputTag"></param>
+        /// <param name="isBanned"></param>
         internal static void AddTagToDatabase(Cinephiliacs_MovieContext context, TaggingDTO inputTag, bool isBanned)
         {
             var tag = new Tag();

@@ -280,6 +280,23 @@ namespace Repository
         }
 
         /// <summary>
+        /// Adds the word specified in the argument and whether
+        /// it is considered a tag to the database.
+        /// </summary>
+        /// <param name="word"></param>
+        /// <param name="wordIsTag"></param>
+        public bool AddWord(Word word)
+        {
+            if(WordExists(word.Word1))
+            {
+                return false;
+            }
+            _dbContext.Words.Add(word);
+            _dbContext.SaveChanges();
+            return true;
+        }
+
+        /// <summary>
         /// Updates an existing Movie in the database.
         /// </summary>
         /// <param name="movie"></param>
@@ -396,6 +413,7 @@ namespace Repository
         {
             return _dbContext.Movies
                 .Where(m => m.ImdbId == movieId)
+                .OrderBy(m => m.ImdbId)
                 .AsSplitQuery()
                 .Include(m => m.Rating)
                 .Include(m => m.MovieActors)
@@ -486,6 +504,17 @@ namespace Repository
         public Tag GetTag(string tagName)
         {
             return _dbContext.Tags.FirstOrDefault(t => t.TagName == tagName);
+        }
+
+        /// <summary>
+        /// Returns the Word specified by the argument if it exists.
+        /// Returns null if the word does not exist.
+        /// </summary>
+        /// <param name="word"></param>
+        /// <returns></returns>
+        public Word GetWord(string word)
+        {
+            return _dbContext.Words.FirstOrDefault(w => w.Word1 == word);
         }
 
         /// <summary>
@@ -626,6 +655,16 @@ namespace Repository
         }
 
         /// <summary>
+        /// Returns all MovieTags with a TagName that matches the argument.
+        /// </summary>
+        /// <param name="baseTagName"></param>
+        /// <returns></returns>
+        public List<MovieTag> GetMovieTagsByName(string baseTagName)
+        {
+            return _dbContext.MovieTags.Where(mt => mt.TagName == baseTagName).ToList();
+        }
+
+        /// <summary>
         /// Removes all actors from the Movie assocaited with the
         /// provided movie Id.
         /// </summary>
@@ -687,6 +726,46 @@ namespace Repository
         }
 
         /// <summary>
+        /// Returns all MovieActors with the actorId specified in the argument
+        /// </summary>
+        /// <param name="actorId"></param>
+        /// <returns></returns>
+        public List<MovieActor> GetMovieActorsById(Guid actorId)
+        {
+            return _dbContext.MovieActors.Where(ma => ma.ActorId == actorId).ToList();
+        }
+
+        /// <summary>
+        /// Returns all MovieDirectors with the actorId specified in the argument
+        /// </summary>
+        /// <param name="directorId"></param>
+        /// <returns></returns>
+        public List<MovieDirector> GetMovieDirectorsById(Guid directorId)
+        {
+            return _dbContext.MovieDirectors.Where(md => md.DirectorId == directorId).ToList();
+        }
+
+        /// <summary>
+        /// Returns all MovieGenres with the actorId specified in the argument
+        /// </summary>
+        /// <param name="genreId"></param>
+        /// <returns></returns>
+        public List<MovieGenre> GetMovieGenresById(Guid genreId)
+        {
+            return _dbContext.MovieGenres.Where(mg => mg.GenreId == genreId).ToList();
+        }
+
+        /// <summary>
+        /// Returns all MovieLanguages with the actorId specified in the argument
+        /// </summary>
+        /// <param name="languageId"></param>
+        /// <returns></returns>
+        public List<MovieLanguage> GetMovieLanguagesById(Guid languageId)
+        {
+            return _dbContext.MovieLanguages.Where(ml => ml.LanguageId == languageId).ToList();
+        }
+
+        /// <summary>
         /// Removes the movie specified in the argument from the user
         /// specified in the argument's following movie list.
         /// </summary>
@@ -712,6 +791,16 @@ namespace Repository
         public bool MovieExists(string movieId)
         {
             return (_dbContext.Movies.FirstOrDefault(m => m.ImdbId == movieId) != null);
+        }
+
+        /// <summary>
+        /// Returns true if the word exists in the database.
+        /// </summary>
+        /// <param name="word"></param>
+        /// <returns></returns>
+        private bool WordExists(string word)
+        {
+            return (_dbContext.Words.FirstOrDefault(w => w.Word1 == word) != null);
         }
 
         /// <summary>
@@ -873,18 +962,5 @@ namespace Repository
             return (_dbContext.FollowingMovies.FirstOrDefault(fm => fm.ImdbId == movieId 
                 && fm.UserId == userId) != null);
         }
-
-        public List<Movie> RecommendationsByMovie(string movieId)
-        {
-            var recommendedMovies = new List<Movie>();
-            var genres = _dbContext.MovieGenres.Where(x => x.ImdbId == movieId);
-            foreach (var g in genres)
-
-                recommendedMovies.Add(_dbContext.Movies.Select(m => m.MovieGenres.Where(mg => mg.GenreId == g.GenreId)) as Movie);
-
-            return recommendedMovies;
-
-        }
-
     }
 }
