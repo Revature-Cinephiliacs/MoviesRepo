@@ -24,7 +24,7 @@ namespace Tests
             //Act
 
             IMovieLogic ml = new MovieLogic(null);
-            var res = ml.recommendedMovies(movieId);
+            var res = ml.RecommendedMovies(movieId);
             string actual = res.Status.ToString();
             string expected = "WaitingForActivation";
             //Assert
@@ -44,7 +44,7 @@ namespace Tests
             //Act
 
             IMovieLogic ml = new MovieLogic(null);
-            var res = ml.recommendedMoviesByUserId(userId);
+            var res = ml.RecommendedMoviesByUserId(userId);
             string actual = res.Status.ToString();
             string expected = "Faulted";
             //Assert
