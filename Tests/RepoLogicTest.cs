@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -1705,6 +1705,45 @@ namespace Tests
             }
             Assert.False(result2);
         }
+        [Fact]
+        public void TestUpdateMovieTagUser()
+        {
+            var movieTagUser = new MovieTagUser();
+            movieTagUser.ImdbId = Guid.NewGuid().ToString();
+            movieTagUser.TagName = Guid.NewGuid().ToString();
+            movieTagUser.IsUpvote = true;
+            movieTagUser.UserId = Guid.NewGuid().ToString();
 
+            using (var context = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
+
+                Tag tag = new Tag();
+                tag.TagName = movieTagUser.TagName;
+                tag.IsBanned = false;
+
+                context.Tags.Add(tag);
+                context.MovieTagUsers.Add(movieTagUser);
+
+                context.SaveChanges();
+            }
+
+            movieTagUser.IsUpvote = false;
+            MovieTagUser result;
+            
+            using (var context = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context.Database.EnsureCreated();
+                
+                var repo = new RepoLogic(context);
+                repo.UpdateMovieTagUser(movieTagUser);
+
+                result = context.MovieTagUsers.First(mtu => mtu.ImdbId == movieTagUser.ImdbId
+                    && mtu.UserId == movieTagUser.UserId && mtu.TagName == movieTagUser.TagName);
+            }
+
+            Assert.False(result.IsUpvote);
+        }
     }
 }

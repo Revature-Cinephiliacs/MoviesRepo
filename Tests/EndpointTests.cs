@@ -14,10 +14,12 @@ namespace Tests
 {
     public class EndpointTests
     {
+        readonly DbContextOptions<Cinephiliacs_MovieContext> dbOptions
+            = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
+
         [Fact]
         public async Task GetMovieTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie();
             MovieDTO outputMovie;
 
@@ -46,7 +48,6 @@ namespace Tests
         [Fact]
         public async Task PatchNewMovieTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie();
             inputMovie.ImdbId = "tt4154796";
             Movie outputMovie;
@@ -75,7 +76,6 @@ namespace Tests
         [Fact]
         public async Task PatchExistingMovieTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie();
             Movie outputMovie;
 
@@ -105,7 +105,6 @@ namespace Tests
         [Fact]
         public void DeleteMovieTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie();
             Movie outputMovie;
 
@@ -134,7 +133,6 @@ namespace Tests
         [Fact]
         public async Task PostMovieTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie();
             Movie outputMovie;
 
@@ -162,7 +160,6 @@ namespace Tests
         [Fact]
         public async Task PostExistingMovieTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie();
             Movie outputMovie;
 
@@ -192,7 +189,6 @@ namespace Tests
         [Fact]
         public async Task PutMovieTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie();
             MovieDTO updatedMovie = TestingHelper.GetRandomMovie();
             updatedMovie.ImdbId = inputMovie.ImdbId;
@@ -224,7 +220,6 @@ namespace Tests
         [Fact]
         public void SearchActorTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie(1, 1, 1, 1, 1);
             List<string> searchResults;
 
@@ -256,7 +251,6 @@ namespace Tests
         [Fact]
         public void SearchDirectorTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie(1, 1, 1, 1, 1);
             List<string> searchResults;
 
@@ -287,7 +281,6 @@ namespace Tests
         [Fact]
         public void SearchGenreTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie(1, 1, 1, 1, 1);
             List<string> searchResults;
 
@@ -318,7 +311,6 @@ namespace Tests
         [Fact]
         public void SearchLanguageTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie(1, 1, 1, 1, 1);
             List<string> searchResults;
 
@@ -349,7 +341,6 @@ namespace Tests
         [Fact]
         public void SearchTagTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie(1, 1, 1, 1, 1);
             List<string> searchResults;
 
@@ -380,7 +371,6 @@ namespace Tests
         [Fact]
         public void SearchAnyTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie(1, 1, 1, 1, 1);
             List<string> searchResults;
 
@@ -411,7 +401,6 @@ namespace Tests
         [Fact]
         public void SearchRatingTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie(0, 0, 0, 0, 0);
             List<string> searchResults;
 
@@ -444,7 +433,6 @@ namespace Tests
         [Fact]
         public void SearchMultiTagTest1()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie(0, 0, 0, 0, 2);
             List<string> searchResults;
 
@@ -476,7 +464,6 @@ namespace Tests
         [Fact]
         public void SearchActorTagTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie(1, 1, 1, 1, 1);
             MovieDTO unmatchedMovie = TestingHelper.GetRandomMovie(1, 1, 1, 1, 1);
             unmatchedMovie.MovieActors[0] = inputMovie.MovieActors[0];
@@ -511,7 +498,6 @@ namespace Tests
         [Fact]
         public async Task PostTagTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             var inputMovie = TestingHelper.GetRandomMovie();
             var inputTag = TestingHelper.GetRandomTaggingDTO(inputMovie.ImdbId);
             MovieTagUser movieTagUser;
@@ -544,7 +530,6 @@ namespace Tests
         [Fact]
         public void BanTagTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             var inputMovie = TestingHelper.GetRandomMovie();
             var inputTag = TestingHelper.GetRandomTaggingDTO(inputMovie.ImdbId);
             bool inputBanState = false;
@@ -577,7 +562,6 @@ namespace Tests
         [Fact]
         public void UnbanTagTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             var inputMovie = TestingHelper.GetRandomMovie();
             var inputTag = TestingHelper.GetRandomTaggingDTO(inputMovie.ImdbId);
             bool inputBanState = true;
@@ -610,7 +594,6 @@ namespace Tests
         [Fact]
         public void GetTagsTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie(0, 0, 0, 0, 3);
             List<string> results;
 
@@ -641,7 +624,6 @@ namespace Tests
         [Fact]
         public void FollowMovieTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie();
             string userId = Guid.NewGuid().ToString();
             var followedMovies = new List<string>();
@@ -675,7 +657,6 @@ namespace Tests
         [Fact]
         public async Task RecommendedMoviesByUserIdTest()
         {
-            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie();
             inputMovie.ImdbId = "tt4154796";
             string userId = Guid.NewGuid().ToString();
