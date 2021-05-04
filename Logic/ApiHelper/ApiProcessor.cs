@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 using System.Threading.Tasks;
 using Model;
+using Newtonsoft.Json;
 
 namespace Logic.ApiHelper
 {
     public class ApiProcessor
     {
+        private static readonly string _userapi = "http://20.45.2.119/user/";
         /// <summary>
         /// Retrieves the details for a movie based on an IMDB identification number, imdbId,
         /// from a public API endpoint. Returns null if the imdbId is not found.
@@ -110,8 +113,10 @@ namespace Logic.ApiHelper
         /// <returns></returns>
         public static async Task<bool> SendForumNotification(ForumNotification forumNotification)
         {
-            HttpClient client = new HttpClient();
-            string path = "http://20.45.2.119/user/notification/discussion";
+            HttpClientHandler clientHandler = new HttpClientHandler();
+            clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+            HttpClient client = new HttpClient(clientHandler);
+            string path = $"{_userapi}notification/discussion";
             HttpResponseMessage response = await client.PostAsJsonAsync(path, forumNotification);
             if(response.IsSuccessStatusCode)
             {   
@@ -131,9 +136,13 @@ namespace Logic.ApiHelper
         /// <returns></returns>
         public static async Task<bool> SendReviewNotification(ReviewNotification reviewNotification)
         {
-            HttpClient client = new HttpClient();
-            string path = "http://20.45.2.119/user/notification/review";
-            HttpResponseMessage response = await client.PostAsJsonAsync(path, reviewNotification);
+            HttpClientHandler clientHandler = new HttpClientHandler();
+            clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+            HttpClient client = new HttpClient(clientHandler);
+            string path = $"{_userapi}notification/review";
+            var json = JsonConvert.SerializeObject(reviewNotification);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await client.PostAsync(path, data);
             if(response.IsSuccessStatusCode)
             {   
                 return true;
