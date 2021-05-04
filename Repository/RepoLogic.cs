@@ -962,18 +962,5 @@ namespace Repository
             return (_dbContext.FollowingMovies.FirstOrDefault(fm => fm.ImdbId == movieId 
                 && fm.UserId == userId) != null);
         }
-
-        public List<Movie> RecommendationsByMovie(string movieId)
-        {
-            var recommendedMovies = new List<Movie>();
-            var genres = _dbContext.MovieGenres.Where(x => x.ImdbId == movieId);
-            foreach (var g in genres)
-
-                recommendedMovies.Add(_dbContext.Movies.Select(m => m.MovieGenres.Where(mg => mg.GenreId == g.GenreId)) as Movie);
-
-            return recommendedMovies;
-
-        }
-
     }
 }

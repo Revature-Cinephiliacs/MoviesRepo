@@ -1577,5 +1577,134 @@ namespace Tests
             }
             Assert.Equal(2,result2.Count);
         }
+        [Fact]
+        public void TestGetMovieGenreById()
+        {
+            var id  = Guid.NewGuid();
+            
+            var followed = new MovieGenre() {Imdb = new Movie(){ImdbId = "12345",Title = "Avenger"}, GenreId = id};
+            var followed2 = new MovieGenre() {Imdb = new Movie(){ImdbId = "123456",Title = "Titanic"}, GenreId = id};
+
+            using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context1.Database.EnsureDeleted();
+                context1.Database.EnsureCreated();
+                context1.MovieGenres.Add(followed);
+                context1.MovieGenres.Add(followed2);
+                context1.SaveChanges();
+            }
+            List<MovieGenre> result2;
+            using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context2.Database.EnsureCreated();
+                
+                var msr = new RepoLogic(context2);
+                result2 = msr.GetMovieGenresById(id);
+
+            }
+            Assert.Equal(2,result2.Count);
+        }
+        [Fact]
+        public void TestGetMovieLanguageById()
+        {
+            var id  = Guid.NewGuid();
+            var followed = new MovieLanguage() {Imdb = new Movie(){ImdbId = "12345",Title = "Avenger"}, LanguageId = id};
+            var followed2 = new MovieLanguage() {Imdb = new Movie(){ImdbId = "123456",Title = "Titanic"}, LanguageId = id};
+
+            using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context1.Database.EnsureDeleted();
+                context1.Database.EnsureCreated();
+                context1.MovieLanguages.Add(followed);
+                context1.MovieLanguages.Add(followed2);
+                context1.SaveChanges();
+            }
+            List<MovieLanguage> result2;
+            using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context2.Database.EnsureCreated();
+                
+                var msr = new RepoLogic(context2);
+                result2 = msr.GetMovieLanguagesById(id);
+
+            }
+            Assert.Equal(2,result2.Count);
+        }
+        [Fact]
+        public void TestDeleteFollowingMovie()
+        {
+            var id  = Guid.NewGuid().ToString();
+            
+            var followed = new FollowingMovie() {Imdb = new Movie(){ImdbId = "12345",Title = "Avenger"}, UserId = id};
+            
+
+            using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context1.Database.EnsureDeleted();
+                context1.Database.EnsureCreated();
+                context1.FollowingMovies.Add(followed);
+                context1.SaveChanges();
+            }
+            List<FollowingMovie> result2;
+            using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context2.Database.EnsureCreated();
+                
+                var msr = new RepoLogic(context2);
+                msr.DeleteFollowingMovie("12345",id);
+                result2 = context2.FollowingMovies.Where(fm => fm.UserId == id).ToList();
+
+            }
+            Assert.Empty(result2);
+        }
+        [Fact]
+        public void TestFollowingMovieExist()
+        {
+            var id  = Guid.NewGuid();
+            
+            var followed = new FollowingMovie() {Imdb = new Movie(){ImdbId = "12345",Title = "Avenger"},UserId = "Anis"};
+           
+
+            using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context1.Database.EnsureDeleted();
+                context1.Database.EnsureCreated();
+                context1.FollowingMovies.Add(followed);
+                context1.SaveChanges();
+            }
+            bool result2;
+            using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context2.Database.EnsureCreated();
+                
+                var msr = new RepoLogic(context2);
+                result2 = msr.FollowingMovieExists("12345", "Anis");
+
+            }
+            Assert.True(result2);
+        }
+        [Fact]
+        public void TestFollowingMovieExistBadPath()
+        {
+            
+
+            using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context1.Database.EnsureDeleted();
+                context1.Database.EnsureCreated();
+                context1.SaveChanges();
+            }
+            bool result2;
+            using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context2.Database.EnsureCreated();
+                
+                var msr = new RepoLogic(context2);
+                result2 = msr.FollowingMovieExists("12345", "Anis");
+
+            }
+            Assert.False(result2);
+        }
+
     }
 }
