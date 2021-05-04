@@ -873,7 +873,7 @@ namespace Tests
             reviewNotification.Imdbid = "Avengers";
             ReviewNotification testNote = movieLogic.GetFollowersForReviewNotification(reviewNotification);
             var expected = 1;
-            var actual = testNote.Followers.Count();
+            var actual = testNote.Followers.Count;
             Assert.Equal(expected, actual);
         }
 
@@ -888,7 +888,7 @@ namespace Tests
             forumNotification.Imdbid = "Avengers";
             ForumNotification testNote = movieLogic.GetFollowersForForumNotification(forumNotification);
             var expected = 1;
-            var actual = testNote.Followers.Count();
+            var actual = testNote.Followers.Count;
             Assert.Equal(expected, actual);
         }
 
@@ -985,13 +985,6 @@ namespace Tests
         {
             var lang = new Language() {LanguageId = Guid.NewGuid(), LanguageName = "French"};
             var movie = new Movie() {ImdbId = "12345", Title = "Avenger"};
-            var movieLang = new MovieLanguage()
-            {
-                
-                Language = lang,
-                Imdb = movie
-            };
-           
            
             using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
             {
@@ -1016,11 +1009,6 @@ namespace Tests
         {
             var lang = new Language() {LanguageId = Guid.NewGuid(), LanguageName = "French"};
             
-            var movieLang = new MovieLanguage()
-            {
-                Language = lang,
-               
-            };
             using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
             {
                 context1.Database.EnsureDeleted();
@@ -1043,11 +1031,6 @@ namespace Tests
         {
             var movie = new Movie() {ImdbId = "12345", Title = "Avenger"};
             
-            var movieLang = new MovieLanguage()
-            {
-               Imdb = movie
-               
-            };
             using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
             {
                 context1.Database.EnsureDeleted();
@@ -1526,31 +1509,6 @@ namespace Tests
             Assert.Equal(2,result2.Count);
         }
         [Fact]
-        public void TestGetMovieActor()
-        {
-            var followed = new FollowingMovie() {Imdb = new Movie(){ImdbId = "12345",Title = "Avenger"}, UserId = "Anis"};
-            var followed2 = new FollowingMovie() {Imdb = new Movie(){ImdbId = "123456",Title = "Titanic"}, UserId = "Anis"};
-
-            using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
-            {
-                context1.Database.EnsureDeleted();
-                context1.Database.EnsureCreated();
-                context1.FollowingMovies.Add(followed);
-                context1.FollowingMovies.Add(followed2);
-                context1.SaveChanges();
-            }
-            List<string> result2;
-            using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
-            {
-                context2.Database.EnsureCreated();
-                
-                var msr = new RepoLogic(context2);
-                result2 = msr.GetFollowingMovies("Anis");
-
-            }
-            Assert.Equal(2,result2.Count);
-        }
-        [Fact]
         public void TestGetMovieDirectorById()
         {
             var id  = Guid.NewGuid();
@@ -1660,8 +1618,6 @@ namespace Tests
         [Fact]
         public void TestFollowingMovieExist()
         {
-            var id  = Guid.NewGuid();
-            
             var followed = new FollowingMovie() {Imdb = new Movie(){ImdbId = "12345",Title = "Avenger"},UserId = "Anis"};
            
 
