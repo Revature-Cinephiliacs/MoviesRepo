@@ -7,7 +7,7 @@ namespace CinemaAPI.Helpers
 {
     static class Helper
     {
-        private static readonly string _authUrl = "https://localhost:5001/Authentication";
+        private static readonly string _authUrl = "http://20.45.0.16/Authentication";
 
         /// <summary>
         /// Extract token from request
