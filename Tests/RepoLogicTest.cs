@@ -1419,5 +1419,163 @@ namespace Tests
             }
             Assert.Single(result2);
         }
+        [Fact]
+        public void TestGetMovieTags()
+        {
+            var sut1 = new MovieTag() {
+                Imdb = new Movie(){ImdbId = "12345",Title = "Avenger"},
+                TagNameNavigation = new Tag(){TagName = "Action",IsBanned = true}
+
+            };
+
+            using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context1.Database.EnsureDeleted();
+                context1.Database.EnsureCreated();
+                context1.MovieTags.Add(sut1);
+                context1.SaveChanges();
+            }
+            List<MovieTag> result2;
+            using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context2.Database.EnsureCreated();
+                
+                var msr = new RepoLogic(context2);
+                result2 = msr.GetMovieTags("12345");
+
+            }
+            Assert.Single(result2);
+        }
+        [Fact]
+        public void TestGetFollowingMovie()
+        {
+            
+            var followed = new FollowingMovie() {Imdb = new Movie(){ImdbId = "12345",Title = "Avenger"}, UserId = "Anis"};
+            var followed2 = new FollowingMovie() {Imdb = new Movie(){ImdbId = "123456",Title = "Titanic"}, UserId = "Anis"};
+
+            using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context1.Database.EnsureDeleted();
+                context1.Database.EnsureCreated();
+                context1.FollowingMovies.Add(followed);
+                context1.FollowingMovies.Add(followed2);
+                context1.SaveChanges();
+            }
+            List<string> result2;
+            using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context2.Database.EnsureCreated();
+                
+                var msr = new RepoLogic(context2);
+                result2 = msr.GetFollowingMovies("Anis");
+
+            }
+            Assert.Equal(2,result2.Count);
+        }
+        [Fact]
+        public void TestGetFollowingMovieByMovieId()
+        {
+            
+            var followed = new FollowingMovie() {Imdb = new Movie(){ImdbId = "12345",Title = "Avenger"}, UserId = "Anis"};
+            var followed2 = new FollowingMovie() {Imdb = new Movie(){ImdbId = "123457",Title = "Avenger"}, UserId = "Anis"};
+            
+            using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context1.Database.EnsureDeleted();
+                context1.Database.EnsureCreated();
+                context1.FollowingMovies.Add(followed);
+                context1.FollowingMovies.Add(followed2);
+                context1.SaveChanges();
+            }
+            List<string> result2;
+            using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context2.Database.EnsureCreated();
+                
+                var msr = new RepoLogic(context2);
+                result2 = msr.GetFollowingMoviesByMovieID("12345");
+
+            }
+            Assert.Single(result2);
+        }
+        [Fact]
+        public void TestGetMovieTagsByname()
+        {
+            List<MovieTag> mvtags = new List<MovieTag>();
+            var followed = new MovieTag() {Imdb = new Movie(){ImdbId = "12345",Title = "Avenger"}, TagName = "Anis"};
+            var followed2 = new MovieTag() { Imdb = new Movie() { ImdbId = "123456", Title = "Titanic" }, TagName = "Anis" };
+            mvtags.Add(followed);
+            mvtags.Add(followed2);
+
+            using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context1.Database.EnsureDeleted();
+                context1.Database.EnsureCreated();
+                context1.MovieTags.Add(followed);
+                context1.MovieTags.Add(followed2);
+                context1.SaveChanges();
+            }
+            List<MovieTag> result2;
+            using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context2.Database.EnsureCreated();
+                
+                var msr = new RepoLogic(context2);
+                result2 = msr.GetMovieTagsByName("Anis");
+            }
+            Assert.Equal(2,result2.Count);
+        }
+        [Fact]
+        public void TestGetMovieActor()
+        {
+            var followed = new FollowingMovie() {Imdb = new Movie(){ImdbId = "12345",Title = "Avenger"}, UserId = "Anis"};
+            var followed2 = new FollowingMovie() {Imdb = new Movie(){ImdbId = "123456",Title = "Titanic"}, UserId = "Anis"};
+
+            using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context1.Database.EnsureDeleted();
+                context1.Database.EnsureCreated();
+                context1.FollowingMovies.Add(followed);
+                context1.FollowingMovies.Add(followed2);
+                context1.SaveChanges();
+            }
+            List<string> result2;
+            using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context2.Database.EnsureCreated();
+                
+                var msr = new RepoLogic(context2);
+                result2 = msr.GetFollowingMovies("Anis");
+
+            }
+            Assert.Equal(2,result2.Count);
+        }
+        [Fact]
+        public void TestGetMovieDirectorById()
+        {
+            var id  = Guid.NewGuid();
+            
+            var followed = new MovieDirector() {Imdb = new Movie(){ImdbId = "12345",Title = "Avenger"}, DirectorId = id};
+            var followed2 = new MovieDirector() {Imdb = new Movie(){ImdbId = "123456",Title = "Titanic"}, DirectorId = id};
+
+            using (var context1 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context1.Database.EnsureDeleted();
+                context1.Database.EnsureCreated();
+                context1.MovieDirectors.Add(followed);
+                context1.MovieDirectors.Add(followed2);
+                context1.SaveChanges();
+            }
+            List<MovieDirector> result2;
+            using (var context2 = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context2.Database.EnsureCreated();
+                
+                var msr = new RepoLogic(context2);
+                result2 = msr.GetMovieDirectorsById(id);
+
+            }
+            Assert.Equal(2,result2.Count);
+        }
     }
 }
