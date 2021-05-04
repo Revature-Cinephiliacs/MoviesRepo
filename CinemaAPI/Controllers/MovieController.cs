@@ -324,7 +324,7 @@ namespace CinemaAPI.Controllers
         /// <returns></returns>
 
         [HttpGet("recommended/{imdbId}")]
-        public async Task<ActionResult<List<MovieDTO>>> getRecommended(string imdbId)
+        public async Task<ActionResult<List<MovieDTO>>> GetRecommended(string imdbId)
         {
             List<MovieDTO> movieDto = await _movieLogic.RecommendedMovies(imdbId);
             if (movieDto == null)
@@ -343,11 +343,11 @@ namespace CinemaAPI.Controllers
         /// <returns></returns>
         [HttpGet("recommendedByUserId")]
         [Authorize]
-        public async Task<ActionResult<List<MovieDTO>>> getRecommendedById()
+        public async Task<ActionResult<List<MovieDTO>>> GetRecommendedById()
         {
             var response = await Helpers.Helper.Sendrequest("/userdata", Method.GET, Helpers.Helper.GetTokenFromRequest(this.Request));
             var userId = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)["sub"];
-            List<MovieDTO> movieDto = await _movieLogic.RecommendedMoviesByUserId(userId);
+            var movieDto = await _movieLogic.RecommendedMoviesByUserId(userId);
             if (movieDto == null)
             {
                 return StatusCode(404);

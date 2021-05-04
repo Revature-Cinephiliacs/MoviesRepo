@@ -272,24 +272,17 @@ namespace Logic
 
         public async Task<List<MovieDTO>> RecommendedMoviesByUserId(string userId)
         {
-            var loadRecommendedTask = new List<Task<List<string>>>();
             List<string> followedMovieIds = _repo.GetFollowingMovies(userId);
-            if (followedMovieIds.Count > 5 )
+            var numberOfMovies = Math.Min(3, followedMovieIds.Count);
+            var randomIndiciesArray = GetRandomUniquePositiveInts(numberOfMovies, followedMovieIds.Count);
+
+            var loadRecommendedTask = new List<Task<List<string>>>();
+            for (int i = 0; i < numberOfMovies; i++)
             {
-                for (int i = 0; i < 5; i++)
-                {
-                    loadRecommendedTask.Add(ApiProcessor.LoadRecommendedMovies(followedMovieIds[i]));
-                }
+                loadRecommendedTask.Add(ApiProcessor.LoadRecommendedMovies(followedMovieIds[randomIndiciesArray[i]]));
             }
 
-            if (followedMovieIds.Count < 5)
-            {
-                foreach (var followedMovieId in followedMovieIds)
-                {
-                    loadRecommendedTask.Add(ApiProcessor.LoadRecommendedMovies(followedMovieId));
-                } 
-            }
-            var movieIds = new List<string>();
+            var movieIds = new HashSet<string>();
             while(loadRecommendedTask.Count > 0)
             {
                 var completedTask = await Task.WhenAny(loadRecommendedTask);
@@ -301,15 +294,17 @@ namespace Logic
                 loadRecommendedTask.Remove(completedTask);
             }
 
-            var getMovieTasks = new List<Task<MovieDTO>>();
-
-            Random _random = new Random();
-            for (int i = 0; i < movieIds.Count; i++)
+            foreach (var followedMovieId in followedMovieIds)
             {
-                int rand = _random.Next(0, movieIds.Count);
-                getMovieTasks.Add(GetMovie(movieIds[rand]));
-                
+                movieIds.Remove(followedMovieId);
             }
+
+            var getMovieTasks = new List<Task<MovieDTO>>();
+            foreach (var movieId in movieIds)
+            {
+                getMovieTasks.Add(GetMovie(movieId));
+            }
+            
             var recommendedDTOs = new List<MovieDTO>();
             while(getMovieTasks.Count > 0)
             {
@@ -518,6 +513,40 @@ namespace Logic
                 }
             }
             return tagNames;
+        }
+
+        /// <summary>
+        /// Returns an array of integers, with Length equal to the count argument. 
+        /// Each integer in the array will be unique and is pseudo-randomly
+        /// generated to be between 0 and (exclusiveMax - 1). Returns null if the
+        /// arguments specified are impossible to fulfill.
+        /// </summary>
+        /// <param name="count"></param>
+        /// <param name="exclusiveMax"></param>
+        /// <returns></returns>
+        private int[] GetRandomUniquePositiveInts(int count, int exclusiveMax)
+        {
+            if(count < 1 || exclusiveMax < 1 || count > exclusiveMax)
+            {
+                return null;
+            }
+
+            var inOrderIntsList = new List<int>();
+            for (int i = 0; i < exclusiveMax; i++)
+            {
+                inOrderIntsList.Add(i);
+            }
+
+            Random randomGen = new Random();
+            var randomIntsArray = new int[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                randomIntsArray[i] = inOrderIntsList[randomGen.Next(exclusiveMax - i)];
+                inOrderIntsList.Remove(randomIntsArray[i]);
+            }
+
+            return randomIntsArray;
         }
 
         /// <summary>
