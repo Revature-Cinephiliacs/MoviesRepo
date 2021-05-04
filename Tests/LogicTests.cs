@@ -18,7 +18,7 @@ namespace Tests
             var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie();
             string userId = Guid.NewGuid().ToString();
-            var followedMovies = new List<string>();
+            List<string> followedMovies;
 
             // Seed the test database
             using(var context = new Cinephiliacs_MovieContext(dbOptions))
