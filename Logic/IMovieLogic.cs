@@ -11,12 +11,21 @@ namespace Logic
     public interface IMovieLogic
     {
         /// <summary>
+        /// Returns detailed information for the specified movieid. Adds the
+        /// movie to the database if it does not exist. Returns null if the
+        /// specified movieId does not exist.
+        /// </summary>
+        /// <param name="movieid"></param>
+        /// <returns></returns>
+        Task<MovieDTO> GetMovie(string movieId);
+
+        /// <summary>
         /// Returns detailed information for the specified movieid. Returns
         /// null if the specified movieId does not exist.
         /// </summary>
         /// <param name="movieid"></param>
         /// <returns></returns>
-        Task<MovieDTO> GetMovie(string movieId);
+        Task<MovieDTO> GetMovieWithoutAdding(string movieId);
 
         /// <summary>
         /// Returns a movieId for each movie that matches all of the filters

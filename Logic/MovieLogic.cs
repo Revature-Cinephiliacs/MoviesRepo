@@ -23,6 +23,37 @@ namespace Logic
 
         public async Task<MovieDTO> GetMovie(string movieId)
         {
+            if(!_repo.MovieExists(movieId))
+            {
+                ApiHelper.MovieObject movieObject = await ApiHelper.ApiProcessor.LoadMovieAsync(movieId);
+                if(movieObject == null || movieObject.imdbID != movieId)
+                {
+                    return null;
+                }
+                await CreateMovie(Mapper.MovieObjectToMovieDTO(movieObject));
+            }
+
+            Movie movie = _repo.GetMovieFullInfo(movieId);
+
+            var tagNamesToRemove = new List<string>();
+            foreach (var movieTag in movie.MovieTags)
+            {
+                var tag = _repo.GetTag(movieTag.TagName);
+                if(tag == null || tag.IsBanned)
+                {
+                    tagNamesToRemove.Add(movieTag.TagName);
+                }
+            }
+            foreach (var tagNameToRemove in tagNamesToRemove)
+            {
+                movie.MovieTags.Remove(movie.MovieTags.First(mt => mt.TagName == tagNameToRemove));
+            }
+
+            return Mapper.MovieToMovieDTO(movie);
+        }
+
+        public async Task<MovieDTO> GetMovieWithoutAdding(string movieId)
+        {
             if(_repo.MovieExists(movieId))
             {
                 Movie movie = _repo.GetMovieFullInfo(movieId);
@@ -257,7 +288,7 @@ namespace Logic
             for (int i = 0; i < recommendedURLs.Count; i++)
             {
                 var movieId = ParseMovieIdFromURL(recommendedURLs[i]);
-                getMovieTasks.Add(GetMovie(movieId));
+                getMovieTasks.Add(GetMovieWithoutAdding(movieId));
             }
 
             var recommendedDTOs = new List<MovieDTO>();
@@ -302,7 +333,7 @@ namespace Logic
             var getMovieTasks = new List<Task<MovieDTO>>();
             foreach (var movieId in movieIds)
             {
-                getMovieTasks.Add(GetMovie(movieId));
+                getMovieTasks.Add(GetMovieWithoutAdding(movieId));
             }
             
             var recommendedDTOs = new List<MovieDTO>();
