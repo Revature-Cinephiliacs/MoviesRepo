@@ -468,11 +468,11 @@ namespace Logic
             return true;
         }
 
-        public bool FollowMovie(string movieId, string userId)
+        public async Task<bool> FollowMovie(string movieId, string userId)
         {
             if(!_repo.MovieExists(movieId))
             {
-                return false;
+                await GetMovie(movieId);
             }
 
             _repo.AddFollowingMovie(movieId, userId);
