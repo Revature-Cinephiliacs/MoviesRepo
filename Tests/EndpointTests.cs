@@ -40,9 +40,9 @@ namespace Tests
                 outputMovie = (await movieController.GetMovie(inputMovie.ImdbId)).Value;
             }
 
-            Assert.Equal(inputMovie, outputMovie);
+            Assert.Equal(inputMovie.ImdbId, outputMovie.ImdbId);
         }
-        
+
         [Fact]
         public async Task PatchNewMovieTest()
         {
@@ -426,6 +426,7 @@ namespace Tests
                 context.Database.EnsureCreated();
 
                 TestingHelper.AddMovieDTOToDatabase(context, inputMovie);
+                TestingHelper.AddMovieDTOToDatabase(context, TestingHelper.GetRandomMovie(0, 0, 0, 0, 0));
             }
 
             using(var context = new Cinephiliacs_MovieContext(dbOptions))
@@ -477,6 +478,8 @@ namespace Tests
         {
             var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
             MovieDTO inputMovie = TestingHelper.GetRandomMovie(1, 1, 1, 1, 1);
+            MovieDTO unmatchedMovie = TestingHelper.GetRandomMovie(1, 1, 1, 1, 1);
+            unmatchedMovie.MovieActors[0] = inputMovie.MovieActors[0];
             List<string> searchResults;
 
             var filters = new Dictionary<string, string[]>();
@@ -490,6 +493,7 @@ namespace Tests
                 context.Database.EnsureCreated();
 
                 TestingHelper.AddMovieDTOToDatabase(context, inputMovie);
+                TestingHelper.AddMovieDTOToDatabase(context, unmatchedMovie);
             }
 
             using(var context = new Cinephiliacs_MovieContext(dbOptions))
@@ -666,6 +670,41 @@ namespace Tests
             }
 
             Assert.Contains(inputMovie.ImdbId, followedMovies);
+        }
+
+        [Fact]
+        public async Task RecommendedMoviesByUserIdTest()
+        {
+            var dbOptions = TestingHelper.GetUniqueContextOptions<Cinephiliacs_MovieContext>();
+            MovieDTO inputMovie = TestingHelper.GetRandomMovie();
+            inputMovie.ImdbId = "tt4154796";
+            string userId = Guid.NewGuid().ToString();
+            var results = new List<MovieDTO>();
+
+            // Seed the test database
+            using(var context = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
+
+                TestingHelper.AddMovieDTOToDatabase(context, inputMovie);
+
+                var followingMovie = new FollowingMovie();
+                followingMovie.ImdbId = inputMovie.ImdbId;
+                followingMovie.UserId = userId;
+                context.FollowingMovies.Add(followingMovie);
+                context.SaveChanges();
+            }
+
+            using(var context = new Cinephiliacs_MovieContext(dbOptions))
+            {
+                RepoLogic repoLogic = new RepoLogic(context);
+                MovieLogic movieLogic = new MovieLogic(repoLogic);
+                // Test RecommendedMoviesByUserId()
+                results = await movieLogic.RecommendedMoviesByUserId(userId);
+            }
+
+            Assert.True(results.Count > 0);
         }
     }
 }
