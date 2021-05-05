@@ -152,5 +152,14 @@ namespace Logic
         /// <param name="forumNote"></param>
         /// <returns>ForumNotification</returns>
         ForumNotification GetFollowersForForumNotification(ForumNotification forumNote);
+
+        /// <summary>
+        /// Returns a bool indicating whether the logged in user is following
+        /// the movie specified in the argument.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        bool IsFollowingMovie(string movieId, string userId);
     }
 }
