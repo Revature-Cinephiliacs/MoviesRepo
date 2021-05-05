@@ -497,6 +497,10 @@ namespace Logic
 
         public bool IsFollowingMovie(string movieId, string userId)
         {
+            if(!_repo.MovieExists(movieId))
+            {
+                return false;
+            }
             return _repo.IsFollowingMovie(movieId, userId);
         }
 
