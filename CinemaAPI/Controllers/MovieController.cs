@@ -280,14 +280,7 @@ namespace CinemaAPI.Controllers
         {
             var response = await Helpers.Helper.Sendrequest("/userdata", Method.GET, Helpers.Helper.GetTokenFromRequest(this.Request));
             var userId = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)["sub"];
-            if(_movieLogic.IsFollowingMovie(movieId, userId))
-            {
-                return StatusCode(200);
-            }
-            else
-            {
-                return StatusCode(404);
-            }
+            return _movieLogic.IsFollowingMovie(movieId, userId);
         }
 
         /// <summary>
@@ -341,11 +334,10 @@ namespace CinemaAPI.Controllers
         }
 
         /// <summary>
-        /// retuns recommended movies basewd
+        /// return a list of movies recommended by the movieId
         /// </summary>
         /// <param name="imdbId"></param>
         /// <returns></returns>
-
         [HttpGet("recommended/{imdbId}")]
         public async Task<ActionResult<List<MovieDTO>>> GetRecommended(string imdbId)
         {
