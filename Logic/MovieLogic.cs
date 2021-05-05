@@ -495,6 +495,11 @@ namespace Logic
             return _repo.GetFollowingMovies(userId);
         }
 
+        public bool IsFollowingMovie(string movieId, string userId)
+        {
+            return _repo.IsFollowingMovie(movieId, userId);
+        }
+
         public List<string> GetAllTags()
         {
             var tags = _repo.GetAllTags();

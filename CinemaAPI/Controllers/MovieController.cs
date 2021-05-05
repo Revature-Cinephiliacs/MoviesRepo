@@ -268,6 +268,29 @@ namespace CinemaAPI.Controllers
         }
 
         /// <summary>
+        /// Returns a bool indicating whether the logged in user is following
+        /// the movie specified in the argument.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpGet("isfollowing/{movieId}")]
+        [Authorize]
+        public async Task<ActionResult<bool>> IsFollowingMovie(string movieId)
+        {
+            var response = await Helpers.Helper.Sendrequest("/userdata", Method.GET, Helpers.Helper.GetTokenFromRequest(this.Request));
+            var userId = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)["sub"];
+            if(_movieLogic.IsFollowingMovie(movieId, userId))
+            {
+                return StatusCode(200);
+            }
+            else
+            {
+                return StatusCode(404);
+            }
+        }
+
+        /// <summary>
         /// Returns all movies that the user is following.
         /// </summary>
         /// <param name="userId"></param>
