@@ -235,7 +235,7 @@ namespace CinemaAPI.Controllers
         {
             var response = await Helpers.Helper.Sendrequest("/userdata", Method.GET, Helpers.Helper.GetTokenFromRequest(this.Request));
             var userId = JsonConvert.DeserializeObject<Dictionary<string, string>>(response.Content)["sub"];
-            if(_movieLogic.FollowMovie(movieId, userId))
+            if(await _movieLogic.FollowMovie(movieId, userId))
             {
                 return StatusCode(200);
             }

@@ -98,7 +98,7 @@ namespace Logic
         /// <param name="movieId"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        bool FollowMovie(string movieId, string userId);
+        Task<bool> FollowMovie(string movieId, string userId);
 
         /// <summary>
         /// Removes the Movie to the User's following list.

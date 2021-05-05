@@ -33,7 +33,7 @@ namespace Logic
                     var tag = _repo.GetTag(movieTag.TagName);
                     if(tag == null || tag.IsBanned)
                     {
-                        tagNamesToRemove.Add(tag.TagName);
+                        tagNamesToRemove.Add(movieTag.TagName);
                     }
                 }
                 foreach (var tagNameToRemove in tagNamesToRemove)
@@ -55,7 +55,7 @@ namespace Logic
         public List<string> SearchMovies(Dictionary<string, string[]> filters)
         {
             var cumulativeResult = new List<string>();
-            var currentResult = new List<string>();
+            List<string> currentResult;
             string ratingName = null;
 
             foreach (var filter in filters)
@@ -92,7 +92,6 @@ namespace Logic
                     {
                         return new List<string>();
                     }
-                    var movieIds = new List<string>();
                     foreach (var movie in movies)
                     {
                         cumulativeResult.Add(movie.ImdbId);
@@ -469,11 +468,11 @@ namespace Logic
             return true;
         }
 
-        public bool FollowMovie(string movieId, string userId)
+        public async Task<bool> FollowMovie(string movieId, string userId)
         {
             if(!_repo.MovieExists(movieId))
             {
-                return false;
+                await CreateMovie(await GetMovie(movieId));
             }
 
             _repo.AddFollowingMovie(movieId, userId);
@@ -524,11 +523,11 @@ namespace Logic
         /// <param name="count"></param>
         /// <param name="exclusiveMax"></param>
         /// <returns></returns>
-        private int[] GetRandomUniquePositiveInts(int count, int exclusiveMax)
+        private static int[] GetRandomUniquePositiveInts(int count, int exclusiveMax)
         {
             if(count < 1 || exclusiveMax < 1 || count > exclusiveMax)
             {
-                return null;
+                return new int[0];
             }
 
             var inOrderIntsList = new List<int>();
@@ -557,7 +556,7 @@ namespace Logic
         /// </summary>
         /// <param name="plot"></param>
         /// <returns></returns>
-        private List<string> SplitPlotIntoWords(string plot)
+        private static List<string> SplitPlotIntoWords(string plot)
         {
             var plotWords = new List<string>();
             if(plot != null && plot.Length > 10)
@@ -656,7 +655,7 @@ namespace Logic
         /// </summary>
         /// <param name="wordObject"></param>
         /// <returns></returns>
-        private bool WordQualifiesAsTag(WordObject wordObject)
+        private static bool WordQualifiesAsTag(WordObject wordObject)
         {
             const double NOUN_RATIO_THRESHOLD = 0.45;
             const int MINIMUM_LENGTH = 3;
@@ -781,9 +780,9 @@ namespace Logic
         /// </summary>
         /// <param name="listofLists"></param>
         /// <returns></returns>
-        private List<string> GetIntersection(List<List<string>> listofLists)
+        private static List<string> GetIntersection(List<List<string>> listofLists)
         {
-            var movieIds = new List<string>();
+            List<string> movieIds;
             if(listofLists.Count == 0)
             {
                 return new List<string>();
@@ -811,9 +810,8 @@ namespace Logic
         /// <param name="listOne"></param>
         /// <param name="listTwo"></param>
         /// <returns></returns>
-        private List<string> GetIntersection(List<string> listOne, List<string> listTwo)
+        private static List<string> GetIntersection(List<string> listOne, List<string> listTwo)
         {
-            var movieIds = new List<string>();
             if(listOne.Count == 0)
             {
                 return listTwo;
@@ -1058,7 +1056,7 @@ namespace Logic
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        private string ParseMovieIdFromURL(string url)
+        private static string ParseMovieIdFromURL(string url)
         {
             string movieId = url;
             if(url.Length > 8)

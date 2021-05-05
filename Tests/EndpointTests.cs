@@ -626,7 +626,7 @@ namespace Tests
         {
             MovieDTO inputMovie = TestingHelper.GetRandomMovie();
             string userId = Guid.NewGuid().ToString();
-            var followedMovies = new List<string>();
+            List<string> followedMovies;
 
             // Seed the test database
             using(var context = new Cinephiliacs_MovieContext(dbOptions))
@@ -660,7 +660,7 @@ namespace Tests
             MovieDTO inputMovie = TestingHelper.GetRandomMovie();
             inputMovie.ImdbId = "tt4154796";
             string userId = Guid.NewGuid().ToString();
-            var results = new List<MovieDTO>();
+            List<MovieDTO> results;
 
             // Seed the test database
             using(var context = new Cinephiliacs_MovieContext(dbOptions))
