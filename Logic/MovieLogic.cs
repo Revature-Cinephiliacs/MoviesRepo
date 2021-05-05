@@ -472,7 +472,7 @@ namespace Logic
         {
             if(!_repo.MovieExists(movieId))
             {
-                await GetMovie(movieId);
+                await CreateMovie(await GetMovie(movieId));
             }
 
             _repo.AddFollowingMovie(movieId, userId);
