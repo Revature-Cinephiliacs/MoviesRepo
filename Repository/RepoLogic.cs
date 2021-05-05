@@ -485,6 +485,18 @@ namespace Repository
         }
 
         /// <summary>
+        /// Returns true if the specified user is following the movie specified
+        /// in the argument.
+        /// </summary>
+        /// <param name="movieId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public bool IsFollowingMovie(string movieId, string userId)
+        {
+            return _dbContext.FollowingMovies.FirstOrDefaultAsync(fm => fm.ImdbId == movieId && fm.UserId == userId) != null;
+        }
+
+        /// <summary>
         /// Gets the Language whose name matches the provided argument.
         /// Returns null if no match is found.
         /// </summary>
