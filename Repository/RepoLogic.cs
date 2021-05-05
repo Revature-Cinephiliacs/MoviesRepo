@@ -493,7 +493,7 @@ namespace Repository
         /// <returns></returns>
         public bool IsFollowingMovie(string movieId, string userId)
         {
-            return _dbContext.FollowingMovies.FirstOrDefaultAsync(fm => fm.ImdbId == movieId && fm.UserId == userId) != null;
+            return _dbContext.FollowingMovies.FirstOrDefault(fm => fm.ImdbId == movieId && fm.UserId == userId) != null;
         }
 
         /// <summary>
